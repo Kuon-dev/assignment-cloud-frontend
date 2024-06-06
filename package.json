@@ -15,7 +15,6 @@
     "@dicebear/collection": "^8.0.1",
     "@dicebear/core": "^8.0.1",
     "@hookform/resolvers": "^3.3.4",
-    "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
@@ -64,7 +63,6 @@
     "lint-staged": "^15.2.2",
     "lucide-react": "^0.378.0",
     "mini-svg-data-uri": "^1.4.4",
-    "monaco-editor": "^0.48.0",
     "next-themes": "^0.3.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
@@ -88,7 +86,6 @@
   "devDependencies": {
     "@playwright/test": "^1.44.0",
     "@remix-run/dev": "^2.9.1",
-    "@shikijs/monaco": "^1.6.2",
     "@types/node": "^20.12.11",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
@@ -100,7 +97,6 @@
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "shiki": "^1.5.1",
     "typescript": "^5.1.6",
     "vite": "^5.1.0",
     "vite-tsconfig-paths": "^4.2.1"
