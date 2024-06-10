@@ -25,10 +25,8 @@ export default function Navbar() {
         <Sheet>
           <SheetTrigger asChild>
             <Button className="lg:hidden" size="icon" variant="outline">
-              <Link to="/">
-                <MenuIcon className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Link>
+              <MenuIcon className="h-6 w-6" />
+              <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left">
@@ -72,9 +70,9 @@ export default function Navbar() {
           ) : (
             <>
               {" "}
-              <Button variant="outline">
-                <Link to="/login">Login</Link>
-              </Button>
+              <Link to="/login">
+                <Button variant="outline">Login</Button>
+              </Link>
               <Button>
                 <Link to="/register">Sign Up</Link>
               </Button>
