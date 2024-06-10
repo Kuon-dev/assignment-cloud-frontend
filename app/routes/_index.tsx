@@ -11,7 +11,7 @@ import {
 import { motion } from "framer-motion";
 import { EagerImage } from "@/components/custom/image";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/elements/landing-navbar";
+import Navbar from "@/components/landing/navbar";
 import Footer from "@/components/landing/footer";
 
 export const meta: MetaFunction = () => {

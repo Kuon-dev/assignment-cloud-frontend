@@ -3,9 +3,7 @@ import { ClientOnly } from "remix-utils/client-only";
 import { EagerImage } from "@/components/custom/image";
 import { Spinner } from "@/components/custom/spinner";
 import { Shell } from "@/components/landing/shell";
-import { TYPESCRIPT_VARIANT_5 } from "@/integrations/monaco/constants";
 import { useRef, useState, useEffect } from "react";
-import { codeToHtml } from "shiki";
 
 export default function AuthLayout({
   children,
@@ -15,20 +13,7 @@ export default function AuthLayout({
   const shikiContainer = useRef<HTMLDivElement | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const initShiki = async () => {
-    try {
-      const html = await codeToHtml(TYPESCRIPT_VARIANT_5, {
-        lang: "tsx",
-        theme: "vitesse-dark",
-      });
-      if (shikiContainer.current) {
-        shikiContainer.current.innerHTML = html;
-        setIsLoaded(true);
-      }
-    } catch (error) {
-      console.error("Error generating code HTML:", error);
-    }
-  };
+  const initShiki = async () => {};
   useEffect(() => {
     initShiki();
   }, []);

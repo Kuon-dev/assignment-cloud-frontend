@@ -12,8 +12,8 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Separator } from "@/components/ui/separator";
 import { IconTool, IconUser } from "@tabler/icons-react";
-import SidebarNav from "@/elements/sidebar-nav";
-import DashboardSidebar, { LinkProps } from "@/elements/dashboard-sidebar";
+import SidebarNav from "@/components/dashboard/sidebar-nav";
+import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 import { Layout, LayoutBody } from "@/components/custom/layout";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
