@@ -32,7 +32,7 @@ export default function Navbar() {
           <SheetContent side="left">
             <Link className="flex items-center gap-2" to="/">
               <MountainIcon className="h-6 w-6" />
-              <span className="text-lg font-semibold">Kortex</span>
+              <span className="text-lg font-semibold">RentEase</span>
             </Link>
             <div className="grid gap-4 py-6">
               {navLinks.map((link, index) => (
@@ -49,7 +49,7 @@ export default function Navbar() {
         </Sheet>
         <Link className="mr-20 hidden lg:flex items-center gap-4" to="/">
           <MountainIcon className="h-6 w-6" />
-          <span className="text-lg font-semibold">Kortex</span>
+          <span className="text-lg font-semibold">RentEase</span>
         </Link>
         <nav className="hidden lg:flex items-center gap-6 flex-row mx-4">
           {navLinks.map((link, index) => (

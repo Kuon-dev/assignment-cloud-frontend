@@ -7,6 +7,7 @@ import {
   IconChecks,
   IconChartBar,
   IconBuildingStore,
+  IconHome,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { EagerImage } from "@/components/custom/image";
@@ -309,35 +310,35 @@ const SkeletonFive = () => {
 
 const items = [
   {
-    title: "AI Code Analysis",
+    title: "Browse Listings",
     description: (
       <span className="text-sm">
-        Utilize Kortex's AI tool to analyze and ensure high standards of code
-        quality, functionality, and security.
+        Explore a wide range of high-quality rental listings tailored to your
+        needs.
       </span>
     ),
     header: <SkeletonOne />,
     className: "md:col-span-1",
-    icon: <IconClipboardCheck className="h-4 w-4 text-neutral-500" />,
+    icon: <IconHome className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "Code Optimization",
+    title: "Easy Applications",
     description: (
       <span className="text-sm">
-        Optimize your code with Kortex's advanced AI to improve efficiency and
-        performance.
+        Apply for your next home easily with our streamlined application
+        process.
       </span>
     ),
     header: <SkeletonTwo />,
     className: "md:col-span-1",
-    icon: <IconChartBar className="h-4 w-4 text-neutral-500" />,
+    icon: <IconClipboardCheck className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "Security Compliance",
+    title: "Secure Transactions",
     description: (
       <span className="text-sm">
-        Ensure your code meets industry security standards with Kortex's
-        AI-driven assessments.
+        Ensure secure and reliable transactions with our trusted payment
+        systems.
       </span>
     ),
     header: <SkeletonThree />,
@@ -345,23 +346,22 @@ const items = [
     icon: <IconChecks className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "Code Reliability",
+    title: "Tenant Support",
     description: (
       <span className="text-sm">
-        Improve the reliability and maintainability of your code with detailed
-        AI feedback from Kortex.
+        Get reliable support and assistance throughout your rental experience.
       </span>
     ),
     header: <SkeletonFour />,
     className: "md:col-span-2",
-    icon: <IconChecks className="h-4 w-4 text-neutral-500" />,
+    icon: <IconChartBar className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "Marketplace Integration",
+    title: "List Your Property",
     description: (
       <span className="text-sm">
-        Monetize your coding skills by selling high-quality, AI-reviewed code
-        snippets on the Kortex platform.
+        Easily list your property and reach potential tenants quickly and
+        efficiently.
       </span>
     ),
     header: <SkeletonFive />,
@@ -377,12 +377,12 @@ export default function Index() {
       <Navbar />
       <div className="h-screen w-full dark:bg-black bg-white dark:bg-grid-white/[0.1] bg-grid-black/[0.2] relative flex items-center justify-center md:px-0 px-4 flex-col">
         {/* Radial gradient for the container to give a faded look */}
-        <p className="text-4xl sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-8 max-w-4xl">
-          Elevate Your Code Quality with AI-Powered Analysis
+        <p className="text-4xl text-center sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-8 max-w-4xl">
+          Rent Your Dream Home Quickly & Easily
         </p>
         <div>
           <p className="text-lg sm:text-xl font-semibold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 max-w-4xl">
-            Sell high-quality, AI-reviewed code snippets on the Kortex platform.
+            Browse high-quality rental homes effortlessly with RentEase.
           </p>
         </div>
         <div>
