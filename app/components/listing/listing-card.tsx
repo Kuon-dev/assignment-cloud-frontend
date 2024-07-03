@@ -58,12 +58,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <p>{location}</p>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1 mb-4">
           <div className="prose max-w-none text-white">
             <h3 className="text-lg font-bold">{title}</h3>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
               <StarIcon className="w-5 h-5 fill-primary" />
               <span className="text-sm font-medium">{rating}</span>
             </div>
@@ -77,7 +77,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               display: "-webkit-box",
               WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical",
-              minHeight: "4.5rem", // Adjust this value based on the font size and line height
+              minHeight: "4.5rem",
             }}
           >
             {description}
@@ -85,8 +85,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
       </div>
       <div className="mt-auto">
-        <div className="text-3xl font-bold text-white">{price}</div>
-        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <div className="text-3xl font-bold text-white mb-2">{price}</div>
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-4">
           <BedIcon className="w-5 h-5" />
           <span>{bedrooms} Bedrooms</span>
           <BathIcon className="w-5 h-5" />

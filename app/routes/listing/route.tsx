@@ -3,7 +3,8 @@ import Footer from "@/components/landing/footer";
 import { Shell } from "@/components/landing/shell";
 import { Button } from "@/components/ui/button";
 import { Link } from "@remix-run/react";
-import { PropertyCard } from "@/components/custom/listing-card";
+import { PropertyCard } from "@/components/listing/listing-card";
+import ListingForm from "@/components/listing/form/listing-form";
 
 const properties = [
   {
@@ -108,7 +109,7 @@ export default function ListingLayout() {
             <Link to="/">&larr; Back to Home</Link>
           </Button>
 
-          <Listing />
+          <ListingForm />
 
           <Footer className="pt-10" />
         </div>
