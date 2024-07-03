@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@remix-run/react";
 import { PropertyCard } from "@/components/listing/listing-card";
 import ListingForm from "@/components/listing/form/listing-form";
+import PropertyForm from "@/components/property/form/property-form";
 
 const properties = [
   {
@@ -109,7 +110,9 @@ export default function ListingLayout() {
             <Link to="/">&larr; Back to Home</Link>
           </Button>
 
-          <ListingForm />
+          {/* <Listing /> */}
+          {/* <ListingForm /> */}
+          <PropertyForm />
 
           <Footer className="pt-10" />
         </div>
