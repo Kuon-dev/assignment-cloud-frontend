@@ -1,7 +1,7 @@
 import React from "react";
-import { Link, Outlet } from "@remix-run/react";
+import { Outlet } from "@remix-run/react";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
-import { Layout, LayoutHeader, LayoutBody } from "@/components/custom/layout";
+import { Layout, LayoutBody } from "@/components/custom/layout";
 import {
   adminSidebarLinks,
   moderatorSidebarLinks,
@@ -9,7 +9,7 @@ import {
   buyerSidebarLinks,
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
-import VerifyEmailComponent from "@/components/dashboard/verify-email";
+// import VerifyEmailComponent from "@/components/dashboard/verify-email";
 import { useDashboardStore } from "@/stores/dashboard-store";
 
 export default function DashboardLayout() {
@@ -21,14 +21,11 @@ export default function DashboardLayout() {
       case "admin":
         setSidebarLinks(adminSidebarLinks);
         break;
-      case "moderator":
+      case "tenant":
         setSidebarLinks(moderatorSidebarLinks);
         break;
-      case "seller":
+      case "owner":
         setSidebarLinks(sellerSidebarLinks);
-        break;
-      case "buyer":
-        setSidebarLinks(buyerSidebarLinks);
         break;
       default:
         setSidebarLinks(buyerSidebarLinks);
@@ -50,9 +47,9 @@ export default function DashboardLayout() {
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <Layout className="flex min-h-screen w-full flex-col relative">
           <LayoutBody>
-            <main className="">
+            <main>
               <Outlet />
-              {user?.emailVerified ? <div /> : <VerifyEmailComponent />}
+              {/* {user?.emailVerified ? <div /> : <VerifyEmailComponent />} */}
             </main>
           </LayoutBody>
         </Layout>
