@@ -6,6 +6,7 @@ import {
   ListingFilterFormValues,
 } from "@/components/listing/form/listing-filter-form";
 import { RentalApplicationForm } from "@/components/rental/form/rental-application-form";
+import { MaintenanceRequestForm } from "@/components/maintenance/form/maintenance-request-form";
 
 export default function Component() {
   const [filters, setFilters] = useState<ListingFilterFormValues>({
@@ -80,7 +81,8 @@ export default function Component() {
   return (
     <section className="w-full mx-auto py-12">
       <div className="max-w-2xl mx-auto border p-10">
-        <RentalApplicationForm onSubmit={(data) => console.log(data)} />
+        {/* <RentalApplicationForm onSubmit={(data) => console.log(data)} /> */}
+        <MaintenanceRequestForm onSubmit={(data) => console.log(data)} />
       </div>
       {/* <ListingFilterForm onSubmit={handleFilterSubmit} />
       <Listing properties={properties} /> */}

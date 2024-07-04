@@ -21,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Define the schema for the rental application form
 const RentalApplicationSchema = z.object({
   personalInfo: z
     .string()
