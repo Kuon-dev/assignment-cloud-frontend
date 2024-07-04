@@ -1,4 +1,3 @@
-import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -78,11 +77,6 @@ export const ListingFilterForm: React.FC<FilterFormProps> = ({ onSubmit }) => {
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
                   />
                 </FormControl>
-                {fieldState.error && (
-                  <FormMessage className="text-red-500">
-                    {fieldState.error.message}
-                  </FormMessage>
-                )}
               </FormItem>
             )}
           />
@@ -100,11 +94,6 @@ export const ListingFilterForm: React.FC<FilterFormProps> = ({ onSubmit }) => {
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
                   />
                 </FormControl>
-                {fieldState.error && (
-                  <FormMessage className="text-red-500">
-                    {fieldState.error.message}
-                  </FormMessage>
-                )}
               </FormItem>
             )}
           />
