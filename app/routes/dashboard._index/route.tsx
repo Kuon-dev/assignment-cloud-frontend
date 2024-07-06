@@ -79,12 +79,12 @@ export default function Component() {
 
   return (
     <section className="w-full mx-auto py-12">
-      {/* <MaintenanceRequestForm onSubmit={(data) => console.log(data)} /> */}
-      <RentalApplicationForm
+      {/* <MaintenanceRequestForm propertyId="" /> */}
+      {/* <RentalApplicationForm
         className="max-w-3xl mx-auto"
         tenantId="9f8d0949-eda0-472c-ab88-a384c88ef237"
         listingId="b193aa6b-4310-44c7-a995-8cff7b2b3ae0"
-      />
+      /> */}
       {/* <RentalApplicationForm className="max-w-3xl mx-auto" /> */}
       {/* <ListingFilterForm onSubmit={handleFilterSubmit} />
       <Listing properties={properties} /> */}

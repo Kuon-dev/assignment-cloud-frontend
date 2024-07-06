@@ -30,10 +30,12 @@ interface ImageFile extends File {
 
 const MaintenanceRequestSchema = z.object({
   description: z.string().min(1, { message: "Description is required" }),
-  images: z.instanceof(File).array().optional(),
+  // images: z.instanceof(File).array().optional(),
 });
 
-interface MaintenanceRequestFormProps extends HTMLAttributes<HTMLDivElement> {}
+interface MaintenanceRequestFormProps extends HTMLAttributes<HTMLDivElement> {
+  propertyId: string;
+}
 
 type MaintenanceRequestFormErrorSchema = {
   data: {
@@ -47,17 +49,18 @@ type MaintenanceRequestFormErrorSchema = {
 };
 
 export default function MaintenanceRequestForm({
+  propertyId,
   className,
   ...props
 }: MaintenanceRequestFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<ImageFile[]>([]);
+  // const [images, setImages] = useState<ImageFile[]>([]);
 
   const form = useForm<z.infer<typeof MaintenanceRequestSchema>>({
     resolver: zodResolver(MaintenanceRequestSchema),
     defaultValues: {
       description: "",
-      images: [],
+      // images: [],
     },
   });
 
@@ -65,20 +68,23 @@ export default function MaintenanceRequestForm({
     try {
       setIsLoading(true);
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdjNzBlMzI5LTE3NGQtNDVjYi05MTUwLWNjZTZlMGY0ZThjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QyQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiJhYTc1MjE0ZS01MmZkLTRiMjUtOGUxOC03OWY0YTMzODY3OGQiLCJleHAiOjE3MjAzMzU4ODcsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.8mhBtOo4gkOh6xEEqAOkq8c2AwIHcQYiSf8nsWqR4bc";
-      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/property`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+      const token = "user_token";
+      const res = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/maintenance-requests`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            propertyId,
+            ...data,
+          }),
+          credentials: "include",
         },
-        body: JSON.stringify({
-          ...data,
-        }),
-        credentials: "include",
-      });
+      );
 
       if (!res.ok) {
         const error = (await res.json()) as MaintenanceRequestFormErrorSchema;
@@ -130,7 +136,7 @@ export default function MaintenanceRequestForm({
                     </FormItem>
                   )}
                 />
-                <Controller
+                {/* <Controller
                   name="images"
                   control={form.control}
                   render={({ field }) => (
@@ -142,11 +148,11 @@ export default function MaintenanceRequestForm({
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="mt-4" loading={isLoading}>
+              <Button type="submit" loading={isLoading}>
                 Submit Request
               </Button>
             </CardFooter>
