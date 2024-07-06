@@ -1,10 +1,8 @@
-"use client";
-
-import { useState, ChangeEvent, DragEvent, HTMLAttributes } from "react";
+import { HTMLAttributes, SVGProps, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 import {
   Card,
@@ -14,6 +12,17 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -22,135 +31,160 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/custom/button";
 
-interface ImageFile extends File {
-  preview: string;
+interface PropertyFormProps {
+  className?: HTMLAttributes<HTMLDivElement>;
+  ownerId: string;
 }
 
-interface PropertyFormProps extends HTMLAttributes<HTMLDivElement> {}
+type PropertyFormErrorSchema = {
+  data: {
+    message: string;
+    details?: string;
+    timestamp?: string;
+  };
+  statusCode: number;
+  error: string;
+  stackTrace?: string;
+};
+
+const propertyTypes = ["Apartment", "House", "Condo", "Townhouse"] as const;
+const roomTypes = ["MasterBedroom", "MiddleBedroom", "SmallBedroom"] as const;
+
+enum PropertyType {
+  Apartment,
+  House,
+  Condo,
+  Townhouse,
+}
+
+enum RoomType {
+  MasterBedroom,
+  MiddleBedroom,
+  SmallBedroom,
+}
 
 const propertyFormSchema = z.object({
-  ownerId: z.string().uuid({ message: "Please enter a valid owner ID" }),
-  address: z.string().min(1, { message: "Please enter the address" }),
-  city: z.string().min(1, { message: "Please enter the city" }),
-  state: z.string().min(1, { message: "Please enter the state" }),
-  zipCode: z.string().min(1, { message: "Please enter the zip code" }),
-  propertyType: z.enum(["Apartment", "House", "Condo", "Townhouse"], {
-    errorMap: () => ({ message: "Please select a property type" }),
+  address: z.string().min(1, { message: "Address is required" }),
+  city: z.string().min(1, { message: "City is required" }),
+  state: z.string().min(1, { message: "State is required" }),
+  zipCode: z.string().min(1, { message: "Zip Code is required" }),
+  propertyType: z.nativeEnum(PropertyType, {
+    required_error: "Property type is required",
   }),
-  bedrooms: z
-    .number()
-    .min(1, { message: "Please enter the number of bedrooms" }),
+  bedrooms: z.number().min(1, { message: "At least one bedroom is required" }),
   bathrooms: z
     .number()
-    .min(1, { message: "Please enter the number of bathrooms" }),
-  squareFootage: z
-    .number()
-    .min(1, { message: "Please enter the square footage" }),
-  rentAmount: z.number().min(1, { message: "Please enter the rent amount" }),
-  description: z.string().min(1, { message: "Please enter a description" }),
+    .min(1, { message: "At least one bathroom is required" }),
+  rentAmount: z.number().min(1, { message: "Rent amount is required" }),
+  description: z.string().optional(),
   amenities: z.array(z.string()).optional(),
   isAvailable: z.boolean(),
-  images: z.array(z.any()).optional(),
+  roomType: z.nativeEnum(RoomType, { required_error: "Room type is required" }),
 });
 
-export default function PropertyForm({
+export default function CreatePropertyForm({
   className,
+  ownerId,
   ...props
 }: PropertyFormProps) {
-  const [images, setImages] = useState<ImageFile[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof propertyFormSchema>>({
     resolver: zodResolver(propertyFormSchema),
     defaultValues: {
-      ownerId: "",
       address: "",
       city: "",
       state: "",
       zipCode: "",
-      propertyType: undefined,
-      bedrooms: 0,
-      bathrooms: 0,
-      squareFootage: 0,
-      rentAmount: 0,
+      propertyType: PropertyType.Apartment,
+      roomType: RoomType.MasterBedroom,
+      bedrooms: 1,
+      bathrooms: 1,
+      rentAmount: 1000,
       description: "",
       amenities: [],
       isAvailable: true,
-      images: [],
     },
   });
 
-  const propertyTypes = ["Apartment", "House", "Condo", "Townhouse"];
+  async function onSubmit(data: z.infer<typeof propertyFormSchema>) {
+    try {
+      setIsLoading(true);
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
+      const token =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdjNzBlMzI5LTE3NGQtNDVjYi05MTUwLWNjZTZlMGY0ZThjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QyQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiJhYTc1MjE0ZS01MmZkLTRiMjUtOGUxOC03OWY0YTMzODY3OGQiLCJleHAiOjE3MjAzMzU4ODcsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.8mhBtOo4gkOh6xEEqAOkq8c2AwIHcQYiSf8nsWqR4bc";
+      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/property`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...data,
+          ownerId,
+        }),
+        credentials: "include",
+      });
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files) as ImageFile[];
-    setImages([...images, ...files]);
-  };
-
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []) as ImageFile[];
-    setImages([...images, ...files]);
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
-  const onSubmit = async (data: z.infer<typeof propertyFormSchema>) => {
-    console.log(data);
-    // Handle form submission
-  };
+      if (!res.ok) {
+        const error = (await res.json()) as PropertyFormErrorSchema;
+        throw new Error(error.data.message);
+      } else {
+        toast.success("Property listed successfully!");
+      }
+      setIsLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(error);
+        toast.error(error.message);
+      }
+      setIsLoading(false);
+    }
+  }
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Card className="max-w-7xl mx-auto p-6">
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold">
-                List Your Property
-              </CardTitle>
-              <CardDescription>
-                Enter the details below to advertise your property.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+    <Card className={`max-w-7xl mx-auto p-6 md:p-10 ${className}`}>
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold">Post your property</CardTitle>
+        <CardDescription>
+          Enter the details below to advertise your property.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid grid-cols-1 gap-6 md:gap-8"
+          >
+            <div className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="address"
+                        placeholder="1, First Street"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="city"
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
+                    <FormItem>
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input placeholder="City" {...field} />
+                        <Input id="city" placeholder="Manhattan" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -160,45 +194,51 @@ export default function PropertyForm({
                   control={form.control}
                   name="state"
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
+                    <FormItem>
                       <FormLabel>State</FormLabel>
                       <FormControl>
-                        <Input placeholder="State" {...field} />
+                        <Input id="state" placeholder="New York" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="zipCode"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Zip Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Zip Code" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              </div>
+              <FormField
+                control={form.control}
+                name="zipCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Zip Code</FormLabel>
+                    <FormControl>
+                      <Input id="zipCode" placeholder="10000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="propertyType"
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
+                    <FormItem>
                       <FormLabel>Property Type</FormLabel>
                       <FormControl>
                         <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
+                          onValueChange={(value) =>
+                            field.onChange(Number(value))
+                          }
+                          value={field.value.toString()}
                         >
-                          <SelectTrigger className="border rounded-md p-2 w-full">
-                            <SelectValue placeholder="Select a property type" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select property type" />
                           </SelectTrigger>
                           <SelectContent>
                             {propertyTypes.map((type, index) => (
-                              <SelectItem key={index} value={type}>
+                              <SelectItem key={type} value={index.toString()}>
                                 {type}
                               </SelectItem>
                             ))}
@@ -211,17 +251,48 @@ export default function PropertyForm({
                 />
                 <FormField
                   control={form.control}
+                  name="roomType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Room Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(Number(value))
+                          }
+                          value={field.value.toString()}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select room type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roomTypes.map((type, index) => (
+                              <SelectItem key={type} value={index.toString()}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
                   name="bedrooms"
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
+                    <FormItem>
                       <FormLabel>Bedrooms</FormLabel>
                       <FormControl>
                         <Input
+                          id="bedrooms"
                           type="number"
-                          placeholder="Bedrooms"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
+                            field.onChange(parseInt(e.target.value))
                           }
                         />
                       </FormControl>
@@ -233,15 +304,15 @@ export default function PropertyForm({
                   control={form.control}
                   name="bathrooms"
                   render={({ field }) => (
-                    <FormItem className="space-y-1">
+                    <FormItem>
                       <FormLabel>Bathrooms</FormLabel>
                       <FormControl>
                         <Input
+                          id="bathrooms"
                           type="number"
-                          placeholder="Bathrooms"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
+                            field.onChange(parseInt(e.target.value))
                           }
                         />
                       </FormControl>
@@ -249,108 +320,98 @@ export default function PropertyForm({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="squareFootage"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Square Footage</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Square Footage"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="rentAmount"
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Rent Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Rent Amount"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(e.target.valueAsNumber)
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div
-                  className="border-2 border-dashed border-muted-foreground rounded-md px-4 py-8 flex flex-col items-center justify-center cursor-pointer mt-4"
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  <UploadIcon className="w-8 h-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    Drag and drop images here or
-                  </span>
-                  <label
-                    htmlFor="image-upload"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-primary cursor-pointer"
-                  >
-                    <span>Upload images</span>
-                    <UploadIcon className="w-4 h-4" />
-                  </label>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </div>
-                <div className="overflow-x-auto flex gap-4">
-                  {images.map((image, index) => (
-                    <div key={index} className="flex-shrink-0 relative">
-                      <img
-                        src={URL.createObjectURL(image)}
-                        alt={image.name}
-                        width={200}
-                        height={200}
-                        className="rounded-md object-cover"
-                      />
-                      <button
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                        onClick={() => handleRemoveImage(index)}
-                      >
-                        <XIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </CardContent>
+              <FormField
+                control={form.control}
+                name="rentAmount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rent Amount</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="rentAmount"
+                        type="number"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        id="description"
+                        placeholder="Describe your property..."
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="amenities"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Amenities</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        id="amenities"
+                        placeholder="Gym, Pool, Parking, etc. (Comma Separated)"
+                        rows={3}
+                        {...field}
+                        onChange={(e) =>
+                          form.setValue("amenities", e.target.value.split(", "))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isAvailable"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md pt-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel>Currently Available</FormLabel>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <CardFooter>
               <div className="flex justify-end w-full">
-                <Button type="submit" loading={false}>
-                  List Property
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Listing Property..." : "List Property"}
                 </Button>
               </div>
             </CardFooter>
-          </Card>
-        </form>
-      </Form>
-    </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
 
-interface IconProps extends React.SVGProps<SVGSVGElement> {}
-
-function UploadIcon(props: IconProps) {
+function UploadIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -371,7 +432,7 @@ function UploadIcon(props: IconProps) {
   );
 }
 
-function XIcon(props: IconProps) {
+function XIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

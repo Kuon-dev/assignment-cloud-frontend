@@ -1,5 +1,5 @@
 // routes/index.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { PropertyCard } from "@/components/listing/listing-card";
 import {
   ListingFilterForm,
@@ -76,13 +76,12 @@ export default function Component() {
     setFilters(data);
     // Here you can also make an API call to fetch filtered properties
   };
-  console.log(filters);
 
   return (
     <section className="w-full mx-auto py-12">
       <div className="max-w-2xl mx-auto border p-10">
         {/* <RentalApplicationForm onSubmit={(data) => console.log(data)} /> */}
-        <MaintenanceRequestForm onSubmit={(data) => console.log(data)} />
+        {/* <MaintenanceRequestForm onSubmit={(data) => console.log(data)} /> */}
       </div>
       {/* <ListingFilterForm onSubmit={handleFilterSubmit} />
       <Listing properties={properties} /> */}

@@ -7,6 +7,8 @@ import {
   moderatorSidebarLinks,
   sellerSidebarLinks,
   buyerSidebarLinks,
+  tenantSidebarLinks,
+  ownerSidebarLinks,
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
 // import VerifyEmailComponent from "@/components/dashboard/verify-email";
@@ -16,20 +18,21 @@ export default function DashboardLayout() {
   const [sidebarLinks, setSidebarLinks] = React.useState<LinkProps[]>([]);
   const [user] = useDashboardStore((state) => [state.user]);
   React.useEffect(() => {
-    if (!user) return;
-    switch (user.role) {
-      case "admin":
-        setSidebarLinks(adminSidebarLinks);
-        break;
-      case "tenant":
-        setSidebarLinks(moderatorSidebarLinks);
-        break;
-      case "owner":
-        setSidebarLinks(sellerSidebarLinks);
-        break;
-      default:
-        setSidebarLinks(buyerSidebarLinks);
-    }
+    // if (!user) return;
+    // switch (user.role) {
+    //   case "admin":
+    //     setSidebarLinks(adminSidebarLinks);
+    //     break;
+    //   case "tenant":
+    //     setSidebarLinks(moderatorSidebarLinks);
+    //     break;
+    //   case "owner":
+    //     setSidebarLinks(sellerSidebarLinks);
+    //     break;
+    //   default:
+    //     setSidebarLinks(buyerSidebarLinks);
+    // }
+    setSidebarLinks(tenantSidebarLinks);
   }, [user]);
 
   const settingsLink: LinkProps = {

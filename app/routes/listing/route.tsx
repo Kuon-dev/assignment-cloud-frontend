@@ -105,16 +105,16 @@ export default function ListingLayout() {
     <>
       <Navbar />
       <div className="w-full bg-black dark:bg-grid-white/[0.1] bg-grid-black/[0.2] pb-20 pt-32">
-        <div className="md:max-w-6xl mx-auto bg-transparent max-w-2xl lg:px-0 px-4">
-          <Button className="" variant="link">
+        <div className="mx-auto max-w-4xl">
+          <Button variant="link">
             <Link to="/">&larr; Back to Home</Link>
           </Button>
 
           {/* <Listing /> */}
           {/* <ListingForm /> */}
-          <PropertyForm />
+          <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} />
 
-          <Footer className="pt-10" />
+          <Footer className="pt-10 mx-auto" />
         </div>
       </div>
     </>
