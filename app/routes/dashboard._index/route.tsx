@@ -7,6 +7,7 @@ import {
 } from "@/components/listing/form/listing-filter-form";
 import RentalApplicationForm from "@/components/rental/form/rental-application-form";
 import MaintenanceRequestForm from "@/components/maintenance/form/maintenance-request-form";
+import MaintenanceTaskForm from "@/components/maintenance/form/maintenance-task-form";
 
 export default function Component() {
   const [filters, setFilters] = useState<ListingFilterFormValues>({
@@ -79,7 +80,11 @@ export default function Component() {
 
   return (
     <section className="w-full mx-auto py-12">
-      {/* <MaintenanceRequestForm propertyId="" /> */}
+      {/* <MaintenanceRequestForm
+        className="max-w-3xl mx-auto"
+        propertyId=""
+      /> */}
+      <MaintenanceTaskForm className="max-w-3xl mx-auto" requestId="" />
       {/* <RentalApplicationForm
         className="max-w-3xl mx-auto"
         tenantId="9f8d0949-eda0-472c-ab88-a384c88ef237"
@@ -87,7 +92,7 @@ export default function Component() {
       /> */}
       {/* <RentalApplicationForm className="max-w-3xl mx-auto" /> */}
       {/* <ListingFilterForm onSubmit={handleFilterSubmit} />
-      <Listing properties={properties} /> */}
+        <Listing properties={properties} /> */}
     </section>
   );
 }

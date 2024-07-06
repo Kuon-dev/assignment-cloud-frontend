@@ -1,12 +1,14 @@
 import { HTMLAttributes, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ClientOnly } from "remix-utils/client-only";
+
 import { Button } from "@/components/custom/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -23,22 +25,19 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import ImageUpload from "@/components/custom/image-upload";
 
-interface ImageFile extends File {
-  preview: string;
-}
-
-const MaintenanceRequestSchema = z.object({
+const MaintenanceTaskSchema = z.object({
   description: z.string().min(1, { message: "Description is required" }),
-  // images: z.instanceof(File).array().optional(),
+  estimatedCost: z
+    .number()
+    .min(0, { message: "Estimated cost must be non-negative" }),
 });
 
-interface MaintenanceRequestFormProps extends HTMLAttributes<HTMLDivElement> {
-  propertyId: string;
+interface MaintenanceTaskFormProps extends HTMLAttributes<HTMLDivElement> {
+  requestId: string;
 }
 
-type MaintenanceRequestFormErrorSchema = {
+type MaintenanceTaskFormErrorSchema = {
   data: {
     message: string;
     details?: string;
@@ -49,29 +48,28 @@ type MaintenanceRequestFormErrorSchema = {
   stackTrace?: string;
 };
 
-export default function MaintenanceRequestForm({
-  propertyId,
+export default function MaintenanceTaskForm({
+  requestId,
   className,
   ...props
-}: MaintenanceRequestFormProps) {
+}: MaintenanceTaskFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  // const [images, setImages] = useState<ImageFile[]>([]);
 
-  const form = useForm<z.infer<typeof MaintenanceRequestSchema>>({
-    resolver: zodResolver(MaintenanceRequestSchema),
+  const form = useForm<z.infer<typeof MaintenanceTaskSchema>>({
+    resolver: zodResolver(MaintenanceTaskSchema),
     defaultValues: {
       description: "",
-      // images: [],
+      estimatedCost: 0,
     },
   });
 
-  async function onSubmit(data: z.infer<typeof MaintenanceRequestSchema>) {
+  async function onSubmit(data: z.infer<typeof MaintenanceTaskSchema>) {
     try {
       setIsLoading(true);
 
       const token = "user_token";
       const res = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/maintenance-requests`,
+        `${window.ENV?.BACKEND_URL}/api/MaintenanceTask`,
         {
           method: "POST",
           headers: {
@@ -80,7 +78,7 @@ export default function MaintenanceRequestForm({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            propertyId,
+            requestId,
             ...data,
           }),
           credentials: "include",
@@ -88,10 +86,10 @@ export default function MaintenanceRequestForm({
       );
 
       if (!res.ok) {
-        const error = (await res.json()) as MaintenanceRequestFormErrorSchema;
+        const error = (await res.json()) as MaintenanceTaskFormErrorSchema;
         throw new Error(error.data.message);
       } else {
-        toast.success("Property listed successfully!");
+        toast.success("Maintenance task created successfully!");
       }
       setIsLoading(false);
     } catch (error) {
@@ -110,10 +108,10 @@ export default function MaintenanceRequestForm({
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-bold">
-                List Your Property
+                Create Maintenance Task
               </CardTitle>
               <CardDescription>
-                Enter the details below to advertise your property.
+                Enter the details below to create a maintenance task.
               </CardDescription>
             </CardHeader>
             <Form {...form}>
@@ -131,7 +129,7 @@ export default function MaintenanceRequestForm({
                           <FormLabel>Description</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Enter maintenance issue description"
+                              placeholder="Enter task description"
                               {...field}
                             />
                           </FormControl>
@@ -139,24 +137,31 @@ export default function MaintenanceRequestForm({
                         </FormItem>
                       )}
                     />
-                    {/* <Controller
-                  name="images"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Images</FormLabel>
-                      <FormControl>
-                        <ImageUpload images={images} setImages={setImages} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
+                    <FormField
+                      control={form.control}
+                      name="estimatedCost"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estimated Cost</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Enter estimated cost"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" loading={isLoading}>
-                    Submit Request
+                    Submit Task
                   </Button>
                 </CardFooter>
               </form>

@@ -111,8 +111,8 @@ export default function ListingLayout() {
           </Button>
 
           {/* <Listing /> */}
-          <ListingForm />
-          {/* <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} /> */}
+          {/* <ListingForm /> */}
+          <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} />
 
           <Footer className="pt-10 mx-auto" />
         </div>
