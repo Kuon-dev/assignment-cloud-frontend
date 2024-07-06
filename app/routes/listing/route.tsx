@@ -6,6 +6,7 @@ import { Link } from "@remix-run/react";
 import PropertyCard from "@/components/listing/listing-card";
 import ListingForm from "@/components/listing/form/listing-form";
 import PropertyForm from "@/components/property/form/property-form";
+import LeaseForm from "@/components/lease/form/lease-form";
 
 const properties = [
   {
@@ -112,7 +113,8 @@ export default function ListingLayout() {
 
           {/* <Listing /> */}
           {/* <ListingForm /> */}
-          <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} />
+          {/* <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} /> */}
+          <LeaseForm tenantId="" propertyId="" />
 
           <Footer className="pt-10 mx-auto" />
         </div>

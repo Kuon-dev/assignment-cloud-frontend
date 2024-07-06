@@ -1,4 +1,4 @@
-import { useState, HTMLAttributes } from "react";
+import { HTMLAttributes, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,8 +23,8 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/custom/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -33,23 +33,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-// import ImageUpload from "@/components/custom/image-upload";
 
-interface ImageFile extends File {
-  preview: string;
+interface LeaseFormProps extends HTMLAttributes<HTMLDivElement> {
+  tenantId: string;
+  propertyId: string;
 }
 
-interface ListingFormProps extends HTMLAttributes<HTMLDivElement> {}
-
-type ListingsFormErrorSchema = {
+type LeaseFormErrorSchema = {
   data: {
     message: string;
     details?: string;
@@ -60,47 +50,47 @@ type ListingsFormErrorSchema = {
   stackTrace?: string;
 };
 
-const ListingFormSchema = z.object({
-  title: z.string().min(1, { message: "Please enter the title" }),
-  description: z.string().min(1, { message: "Please enter the description" }),
-  // property: z.string().min(1, { message: "Please select a property" }),
-  price: z.number().min(1, { message: "Please enter a valid price" }),
+const LeaseFormSchema = z.object({
   startDate: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
   endDate: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
-  isActive: z.boolean().optional(),
+  rentAmount: z
+    .number()
+    .min(0, { message: "Rent amount must be non-negative" }),
+  securityDeposit: z
+    .number()
+    .min(0, { message: "Security deposit must be non-negative" }),
+  isActive: z.boolean(),
 });
 
-export default function ListingForm({ className, ...props }: ListingFormProps) {
+export default function CreateLeaseForm({
+  tenantId,
+  propertyId,
+  className,
+  ...props
+}: LeaseFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<ImageFile[]>([]);
 
-  const form = useForm<z.infer<typeof ListingFormSchema>>({
-    resolver: zodResolver(ListingFormSchema),
+  const form = useForm<z.infer<typeof LeaseFormSchema>>({
+    resolver: zodResolver(LeaseFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      // property: "",
-      price: 0,
       startDate: undefined,
       endDate: undefined,
+      rentAmount: 0,
+      securityDeposit: 0,
       isActive: true,
     },
   });
 
-  const properties = ["Property 1", "Property 2", "Property 3", "Property 4"];
-
-  const onSubmit = async (data: z.infer<typeof ListingFormSchema>) => {
+  async function onSubmit(data: z.infer<typeof LeaseFormSchema>) {
     try {
       setIsLoading(true);
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdjNzBlMzI5LTE3NGQtNDVjYi05MTUwLWNjZTZlMGY0ZThjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QyQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiI3NGNkNDJiOC1lODhhLTRlZTktOTYzOC0yN2I2ZWE2NmZiMTEiLCJleHAiOjE3MjAzNjE0ODEsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.yJPooh0njPgRm-9Sx4NkX6soVAVm_8j6Zj8Aze-Se40";
-      const propertyId = "174599ab-a263-4168-ae49-45073715ab71";
-      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Listings`, {
+      const token = "jwt_token";
+      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Lease`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,6 +98,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          tenantId,
           propertyId,
           ...data,
         }),
@@ -115,10 +106,10 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
       });
 
       if (!res.ok) {
-        const error = (await res.json()) as ListingsFormErrorSchema;
+        const error = (await res.json()) as LeaseFormErrorSchema;
         throw new Error(error.data.message);
       } else {
-        toast.success("Property listed successfully");
+        toast.success("Lease created successfully!");
       }
       setIsLoading(false);
     } catch (error) {
@@ -128,102 +119,28 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
       }
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <ClientOnly>
       {() => (
-        <div className={cn("grid gap-6", className)} {...props}>
+        <div className={cn("mx-auto", className)} {...props}>
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-bold">
-                List Your Property
+                Create a Lease
               </CardTitle>
               <CardDescription>
-                Enter the details below to advertise your property.
+                Enter the details below to create a new lease.
               </CardDescription>
             </CardHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <CardContent>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="grid grid-cols-1 gap-6 md:gap-8"
+                >
                   <div className="grid gap-4">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel>Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Title" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1">
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Description"
-                              rows={5}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* <FormField
-                    control={form.control}
-                    name="property"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel>Property</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <SelectTrigger className="border rounded-md p-2 w-full">
-                              <SelectValue placeholder="Select a property" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {properties.map((prop, index) => (
-                                <SelectItem key={index} value={prop}>
-                                  {prop}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
-                      <FormField
-                        control={form.control}
-                        name="price"
-                        render={({ field }) => (
-                          <FormItem className="space-y-1">
-                            <FormLabel>Price</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                placeholder="Price"
-                                {...field}
-                                onChange={(e) => field.onChange(e.target.value)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <Controller
                         name="startDate"
@@ -316,11 +233,53 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                         )}
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="rentAmount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Rent Amount</FormLabel>
+                            <FormControl>
+                              <Input
+                                id="rentAmount"
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="securityDeposit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Security Deposit</FormLabel>
+                            <FormControl>
+                              <Input
+                                id="securityDeposit"
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <FormField
                       control={form.control}
                       name="isActive"
                       render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md pt-4">
                           <FormControl>
                             <Checkbox
                               checked={field.value}
@@ -332,30 +291,21 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                         </FormItem>
                       )}
                     />
-                    {/* <Controller
-                  name="images"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Images</FormLabel>
-                      <FormControl>
-                        <ImageUpload images={images} setImages={setImages} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <div className="flex justify-end w-full">
-                    <Button type="submit" loading={isLoading}>
-                      List Property
-                    </Button>
-                  </div>
-                </CardFooter>
-              </form>
-            </Form>
+                  <CardFooter>
+                    <div className="flex justify-end w-full">
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        loading={isLoading}
+                      >
+                        {isLoading ? "Creating Lease..." : "Create Lease"}
+                      </Button>
+                    </div>
+                  </CardFooter>
+                </form>
+              </Form>
+            </CardContent>
           </Card>
         </div>
       )}
