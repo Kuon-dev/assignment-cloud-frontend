@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import {
   Select,
   SelectContent,
@@ -64,7 +64,7 @@ enum RoomType {
   SmallBedroom,
 }
 
-const propertyFormSchema = z.object({
+const PropertyFormSchema = z.object({
   address: z.string().min(1, { message: "Address is required" }),
   city: z.string().min(1, { message: "City is required" }),
   state: z.string().min(1, { message: "State is required" }),
@@ -90,8 +90,8 @@ export default function CreatePropertyForm({
 }: PropertyFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof propertyFormSchema>>({
-    resolver: zodResolver(propertyFormSchema),
+  const form = useForm<z.infer<typeof PropertyFormSchema>>({
+    resolver: zodResolver(PropertyFormSchema),
     defaultValues: {
       address: "",
       city: "",
@@ -108,7 +108,7 @@ export default function CreatePropertyForm({
     },
   });
 
-  async function onSubmit(data: z.infer<typeof propertyFormSchema>) {
+  async function onSubmit(data: z.infer<typeof PropertyFormSchema>) {
     try {
       setIsLoading(true);
 
@@ -220,8 +220,6 @@ export default function CreatePropertyForm({
                     </FormItem>
                   )}
                 />
-              </div>
-              <div className="grid gap-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -405,7 +403,7 @@ export default function CreatePropertyForm({
               </div>
               <CardFooter>
                 <div className="flex justify-end w-full">
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full" loading={isLoading}>
                     {isLoading ? "Listing Property..." : "List Property"}
                   </Button>
                 </div>

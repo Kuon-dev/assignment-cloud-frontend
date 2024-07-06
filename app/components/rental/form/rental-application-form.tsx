@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/custom/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -163,7 +163,7 @@ export default function RentalApplicationForm({
                   )}
                 />
               </div>
-              <Button type="submit" className="mt-4">
+              <Button type="submit" className="mt-4" loading={isLoading}>
                 Submit Application
               </Button>
             </form>

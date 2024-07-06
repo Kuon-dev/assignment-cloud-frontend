@@ -21,7 +21,7 @@ interface PropertyCardProps {
   rating: number;
 }
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({
+export default function PropertyCard({
   images,
   title,
   description,
@@ -30,7 +30,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   bedrooms,
   bathrooms,
   rating,
-}) => {
+}: PropertyCardProps) {
   return (
     <Card className="w-full mx-auto p-4 sm:p-6 md:p-8 mb-6 flex flex-col justify-between">
       <div className="flex flex-col gap-6">
@@ -98,4 +98,4 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       </div>
     </Card>
   );
-};
+}

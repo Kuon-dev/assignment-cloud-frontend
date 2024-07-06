@@ -3,7 +3,7 @@ import Footer from "@/components/landing/footer";
 import { Shell } from "@/components/landing/shell";
 import { Button } from "@/components/ui/button";
 import { Link } from "@remix-run/react";
-import { PropertyCard } from "@/components/listing/listing-card";
+import PropertyCard from "@/components/listing/listing-card";
 import ListingForm from "@/components/listing/form/listing-form";
 import PropertyForm from "@/components/property/form/property-form";
 
@@ -111,8 +111,8 @@ export default function ListingLayout() {
           </Button>
 
           {/* <Listing /> */}
-          {/* <ListingForm /> */}
-          <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} />
+          <ListingForm />
+          {/* <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} /> */}
 
           <Footer className="pt-10 mx-auto" />
         </div>
