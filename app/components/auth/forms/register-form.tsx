@@ -68,7 +68,7 @@ export default function RegisterForm({
   async function onSubmit(data: z.infer<typeof registrationFormSchema>) {
     try {
       setIsLoading(true);
-      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/v1/register`, {
+      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

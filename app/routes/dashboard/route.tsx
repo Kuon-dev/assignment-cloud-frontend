@@ -1,38 +1,38 @@
 import React from "react";
-import { Link, Outlet } from "@remix-run/react";
+import { Outlet } from "@remix-run/react";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
-import { Layout, LayoutHeader, LayoutBody } from "@/components/custom/layout";
+import { Layout, LayoutBody } from "@/components/custom/layout";
 import {
   adminSidebarLinks,
   moderatorSidebarLinks,
   sellerSidebarLinks,
   buyerSidebarLinks,
+  tenantSidebarLinks,
+  ownerSidebarLinks,
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
-import VerifyEmailComponent from "@/components/dashboard/verify-email";
+// import VerifyEmailComponent from "@/components/dashboard/verify-email";
 import { useDashboardStore } from "@/stores/dashboard-store";
 
 export default function DashboardLayout() {
   const [sidebarLinks, setSidebarLinks] = React.useState<LinkProps[]>([]);
   const [user] = useDashboardStore((state) => [state.user]);
   React.useEffect(() => {
-    if (!user) return;
-    switch (user.role) {
-      case "admin":
-        setSidebarLinks(adminSidebarLinks);
-        break;
-      case "moderator":
-        setSidebarLinks(moderatorSidebarLinks);
-        break;
-      case "seller":
-        setSidebarLinks(sellerSidebarLinks);
-        break;
-      case "buyer":
-        setSidebarLinks(buyerSidebarLinks);
-        break;
-      default:
-        setSidebarLinks(buyerSidebarLinks);
-    }
+    // if (!user) return;
+    // switch (user.role) {
+    //   case "admin":
+    //     setSidebarLinks(adminSidebarLinks);
+    //     break;
+    //   case "tenant":
+    //     setSidebarLinks(moderatorSidebarLinks);
+    //     break;
+    //   case "owner":
+    //     setSidebarLinks(sellerSidebarLinks);
+    //     break;
+    //   default:
+    //     setSidebarLinks(buyerSidebarLinks);
+    // }
+    setSidebarLinks(tenantSidebarLinks);
   }, [user]);
 
   const settingsLink: LinkProps = {
@@ -50,9 +50,9 @@ export default function DashboardLayout() {
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <Layout className="flex min-h-screen w-full flex-col relative">
           <LayoutBody>
-            <main className="">
+            <main>
               <Outlet />
-              {user?.emailVerified ? <div /> : <VerifyEmailComponent />}
+              {/* {user?.emailVerified ? <div /> : <VerifyEmailComponent />} */}
             </main>
           </LayoutBody>
         </Layout>
