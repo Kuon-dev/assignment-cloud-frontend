@@ -33,7 +33,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     if (res.ok) {
       const data = await res.json();
-      listingData.listings = data.items.$values;
+      listingData.listings = data.items;
     }
   } catch (error) {
     console.error(error);

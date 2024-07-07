@@ -21,21 +21,33 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const RentalApplicationSchema = z.object({
-  employmentInfo: z
-    .string()
-    .min(1, { message: "Employment details are required" }),
-  references: z.string().min(1, { message: "References are required" }),
-  additionalNotes: z.string().optional(),
-});
-
-interface RentalApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
-  tenantId: string;
-  listingId: string;
+interface ReviewApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
+  application: Application;
 }
 
-type RentalApplicationFormErrorSchema = {
+const statusType = ["Pending", "Approve", "Reject"] as const;
+
+enum StatusType {
+  Pending,
+  Approved,
+  Rejected,
+}
+
+const ReviewApplicationFormSchema = z.object({
+  status: z.nativeEnum(StatusType, {
+    required_error: "Property type is required",
+  }),
+});
+
+type ReviewApplicationFormErrorSchema = {
   data: {
     message: string;
     details?: string;
@@ -46,24 +58,21 @@ type RentalApplicationFormErrorSchema = {
   stackTrace?: string;
 };
 
-export default function RentalApplicationForm({
-  tenantId,
-  listingId,
+export default function ReviewApplicationForm({
+  application,
   className,
   ...props
-}: RentalApplicationFormProps) {
+}: ReviewApplicationFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof RentalApplicationSchema>>({
-    resolver: zodResolver(RentalApplicationSchema),
+  const form = useForm<z.infer<typeof ReviewApplicationFormSchema>>({
+    resolver: zodResolver(ReviewApplicationFormSchema),
     defaultValues: {
-      employmentInfo: "",
-      references: "",
-      additionalNotes: "",
+      status: StatusType.Pending,
     },
   });
 
-  async function onSubmit(data: z.infer<typeof RentalApplicationSchema>) {
+  async function onSubmit(data: z.infer<typeof ReviewApplicationFormSchema>) {
     try {
       setIsLoading(true);
 
@@ -77,15 +86,13 @@ export default function RentalApplicationForm({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          tenantId,
-          listingId,
           ...data,
         }),
         credentials: "include",
       });
 
       if (!res.ok) {
-        const error = (await res.json()) as RentalApplicationFormErrorSchema;
+        const error = (await res.json()) as ReviewApplicationFormErrorSchema;
         throw new Error(error.data.message);
       } else {
         toast.success("Application submitted successfully!");
@@ -99,13 +106,12 @@ export default function RentalApplicationForm({
       setIsLoading(false);
     }
   }
+  console.log(application);
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <CardHeader>
-        <CardTitle className="text-3xl font-bold">
-          Rental Application Form
-        </CardTitle>
+        <CardTitle className="text-3xl font-bold">Review Application</CardTitle>
         <CardDescription>
           Please fill out the form below to submit your rental application.
         </CardDescription>
@@ -114,46 +120,43 @@ export default function RentalApplicationForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 gap-4">
-              <FormField
-                control={form.control}
-                name="employmentInfo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Employment Information</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter employment information"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <Textarea
+                placeholder="Enter employment information"
+                value={application.employmentInfo}
+                disabled
+              />
+              <Textarea
+                placeholder="Enter references"
+                value={application.references}
+                disabled
+              />
+              <Textarea
+                placeholder="Enter additional notes"
+                value={application.additionalNotes}
+                disabled
               />
               <FormField
                 control={form.control}
-                name="references"
+                name="status"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>References</FormLabel>
+                  <FormItem className="space-y-1">
+                    <FormLabel>Property</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Enter references" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="additionalNotes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Additional Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter additional notes"
-                        {...field}
-                      />
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        value={field.value.toString()}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select review status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {statusType.map((type, index) => (
+                            <SelectItem key={index} value={index.toString()}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -161,7 +164,7 @@ export default function RentalApplicationForm({
               />
             </div>
             <Button type="submit" className="mt-4" loading={isLoading}>
-              Submit Application
+              Submit Review
             </Button>
           </form>
         </Form>
