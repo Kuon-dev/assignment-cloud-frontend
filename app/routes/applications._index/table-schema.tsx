@@ -1,123 +1,95 @@
-import { ColumnDef } from "@tanstack/react-table";
-import { z } from "zod";
+import { TableColumn } from "@/components/custom/data-table";
 
 import {
   CheckCircledIcon,
   CrossCircledIcon,
   QuestionMarkCircledIcon,
+  DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import RentalApplicationForm from "@/components/rental/form/rental-application-form";
 
 export const statuses = [
-  { label: "Pending", value: "Pending", icon: QuestionMarkCircledIcon },
-  { label: "Approved", value: "Approved", icon: CheckCircledIcon },
-  { label: "Rejected", value: "Rejected", icon: CrossCircledIcon },
+  { value: 0, label: "Pending", icon: QuestionMarkCircledIcon },
+  { value: 1, label: "Approved", icon: CheckCircledIcon },
+  { value: 2, label: "Rejected", icon: CrossCircledIcon },
 ];
 
-export const applicationSchema = z.object({
-  tenantId: z.string().uuid().nonempty("Tenant ID is required"),
-  listingId: z.string().uuid().nonempty("Listing ID is required"),
-  status: z.enum(["Pending", "Approved", "Rejected"]),
-  applicationDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date",
-  }),
-  employmentInfo: z.string().optional(),
-  references: z.string().optional(),
-  additionalNotes: z.string().optional(),
-});
+function getStatusTextAndClass(status: string) {
+  switch (status) {
+    case "0":
+      return { text: "Pending", className: "text-yellow-500 font-semibold" };
+    case "1":
+      return { text: "Approved", className: "text-green-500 font-semibold" };
+    case "2":
+      return { text: "Rejected", className: "text-red-500 font-semibold" };
+    default:
+      return { text: "Unknown", className: "text-gray-500 font-semibold" };
+  }
+}
 
-export type ApplicationSchema = z.infer<typeof applicationSchema>;
-
-export const columns: ColumnDef<ApplicationSchema>[] = [
+export const columns: TableColumn<Application>[] = [
   {
-    accessorKey: "tenantId",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tenant ID" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[80px] max-w-[80px] truncate">
-        {row.getValue("tenantId")}
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    header: "Tenant First Name",
+    accessor: (row) => row.tenantFirstName,
   },
   {
-    accessorKey: "listingId",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Listing ID" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[80px] max-w-[80px] truncate">
-        {row.getValue("listingId")}
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    header: "Tenant Last Name",
+    accessor: (row) => row.tenantLastName,
   },
   {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-    cell: ({ row }) => {
-      const status = statuses.find(
-        (status) => status.value === row.getValue("status"),
-      );
-
-      if (!status) {
-        return null;
-      }
-
-      return (
-        <div className="flex items-center">
-          {status.icon && (
-            <status.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{status.label}</span>
-        </div>
-      );
+    header: "Tenant Email",
+    accessor: (row) => row.tenantEmail,
+  },
+  {
+    header: "Status",
+    accessor: (row) => {
+      const { text, className } = getStatusTextAndClass(row.status.toString());
+      return <span className={className}>{text}</span>;
     },
-    enableSorting: false,
-    enableHiding: false,
   },
   {
-    accessorKey: "applicationDate",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Application Date" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[120px] max-w-[120px] truncate">
-        {row.getValue("applicationDate")}
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    header: "Application Date",
+    accessor: (row) =>
+      new Date(row.applicationDate).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
   },
   {
-    accessorKey: "employmentInfo",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Employment Info" />
+    header: "Actions",
+    accessor: (row) => (
+      <>
+        <Dialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+              >
+                <DotsHorizontalIcon className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuItem>
+                <DialogTrigger>Edit Application</DialogTrigger>
+              </DropdownMenuItem>
+              <DropdownMenuItem>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DialogContent>
+            <RentalApplicationForm tenantId="" listingId="" />
+          </DialogContent>
+        </Dialog>
+      </>
     ),
-    cell: ({ row }) => (
-      <div className="w-[120px] max-w-[120px] truncate">
-        {row.getValue("employmentInfo")}
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "references",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="References" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[120px] max-w-[120px] truncate">
-        {row.getValue("references")}
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
   },
 ];

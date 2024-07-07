@@ -175,8 +175,17 @@ type Application = {
   createdAt: string;
   updatedAt: string;
   isDeleted: boolean;
+  tenantFirstName: string;
+  tenantLastName: string;
+  tenantEmail: string;
+  applicationDate: string;
+  employmentInfo: string;
+  additionalNotes: string;
+  references: string;
 };
 
 type ApplicationLoaderData = {
   applications: Application[];
+  totalPages: number;
+  currentPage: number;
 };
