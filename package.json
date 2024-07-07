@@ -55,6 +55,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "embla-carousel-autoplay": "^8.1.6",
     "embla-carousel-react": "^8.0.4",
     "framer-motion": "^11.1.9",
     "husky": "^9.0.11",
