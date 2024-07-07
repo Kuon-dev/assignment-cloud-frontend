@@ -1,10 +1,7 @@
 // routes/index.tsx
 import { useState } from "react";
 import PropertyCard from "@/components/listing/listing-card";
-import {
-  ListingFilterForm,
-  ListingFilterFormValues,
-} from "@/components/listing/form/listing-filter-form";
+import ListingFilterForm, { ListingFilterFormValues } from "@/components/listing/form/listing-filter-form";
 import RentalApplicationForm from "@/components/rental/form/rental-application-form";
 import MaintenanceRequestForm from "@/components/maintenance/form/maintenance-request-form";
 import MaintenanceTaskForm from "@/components/maintenance/form/maintenance-task-form";
@@ -17,61 +14,6 @@ export default function Component() {
     bedrooms: 1,
     amenities: [],
   });
-
-  const properties = [
-    {
-      images: ["property1.jpg"],
-      title: "Beautiful Apartment",
-      description: "A beautiful apartment in the heart of the city.",
-      price: "$1,500/month",
-      location: "123 Main St, City, State",
-      bedrooms: 2,
-      bathrooms: 1,
-      rating: 4.5,
-    },
-    {
-      images: ["property2.jpg"],
-      title: "Cozy House",
-      description:
-        "A cozy house with a big backyard. with a big backyard.with a big backyard.",
-      price: "$2,000/month",
-      location: "456 Oak St, City, State",
-      bedrooms: 3,
-      bathrooms: 2,
-      rating: 4.7,
-    },
-    {
-      images: ["property2.jpg"],
-      title: "Cozy House",
-      description: "A cozy house with a big backyard. with a big backyard.",
-      price: "$2,000/month",
-      location: "456 Oak St, City, State",
-      bedrooms: 3,
-      bathrooms: 2,
-      rating: 4.7,
-    },
-    {
-      images: ["property2.jpg"],
-      title: "Cozy House",
-      description:
-        "A cozy house with a big backyard. with a big backyard.with a big backyard.with a big backyard.with a big backyard.with a big backyard.",
-      price: "$2,000/month",
-      location: "456 Oak St, City, State",
-      bedrooms: 3,
-      bathrooms: 2,
-      rating: 4.7,
-    },
-    {
-      images: ["property2.jpg"],
-      title: "Cozy House",
-      description: "A cozy house with a big backyard.",
-      price: "$2,000/month",
-      location: "456 Oak St, City, State",
-      bedrooms: 3,
-      bathrooms: 2,
-      rating: 4.7,
-    },
-  ];
 
   const handleFilterSubmit = (data: ListingFilterFormValues) => {
     setFilters(data);

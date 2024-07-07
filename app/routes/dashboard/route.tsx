@@ -1,23 +1,20 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "@remix-run/react";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 import { Layout, LayoutBody } from "@/components/custom/layout";
 import {
-  adminSidebarLinks,
-  moderatorSidebarLinks,
-  sellerSidebarLinks,
-  buyerSidebarLinks,
   tenantSidebarLinks,
   ownerSidebarLinks,
+  adminSidebarLinks,
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
 // import VerifyEmailComponent from "@/components/dashboard/verify-email";
 import { useDashboardStore } from "@/stores/dashboard-store";
 
 export default function DashboardLayout() {
-  const [sidebarLinks, setSidebarLinks] = React.useState<LinkProps[]>([]);
+  const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
   const [user] = useDashboardStore((state) => [state.user]);
-  React.useEffect(() => {
+  useEffect(() => {
     // if (!user) return;
     // switch (user.role) {
     //   case "admin":
@@ -52,7 +49,6 @@ export default function DashboardLayout() {
           <LayoutBody>
             <main>
               <Outlet />
-              {/* {user?.emailVerified ? <div /> : <VerifyEmailComponent />} */}
             </main>
           </LayoutBody>
         </Layout>
