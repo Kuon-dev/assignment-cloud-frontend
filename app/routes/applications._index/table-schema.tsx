@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import RentalApplicationForm from "@/components/rental/form/rental-application-form";
+import ReviewApplicationForm from "@/components/rental/form/review-rental-application";
 
 export const statuses = [
   { value: 0, label: "Pending", icon: QuestionMarkCircledIcon },
@@ -86,7 +86,7 @@ export const columns: TableColumn<Application>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
           <DialogContent>
-            <RentalApplicationForm tenantId="" listingId="" />
+            <ReviewApplicationForm application={row} />
           </DialogContent>
         </Dialog>
       </>
