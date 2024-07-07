@@ -166,3 +166,17 @@ type ListingsLoaderData = {
     BACKEND_URL: string;
   };
 };
+
+type Application = {
+  id: string;
+  userId: string;
+  listingId: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+};
+
+type ApplicationLoaderData = {
+  applications: Application[];
+};
