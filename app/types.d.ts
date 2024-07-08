@@ -192,6 +192,31 @@ type ApplicationLoaderData = {
   currentPage: number;
 };
 
+enum PaymentStatus {
+  RequiresPaymentMethod = "RequiresPaymentMethod",
+  RequiresConfirmation = "RequiresConfirmation",
+  RequiresAction = "RequiresAction",
+  Processing = "Processing",
+  RequiresCapture = "RequiresCapture",
+  Cancelled = "Cancelled",
+  Succeeded = "Succeeded",
+}
+
+type Payment = {
+  tenantId: string;
+  tenant?: TenantModel;
+  amount: number;
+  currency: string;
+  paymentIntentId: string;
+  paymentMethodId?: string;
+  status: PaymentStatus;
+};
+
+type PaymentLoaderData = {
+  payments: Payment[];
+  totalCount: number;
+};
+
 type Maintenance = {
   id: string;
   userId: string;

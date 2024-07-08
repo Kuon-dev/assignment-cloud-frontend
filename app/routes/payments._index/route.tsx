@@ -1,12 +1,12 @@
-import { json, LoaderFunction } from "@remix-run/node";
+import { DataTable } from "@/components/custom/data-table";
+import { PaginationComponent } from "@/components/custom/data-table-pagination";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { cookieConsent } from "@/utils/cookies.server";
+import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
-import { DataTable } from "@/components/custom/data-table";
-import { columns } from "./table-schema";
-import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { columns } from "./table-schema";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -20,15 +20,14 @@ export const loader: LoaderFunction = async ({ request }) => {
     // return redirect("/login");
   }
 
-  const applicationData: ApplicationLoaderData = {
-    applications: [],
-    totalPages: 0,
-    currentPage: parseInt(pageNumber),
+  const paymentData: PaymentLoaderData = {
+    payments: [],
+    totalCount: 0,
   };
 
   try {
     const res = await fetch(
-      `${process.env.BACKEND_URL}/api/Applications?PageNumber=${pageNumber}&PageSize=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/Payments?page=${pageNumber}&size=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -38,48 +37,45 @@ export const loader: LoaderFunction = async ({ request }) => {
         },
       },
     );
-    console.log(res);
 
     if (res.ok) {
       const data = await res.json();
-      applicationData.applications = data.items;
-      applicationData.currentPage = data.pageNumber;
-      applicationData.totalPages = Math.ceil(data.totalCount / data.pageSize);
+      console.log(data);
+
+      paymentData.payments = data.payments;
+      paymentData.totalCount = data.totalCount;
     }
   } catch (error) {
     console.error(error);
     throw new Error("Failed to fetch data");
   }
 
-  return json(applicationData);
+  return json(paymentData);
 };
 
-export default function Applications() {
+export default function Payments() {
   const data = useLoaderData<typeof loader>();
-  const { applications, currentPage, totalPages } = data;
+  const { payments, currentPage, totalPages } = data;
   const [searchParams, setSearchParams] = useSearchParams();
-  const pageNumber = parseInt(searchParams.get("pageNumber") || "1");
 
-  const handleNavigation = (newPage: number) => {
-    setSearchParams({ pageNumber: newPage.toString() });
+  const handleNavigation = (page: number) => {
+    setSearchParams({ pageNumber: page.toString() });
   };
+  console.log(payments);
 
   return (
     <section className="w-full mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Applications</h1>
+      <h1 className="text-2xl font-semibold mb-4">Your Payment History</h1>
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={applications} />
-
-              <div className="mt-4 flex justify-between">
-                <PaginationComponent
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handleNavigation}
-                />
-              </div>
+              <DataTable columns={columns} data={payments} />
+              <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handleNavigation}
+              />
             </>
           )}
         </ClientOnly>
