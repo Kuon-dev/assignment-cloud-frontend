@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { Outlet } from "@remix-run/react";
 import { Layout, LayoutBody } from "@/components/custom/layout";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
-import { ownerSidebarLinks } from "@/components/dashboard/constants";
+import { tenantSidebarLinks } from "@/components/dashboard/constants";
 
 import { Settings } from "lucide-react";
 
-export default function MaintenanceRequestLayout() {
+export default function RentalLayout() {
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
 
   useEffect(() => {
-    setSidebarLinks(ownerSidebarLinks);
+    setSidebarLinks(tenantSidebarLinks);
   }, []);
 
   const settingsLink: LinkProps = {

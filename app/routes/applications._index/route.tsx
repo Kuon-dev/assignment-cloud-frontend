@@ -1,12 +1,12 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
-import { toast } from "sonner";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { DataTable } from "@/components/custom/data-table";
 import { columns } from "./table-schema";
 import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -14,10 +14,12 @@ export const loader: LoaderFunction = async ({ request }) => {
   const pageSize = url.searchParams.get("pageSize") || "10";
 
   const cookieHeader = request.headers.get("Cookie");
+  const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
   if (!userSession || !userSession.token) {
-    toast.error("You need to be logged in to view this page");
+    // return redirect("/login");
   }
+  console.log(request.headers);
 
   const applicationData: ApplicationLoaderData = {
     applications: [],
@@ -33,10 +35,11 @@ export const loader: LoaderFunction = async ({ request }) => {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZlMTczNDQxLTdjM2QtNGNjMS1iNDVkLTMyZTBjNmM3MjhjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QzQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiIzNDkwZDQ2YS0xODUyLTRhZmYtODI4ZS01NWRmMjRkNDhlMWQiLCJleHAiOjE3MjA0NTcwNjMsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0._egb7hQJB8XXUqWbe2fNKU1efUIR5bryqZggCu0Dy7E`,
+          Authorization: `Bearer ${authToken}`,
         },
       },
     );
+    console.log(res);
 
     if (res.ok) {
       const data = await res.json();

@@ -6,3 +6,22 @@ export const checkAuthCookie = (request: Request) => {
 
   return access_cookie ? true : false;
 };
+
+export const getAuthTokenFromCookie = (
+  cookieHeader: string | null,
+): string | null => {
+  if (!cookieHeader) {
+    return null;
+  }
+
+  const cookies = cookieHeader.split(";").reduce(
+    (acc, cookie) => {
+      const [key, value] = cookie.trim().split("=");
+      acc[key] = value;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+
+  return cookies["auth_token"] || null;
+};

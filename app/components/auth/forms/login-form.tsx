@@ -77,7 +77,15 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
         throw new Error(error.data.message);
       } else {
         // set cookie
-        // const json = await res.json();
+        const json = await res.json();
+        const { token } = json;
+
+        const expiryDate = new Date();
+        expiryDate.setTime(expiryDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const expires = expiryDate.toUTCString();
+
+        // Set the cookie with the expiration time
+        document.cookie = `auth_token=${token}; path=/; secure; SameSite=Strict; expires=${expires}`;
 
         toast.success("Login successful!");
         nav("/dashboard");
