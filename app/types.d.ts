@@ -138,3 +138,54 @@ type ErrorSchema = {
   error: string; // Short error code or type
   stackTrace?: string; // Optional stack trace for debugging purposes
 };
+
+type Listing = {
+  $id: string;
+  propertyId: string;
+  title: string;
+  description: string;
+  price: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  views: number;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  // images: string[];
+  location: string;
+  bedrooms: number;
+  bathrooms: number;
+  views: number;
+};
+
+type ListingsLoaderData = {
+  listings: Listing[];
+  ENV: {
+    BACKEND_URL: string;
+  };
+};
+
+type Application = {
+  id: string;
+  userId: string;
+  listingId: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  tenantFirstName: string;
+  tenantLastName: string;
+  tenantEmail: string;
+  applicationDate: string;
+  employmentInfo: string;
+  additionalNotes: string;
+  references: string;
+};
+
+type ApplicationLoaderData = {
+  applications: Application[];
+  totalPages: number;
+  currentPage: number;
+};

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ClientOnly } from "remix-utils/client-only";
 
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -13,14 +14,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/custom/button";
@@ -40,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-// import ImageUpload from "@/components/custom/image-upload";
+import { DatePicker } from "@/components/custom/date.picker.client";
 
 interface ImageFile extends File {
   preview: string;
@@ -62,16 +55,19 @@ type ListingsFormErrorSchema = {
 const ListingFormSchema = z.object({
   title: z.string().min(1, { message: "Please enter the title" }),
   description: z.string().min(1, { message: "Please enter the description" }),
-  // property: z.string().min(1, { message: "Please select a property" }),
+  property: z.string().min(1, { message: "Please select a property" }),
   price: z.number().min(1, { message: "Please enter a valid price" }),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  startDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+  endDate: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
   isActive: z.boolean().optional(),
 });
 
 export default function ListingForm({ className, ...props }: ListingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState<ImageFile[]>([]);
 
   const form = useForm<z.infer<typeof ListingFormSchema>>({
     resolver: zodResolver(ListingFormSchema),
@@ -93,7 +89,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
       setIsLoading(true);
 
       const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdjNzBlMzI5LTE3NGQtNDVjYi05MTUwLWNjZTZlMGY0ZThjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QyQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiI3NGNkNDJiOC1lODhhLTRlZTktOTYzOC0yN2I2ZWE2NmZiMTEiLCJleHAiOjE3MjAzNjE0ODEsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.yJPooh0njPgRm-9Sx4NkX6soVAVm_8j6Zj8Aze-Se40";
+        "eyJhbGciOiJIUzcCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdjNzBlMzI5LTE3NGQtNDVjYi05MTUwLWNjZTZlMGY0ZThjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QyQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiI3NGNkNDJiOC1lODhhLTRlZTktOTYzOC0yN2I2ZWE2NmZiMTEiLCJleHAiOjE3MjAzNjE0ODEsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.yJPooh0njPgRm-9Sx4NkX6soVAVm_8j6Zj8Aze-Se40";
       const propertyId = "174599ab-a263-4168-ae49-45073715ab71";
       const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Listings`, {
         method: "POST",
@@ -126,19 +122,11 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
   };
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold">
-            List Your Property
-          </CardTitle>
-          <CardDescription>
-            Enter the details below to advertise your property.
-          </CardDescription>
-        </CardHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent>
+    <ClientOnly>
+      {() => (
+        <div className={cn("grid gap-6", className)} {...props}>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
@@ -171,7 +159,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                   )}
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  {/* <FormField
+                  <FormField
                     control={form.control}
                     name="property"
                     render={({ field }) => (
@@ -197,7 +185,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                         <FormMessage />
                       </FormItem>
                     )}
-                  /> */}
+                  />
                   <FormField
                     control={form.control}
                     name="price"
@@ -210,7 +198,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                             placeholder="Price"
                             {...field}
                             onChange={(e) =>
-                              field.onChange(e.target.valueAsNumber)
+                              field.onChange(parseInt(e.target.value))
                             }
                           />
                         </FormControl>
@@ -220,95 +208,17 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Controller
+                  <DatePicker
                     name="startDate"
                     control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel>Start Date</FormLabel>
-                        <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-start font-normal"
-                              >
-                                <CalendarDays className="w-5" />
-                                <span className="ml-3">
-                                  {field.value
-                                    ? format(new Date(field.value), "PPP")
-                                    : "Select date"}
-                                </span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={
-                                  field.value
-                                    ? new Date(field.value)
-                                    : undefined
-                                }
-                                onSelect={(date) => {
-                                  field.onChange(
-                                    date ? date.toISOString() : undefined,
-                                  );
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Start Date"
+                    error={form.formState.errors.startDate}
                   />
-                  <Controller
+                  <DatePicker
                     name="endDate"
                     control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel>End Date</FormLabel>
-                        <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-start font-normal"
-                              >
-                                <CalendarDays className="w-5" />
-                                <span className="ml-3">
-                                  {field.value
-                                    ? format(new Date(field.value), "PPP")
-                                    : "Select date"}
-                                </span>
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
-                            >
-                              <Calendar
-                                mode="single"
-                                selected={
-                                  field.value
-                                    ? new Date(field.value)
-                                    : undefined
-                                }
-                                onSelect={(date) => {
-                                  field.onChange(
-                                    date ? date.toISOString() : undefined,
-                                  );
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="End Date"
+                    error={form.formState.errors.endDate}
                   />
                 </div>
                 <FormField
@@ -327,31 +237,16 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                     </FormItem>
                   )}
                 />
-                {/* <Controller
-                  name="images"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem className="space-y-1">
-                      <FormLabel>Images</FormLabel>
-                      <FormControl>
-                        <ImageUpload images={images} setImages={setImages} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
               </div>
-            </CardContent>
-            <CardFooter>
               <div className="flex justify-end w-full">
                 <Button type="submit" loading={isLoading}>
                   List Property
                 </Button>
               </div>
-            </CardFooter>
-          </form>
-        </Form>
-      </Card>
-    </div>
+            </form>
+          </Form>
+        </div>
+      )}
+    </ClientOnly>
   );
 }
