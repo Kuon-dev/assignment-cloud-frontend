@@ -66,7 +66,7 @@ export const columns: TableColumn<Application>[] = [
   },
   {
     header: "Actions",
-    accessor: (row) => (
+    accessor: (row: Application) => (
       <>
         <Dialog>
           <DropdownMenu>
@@ -78,11 +78,16 @@ export const columns: TableColumn<Application>[] = [
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
-              <DropdownMenuItem>
+            <DropdownMenuContent
+              align="end"
+              className="w-[160px] font-semibold"
+            >
+              <DropdownMenuItem disabled={parseInt(row.status) !== 0}>
                 <DialogTrigger>Edit Application</DialogTrigger>
               </DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DropdownMenuItem className="text-red-500">
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <DialogContent>

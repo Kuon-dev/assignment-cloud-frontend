@@ -140,8 +140,7 @@ type ErrorSchema = {
 };
 
 type Listing = {
-  $id: string;
-  propertyId: string;
+  id: string;
   title: string;
   description: string;
   price: number;
@@ -149,19 +148,22 @@ type Listing = {
   endDate: string;
   isActive: boolean;
   views: number;
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  isDeleted: boolean;
-  // images: string[];
+  imageUrls: string[] | null;
   location: string;
   bedrooms: number;
   bathrooms: number;
-  views: number;
+  amenities: string[];
 };
 
 type ListingsLoaderData = {
   listings: Listing[];
+  ENV: {
+    BACKEND_URL: string;
+  };
+};
+
+type ListingDetailLoaderData = {
+  listing: Listing;
   ENV: {
     BACKEND_URL: string;
   };
@@ -186,6 +188,29 @@ type Application = {
 
 type ApplicationLoaderData = {
   applications: Application[];
+  totalPages: number;
+  currentPage: number;
+};
+
+type Maintenance = {
+  id: string;
+  userId: string;
+  listingId: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  tenantFirstName: string;
+  tenantLastName: string;
+  tenantEmail: string;
+  applicationDate: string;
+  employmentInfo: string;
+  additionalNotes: string;
+  references: string;
+};
+
+type MaintenanceLoaderData = {
+  maintenances: Maintenance[];
   totalPages: number;
   currentPage: number;
 };

@@ -142,6 +142,11 @@ export const ownerSidebarLinks = [
     tooltip: "Your listings",
   },
   {
+    to: "/applications",
+    icon: <ScanEye className="h-5 w-5" />,
+    tooltip: "Your application reviews",
+  },
+  {
     to: "/maintenances",
     icon: <Wrench className="h-5 w-5" />,
     tooltip: "Your maintenance requests",
