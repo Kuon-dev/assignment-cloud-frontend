@@ -13,6 +13,7 @@ import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 
 const ABORT_DELAY = 5_000;
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export default function handleRequest(
   request: Request,

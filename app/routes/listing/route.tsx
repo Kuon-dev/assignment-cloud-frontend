@@ -3,8 +3,6 @@ import { Link, Outlet } from "@remix-run/react";
 import Navbar from "@/components/landing/navbar";
 import Footer from "@/components/landing/footer";
 import ListingForm from "@/components/listing/form/listing-form";
-import PropertyForm from "@/components/property/form/property-form";
-import LeaseForm from "@/components/lease/form/lease-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,9 +48,6 @@ export default function ListingLayout() {
           </div>
 
           <Outlet />
-
-          {/* <PropertyForm ownerId={"37c4f100-0016-4e91-bdf3-b975b4abec08"} /> */}
-          {/* <LeaseForm tenantId="" propertyId="" /> */}
 
           <Footer className="pt-10 mx-auto" />
         </div>

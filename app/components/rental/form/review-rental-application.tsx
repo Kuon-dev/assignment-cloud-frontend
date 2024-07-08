@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface ReviewApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
   application: Application;
@@ -77,19 +78,22 @@ export default function ReviewApplicationForm({
       setIsLoading(true);
 
       const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImM5YWEyMzdmLTE0MWMtNGNiYi04ODM3LWJkYWQ3OGE0NDU0ZSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QzQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVGVuYW50IiwianRpIjoiODE0OGFhNDYtYzJmZi00YzFhLTg4ZTktNTQxM2ZjYzIwYTg2IiwiZXhwIjoxNzIwMzU0ODQwLCJpc3MiOiJrdW9uIiwiYXVkIjoia3VvbiJ9.9qaxzG2L3Q8wX0PfoLZwYGWpsdlZJdMuObH7okXjsEM";
-      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Applications`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZlMTczNDQxLTdjM2QtNGNjMS1iNDVkLTMyZTBjNmM3MjhjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QzQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiJlZGY4Njc5ZS05NGFmLTQzZGYtYjYwZC0xYTQxMGUxZDFjNjAiLCJleHAiOjE3MjA1MDg3NTYsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.RcoYDh4SDHcFSCMWqRPRy6wpMPwmItxQZG2NcaCgHEM";
+      const res = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/Applications/${application.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ...data,
+          }),
+          credentials: "include",
         },
-        body: JSON.stringify({
-          ...data,
-        }),
-        credentials: "include",
-      });
+      );
 
       if (!res.ok) {
         const error = (await res.json()) as ReviewApplicationFormErrorSchema;
@@ -106,7 +110,6 @@ export default function ReviewApplicationForm({
       setIsLoading(false);
     }
   }
-  console.log(application);
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
@@ -120,27 +123,36 @@ export default function ReviewApplicationForm({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 gap-4">
-              <Textarea
-                placeholder="Enter employment information"
-                value={application.employmentInfo}
-                disabled
-              />
-              <Textarea
-                placeholder="Enter references"
-                value={application.references}
-                disabled
-              />
-              <Textarea
-                placeholder="Enter additional notes"
-                value={application.additionalNotes}
-                disabled
-              />
+              <div>
+                <Label>Employment Information</Label>
+                <Textarea
+                  placeholder="Enter employment information"
+                  value={application.employmentInfo}
+                  disabled
+                />
+              </div>
+              <div>
+                <Label>References</Label>
+                <Textarea
+                  placeholder="Enter references"
+                  value={application.references}
+                  disabled
+                />
+              </div>
+              <div>
+                <Label>Additional Notes</Label>
+                <Textarea
+                  placeholder="Enter additional notes"
+                  value={application.additionalNotes}
+                  disabled
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem className="space-y-1">
-                    <FormLabel>Property</FormLabel>
+                    <FormLabel>Status</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={(value) => field.onChange(Number(value))}
