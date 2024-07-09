@@ -15,12 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
 
 const RentalApplicationSchema = z.object({
   employmentInfo: z
@@ -102,70 +96,57 @@ export default function RentalApplicationForm({
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
-      <CardHeader>
-        <CardTitle className="text-3xl font-bold">
-          Rental Application Form
-        </CardTitle>
-        <CardDescription>
-          Please fill out the form below to submit your rental application.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              <FormField
-                control={form.control}
-                name="employmentInfo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Employment Information</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter employment information"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="references"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>References</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Enter references" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="additionalNotes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Additional Notes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter additional notes"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Button type="submit" className="mt-4" loading={isLoading}>
-              Submit Application
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="employmentInfo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employment Information</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter employment information"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="references"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>References</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter references" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="additionalNotes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Notes</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter additional notes" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <Button type="submit" className="mt-4" loading={isLoading}>
+            Submit Application
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }

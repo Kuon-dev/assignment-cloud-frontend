@@ -22,6 +22,7 @@ import CookieBanner from "@/components/landing/cookie-banner";
 import { useDashboardStore } from "./stores/dashboard-store";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { getAuthTokenFromCookie } from "./lib/router-guard";
 // import { json, LoaderFunction, ActionFunction } from "@remix-run/node";
 //
 
@@ -37,11 +38,14 @@ type Me = {
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await cookieConsent.parse(cookieHeader)) || {};
+  const authToken = getAuthTokenFromCookie(cookieHeader);
+
   let user: Me | null = null;
   try {
     user = await fetch(`${process.env.BACKEND_URL}/api/users/profile`, {
       headers: {
         Cookie: cookieHeader ?? "",
+        Authorization: `Bearer ${authToken}` ?? "",
       },
     }).then((res) => {
       if (res.ok) {

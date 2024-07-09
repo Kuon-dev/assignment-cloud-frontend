@@ -1,13 +1,24 @@
 import { useLoaderData } from "@remix-run/react";
 import { json, LoaderFunction, redirect } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
+import { Shell } from "@/components/landing/shell";
+import { ClientOnly } from "remix-utils/client-only";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 import PropertyCarousel from "@/components/property/property-carousel";
 import { BedIcon, BathIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Shell } from "@/components/landing/shell";
-import { ClientOnly } from "remix-utils/client-only";
-import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import RentalApplicationForm from "@/components/rental/form/rental-application-form";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -52,8 +63,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
-
       listingDetailData.listing = data;
     }
   } catch (error) {
@@ -67,6 +76,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function ListingDetail() {
+  const user = useDashboardStore((state) => state.user);
   const data = useLoaderData<ListingDetailLoaderData>();
   const { listing } = data;
 
@@ -93,14 +103,41 @@ export default function ListingDetail() {
         <div className="mb-4">
           <h3 className="text-xl font-bold mb-2">Amenities</h3>
 
-          <div className="flex gap-2">
-            {listing.amenities.map((amenity, index) => (
-              <Badge key={index} className="text-md font-semibold">
-                {amenity}
-              </Badge>
-            ))}
-          </div>
+          {listing.amenities.length > 0 ? (
+            <div className="flex gap-2">
+              {listing.amenities.map((amenity, index) => (
+                <Badge key={index} className="text-md font-semibold">
+                  {amenity}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-md">No amenities available.</p>
+          )}
         </div>
+
+        {user?.tenant !== null && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="inline-flex items-center font-semibold">
+                Apply Now
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Apply to rent this property</DialogTitle>
+                <DialogDescription>
+                  Please fill out the form below to apply to rent this property.
+                </DialogDescription>
+              </DialogHeader>
+
+              <RentalApplicationForm
+                tenantId={user?.tenant.id}
+                listingId={listing.id}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </Shell>
   );

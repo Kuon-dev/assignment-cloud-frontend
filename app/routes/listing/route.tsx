@@ -1,20 +1,13 @@
 import { Link, Outlet } from "@remix-run/react";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 import Navbar from "@/components/landing/navbar";
 import Footer from "@/components/landing/footer";
-import ListingForm from "@/components/listing/form/listing-form";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 
 export default function ListingLayout() {
+  const user = useDashboardStore((state) => state.user);
+
   return (
     <>
       <Navbar />
@@ -24,27 +17,6 @@ export default function ListingLayout() {
             <Button variant="link">
               <Link to="/">&larr; Back to Home</Link>
             </Button>
-
-            {true && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="link" className="inline-flex items-center">
-                    <Plus className="w-6 h-6 mr-2" />
-                    <span>Create Listing</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>List Your Property</DialogTitle>
-                    <DialogDescription>
-                      Enter the details below to advertise your property.
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <ListingForm />
-                </DialogContent>
-              </Dialog>
-            )}
           </div>
 
           <Outlet />

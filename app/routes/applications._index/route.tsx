@@ -7,6 +7,7 @@ import { columns } from "./table-schema";
 import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
