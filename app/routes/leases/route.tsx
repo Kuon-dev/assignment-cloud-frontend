@@ -23,8 +23,6 @@ export default function LeaseLayout() {
       case !!user.owner:
         setSidebarLinks(ownerSidebarLinks);
         break;
-      default:
-        setSidebarLinks(tenantSidebarLinks);
     }
   }, []);
 
