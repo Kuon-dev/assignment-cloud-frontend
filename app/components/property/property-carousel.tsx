@@ -87,23 +87,15 @@ import {
 import { Card, CardContent } from "../ui/card";
 
 interface PropertyCarouselFormProps extends HTMLAttributes<HTMLDivElement> {
-  // slides: string[];
+  slides: string[];
 }
 
 export default function PropertyCarousel({
-  // slides,
+  slides,
   className,
   ...props
 }: PropertyCarouselFormProps) {
   const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
-
-  const slides = [
-    "https://picsum.photos/id/237/200/300",
-    "https://picsum.photos/id/240/200/300",
-    "https://picsum.photos/id/233/200/300",
-    "https://picsum.photos/id/235/200/300",
-    "https://picsum.photos/id/238/200/300",
-  ];
 
   return (
     <div className={cn(className)} {...props}>

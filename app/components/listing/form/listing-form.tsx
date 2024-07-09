@@ -1,19 +1,12 @@
 import { useState, HTMLAttributes } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Control, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ClientOnly } from "remix-utils/client-only";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
 
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarDays } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/custom/button";
@@ -35,11 +28,9 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/custom/date.picker.client";
 
-interface ImageFile extends File {
-  preview: string;
+interface ListingFormProps extends HTMLAttributes<HTMLDivElement> {
+  listing?: Listing;
 }
-
-interface ListingFormProps extends HTMLAttributes<HTMLDivElement> {}
 
 type ListingsFormErrorSchema = {
   data: {
@@ -66,37 +57,42 @@ const ListingFormSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export default function ListingForm({ className, ...props }: ListingFormProps) {
+export default function ListingForm({
+  listing,
+  className,
+  ...props
+}: ListingFormProps) {
+  const cookies = document.cookie;
+  const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
+  console.log(listing);
 
   const form = useForm<z.infer<typeof ListingFormSchema>>({
     resolver: zodResolver(ListingFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
+      title: listing?.title || "",
+      description: listing?.description || "",
       // property: "",
-      price: 0,
-      startDate: undefined,
-      endDate: undefined,
-      isActive: true,
+      price: listing?.price || 0,
+      startDate: listing?.startDate || undefined,
+      endDate: listing?.endDate || undefined,
+      isActive: listing?.isActive || false,
     },
   });
 
   const properties = ["Property 1", "Property 2", "Property 3", "Property 4"];
-
+  // Need to get unlisted properties from owner
   const onSubmit = async (data: z.infer<typeof ListingFormSchema>) => {
     try {
       setIsLoading(true);
 
-      const token =
-        "eyJhbGciOiJIUzcCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjdjNzBlMzI5LTE3NGQtNDVjYi05MTUwLWNjZTZlMGY0ZThjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QyQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiI3NGNkNDJiOC1lODhhLTRlZTktOTYzOC0yN2I2ZWE2NmZiMTEiLCJleHAiOjE3MjAzNjE0ODEsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.yJPooh0njPgRm-9Sx4NkX6soVAVm_8j6Zj8Aze-Se40";
       const propertyId = "174599ab-a263-4168-ae49-45073715ab71";
       const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Listings`, {
-        method: "POST",
+        method: listing ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           propertyId,
@@ -169,6 +165,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
+                            disabled={!!listing}
                           >
                             <SelectTrigger className="border rounded-md p-2 w-full">
                               <SelectValue placeholder="Select a property" />
@@ -210,15 +207,17 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <DatePicker
                     name="startDate"
-                    control={form.control}
+                    control={form.control as unknown as Control<any>}
                     label="Start Date"
                     error={form.formState.errors.startDate}
+                    disabled={!!listing}
                   />
                   <DatePicker
                     name="endDate"
-                    control={form.control}
+                    control={form.control as unknown as Control<any>}
                     label="End Date"
                     error={form.formState.errors.endDate}
+                    disabled={!!listing}
                   />
                 </div>
                 <FormField
@@ -240,7 +239,7 @@ export default function ListingForm({ className, ...props }: ListingFormProps) {
               </div>
               <div className="flex justify-end w-full">
                 <Button type="submit" loading={isLoading}>
-                  List Property
+                  {listing ? "Update List" : "List Property"}
                 </Button>
               </div>
             </form>

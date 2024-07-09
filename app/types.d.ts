@@ -148,7 +148,7 @@ type Listing = {
   endDate: string;
   isActive: boolean;
   views: number;
-  imageUrls: string[] | null;
+  imageUrls: string[];
   location: string;
   bedrooms: number;
   bathrooms: number;
@@ -188,6 +188,31 @@ type Application = {
 
 type ApplicationLoaderData = {
   applications: Application[];
+  totalPages: number;
+  currentPage: number;
+};
+
+type Lease = {
+  id: string;
+  tenantId: string;
+  tenantFirstName: string;
+  tenantLastName: string;
+  tenantEmail: string;
+  propertyId: string;
+  propertyName: string;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  securityDeposit: number;
+  isActive: boolean;
+  applicationDate: string;
+  employmentInfo?: string;
+  additionalNotes?: string;
+  references?: string;
+};
+
+type LeaseLoaderData = {
+  leases: Lease[];
   totalPages: number;
   currentPage: number;
 };

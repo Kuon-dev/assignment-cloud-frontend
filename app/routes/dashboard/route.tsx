@@ -13,23 +13,21 @@ import { useDashboardStore } from "@/stores/dashboard-store";
 
 export default function DashboardLayout() {
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
-  const [user] = useDashboardStore((state) => [state.user]);
+  const user = useDashboardStore((state) => state.user);
+
   useEffect(() => {
-    // if (!user) return;
-    // switch (user.role) {
-    //   case "admin":
-    //     setSidebarLinks(adminSidebarLinks);
-    //     break;
-    //   case "tenant":
-    //     setSidebarLinks(moderatorSidebarLinks);
-    //     break;
-    //   case "owner":
-    //     setSidebarLinks(sellerSidebarLinks);
-    //     break;
-    //   default:
-    //     setSidebarLinks(buyerSidebarLinks);
-    // }
-    setSidebarLinks(tenantSidebarLinks);
+    if (!user) return;
+    switch (true) {
+      case !!user.admin:
+        setSidebarLinks(adminSidebarLinks);
+        break;
+      case !!user.tenant:
+        setSidebarLinks(tenantSidebarLinks);
+        break;
+      case !!user.owner:
+        setSidebarLinks(ownerSidebarLinks);
+        break;
+    }
   }, [user]);
 
   const settingsLink: LinkProps = {

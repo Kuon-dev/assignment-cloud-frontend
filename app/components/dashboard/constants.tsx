@@ -1,10 +1,8 @@
 import {
   Home,
-  LineChart,
-  Package,
-  ShoppingCart,
   DollarSign,
   ScanEye,
+  ReceiptText,
   Wrench,
   LayoutDashboard,
   AlignJustify,
@@ -17,14 +15,19 @@ export const tenantSidebarLinks = [
     tooltip: "Dashboard",
   },
   {
-    to: "/payments",
-    icon: <DollarSign className="h-5 w-5" />,
-    tooltip: "Your payments",
-  },
-  {
     to: "/applications",
     icon: <ScanEye className="h-5 w-5" />,
     tooltip: "Your application reviews",
+  },
+  {
+    to: "/leases",
+    icon: <ReceiptText className="h-5 w-5" />,
+    tooltip: "Your leases",
+  },
+  {
+    to: "/payments",
+    icon: <DollarSign className="h-5 w-5" />,
+    tooltip: "Your payments",
   },
   {
     to: "/maintenances",
@@ -45,7 +48,7 @@ export const ownerSidebarLinks = [
     tooltip: "Your properties",
   },
   {
-    to: "/listings",
+    to: "/listing",
     icon: <AlignJustify className="h-5 w-5" />,
     tooltip: "Your listings",
   },
@@ -58,6 +61,11 @@ export const ownerSidebarLinks = [
     to: "/maintenances",
     icon: <Wrench className="h-5 w-5" />,
     tooltip: "Your maintenance requests",
+  },
+  {
+    to: "/payments",
+    icon: <DollarSign className="h-5 w-5" />,
+    tooltip: "Your payments",
   },
 ];
 

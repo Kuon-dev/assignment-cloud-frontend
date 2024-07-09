@@ -1,8 +1,7 @@
 import { useLoaderData } from "@remix-run/react";
-import { json, LoaderFunction, redirect } from "@remix-run/node";
+import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
 import { Shell } from "@/components/landing/shell";
-import { ClientOnly } from "remix-utils/client-only";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { useDashboardStore } from "@/stores/dashboard-store";
 
@@ -82,7 +81,7 @@ export default function ListingDetail() {
 
   return (
     <Shell>
-      <PropertyCarousel />
+      <PropertyCarousel slides={listing.imageUrls} />
       <div className="flex flex-col gap-2 p-2 bg">
         <h1 className="text-3xl font-semibold text-gray-600 mb-4">
           Rent ${listing.price.toFixed(2)}
@@ -116,7 +115,7 @@ export default function ListingDetail() {
           )}
         </div>
 
-        {user?.tenant !== null && (
+        {user?.tenant && (
           <Dialog>
             <DialogTrigger asChild>
               <Button className="inline-flex items-center font-semibold">

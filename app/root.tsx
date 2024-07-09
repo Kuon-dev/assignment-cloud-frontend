@@ -77,7 +77,7 @@ declare global {
 export const action: ActionFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await cookieConsent.parse(cookieHeader)) || {};
-  console.log(request);
+
   const formData = await request.formData();
   // console.log('POST', formData.get("analytics"))
   if (formData.get("analytics")) {
