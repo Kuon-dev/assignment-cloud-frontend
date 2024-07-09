@@ -39,7 +39,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const cookie = (await cookieConsent.parse(cookieHeader)) || {};
   let user: Me | null = null;
   try {
-    user = await fetch(`${process.env.BACKEND_URL}/api/v1/me`, {
+    user = await fetch(`${process.env.BACKEND_URL}/api/users/profile`, {
       headers: {
         Cookie: cookieHeader ?? "",
       },
