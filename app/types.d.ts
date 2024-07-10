@@ -184,7 +184,8 @@ type Application = {
   employmentInfo: string;
   additionalNotes: string;
   references: string;
-  property: Property;
+  listingAddress: string;
+  propertyId: string;
 };
 
 type ApplicationLoaderData = {
@@ -232,6 +233,10 @@ type Payment = {
 type PaymentLoaderData = {
   payments: Payment[];
   totalCount: number;
+  ENV: {
+    BACKEND_URL: string;
+    STRIPE_PUBLIC_KEY: string;
+  };
 };
 
 enum MaintenanceStatus {
@@ -247,13 +252,12 @@ type Maintenance = {
   listingId: string;
   status: MaintenanceStatus;
   createdAt: string;
+  description: string;
+  priority: string;
+  propertyAddress: string;
+  tenantEmail: string;
   tenantFirstName: string;
   tenantLastName: string;
-  tenantEmail: string;
-  applicationDate: string;
-  employmentInfo: string;
-  additionalNotes: string;
-  references: string;
 };
 
 type MaintenanceLoaderData = {

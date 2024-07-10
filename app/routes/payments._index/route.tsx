@@ -8,6 +8,11 @@ import { ClientOnly } from "remix-utils/client-only";
 import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./table-schema";
 
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
+import CheckoutForm from "@/components/payment/form/checkout-form";
+
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const pageNumber = url.searchParams.get("pageNumber") || "1";
@@ -23,6 +28,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   const paymentData: PaymentLoaderData = {
     payments: [],
     totalCount: 0,
+    ENV: {
+      BACKEND_URL: process.env.BACKEND_URL || "",
+      STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY || "",
+    },
   };
 
   try {
@@ -40,7 +49,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
 
       paymentData.payments = data.payments;
       paymentData.totalCount = data.totalCount;
@@ -55,13 +63,25 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Payments() {
   const data = useLoaderData<typeof loader>();
-  const { payments, currentPage, totalPages } = data;
+  const { payments, totalCount, ENV } = data;
   const [searchParams, setSearchParams] = useSearchParams();
+  const [stripe, setStripe] = useState<Stripe | null>(null);
+
+  useEffect(() => {
+    const fetchStripe = async () => {
+      const stripeInstance = await loadStripe(ENV.STRIPE_PUBLIC_KEY);
+      setStripe(stripeInstance);
+    };
+    fetchStripe();
+  }, [ENV.STRIPE_PUBLIC_KEY]);
 
   const handleNavigation = (page: number) => {
     setSearchParams({ pageNumber: page.toString() });
   };
-  console.log(payments);
+
+  if (!stripe) {
+    return <LoadingComponent />;
+  }
 
   return (
     <section className="w-full mx-auto">
@@ -72,10 +92,15 @@ export default function Payments() {
             <>
               <DataTable columns={columns} data={payments} />
               <PaginationComponent
-                currentPage={currentPage}
-                totalPages={totalPages}
+                currentPage={parseInt(searchParams.get("pageNumber") || "1")}
+                totalPages={Math.ceil(
+                  totalCount / parseInt(searchParams.get("pageSize") || "10"),
+                )}
                 onPageChange={handleNavigation}
               />
+              <Elements stripe={stripe} options={{}}>
+                <CheckoutForm />
+              </Elements>
             </>
           )}
         </ClientOnly>

@@ -3,7 +3,7 @@ import { cookieConsent } from "@/utils/cookies.server";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { DataTable } from "@/components/custom/data-table";
-import { columns } from "./table-schema";
+import { ownerColumns, tenantColumns } from "./table-schema";
 import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
@@ -59,7 +59,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Applications() {
   const user = useDashboardStore((state) => state.user);
-  const data = useLoaderData<typeof loader>();
 
   return (
     <>
@@ -105,7 +104,7 @@ function TenantComponent() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={applications} />
+              <DataTable columns={tenantColumns} data={applications} />
 
               <div className="mt-4 flex justify-between">
                 <PaginationComponent
@@ -138,7 +137,7 @@ function OwnerComponent() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={applications} />
+              <DataTable columns={ownerColumns} data={applications} />
 
               <div className="mt-4 flex justify-between">
                 <PaginationComponent

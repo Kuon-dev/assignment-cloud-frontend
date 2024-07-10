@@ -50,8 +50,6 @@ export default function Properties() {
   const data = useLoaderData<typeof loader>();
   const { leases } = data;
 
-  console.log(leases);
-
   return (
     <>
       <h1 className="text-2xl font-semibold mb-4">Properties</h1>

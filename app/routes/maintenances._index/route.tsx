@@ -48,7 +48,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function Maintenances() {
   const data = useLoaderData<typeof loader>();
   const { maintenances } = data;
-  console.log(maintenances);
 
   return (
     <section className="w-full mx-auto">

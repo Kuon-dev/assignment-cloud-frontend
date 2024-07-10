@@ -1,5 +1,5 @@
 import { useState, HTMLAttributes } from "react";
-import { Control, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -65,7 +65,6 @@ export default function ListingForm({
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(listing);
 
   const form = useForm<z.infer<typeof ListingFormSchema>>({
     resolver: zodResolver(ListingFormSchema),
@@ -207,14 +206,14 @@ export default function ListingForm({
                 <div className="grid grid-cols-2 gap-4">
                   <DatePicker
                     name="startDate"
-                    control={form.control as unknown as Control<any>}
+                    control={form.control}
                     label="Start Date"
                     error={form.formState.errors.startDate}
                     disabled={!!listing}
                   />
                   <DatePicker
                     name="endDate"
-                    control={form.control as unknown as Control<any>}
+                    control={form.control}
                     label="End Date"
                     error={form.formState.errors.endDate}
                     disabled={!!listing}
