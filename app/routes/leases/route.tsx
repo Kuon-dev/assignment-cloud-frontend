@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "@remix-run/react";
 import { Layout, LayoutBody } from "@/components/custom/layout";
-import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
+import { useDashboardStore } from "@/stores/dashboard-store";
+
+import { Settings } from "lucide-react";
 import {
   ownerSidebarLinks,
   tenantSidebarLinks,
 } from "@/components/dashboard/constants";
-import { useDashboardStore } from "@/stores/dashboard-store";
+import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 
-import { Settings } from "lucide-react";
-
-export default function ApplicationLayout() {
+export default function LeaseLayout() {
   const user = useDashboardStore((state) => state.user);
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
 

@@ -1,10 +1,9 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "@remix-run/react";
 import {
   adminSidebarLinks,
-  moderatorSidebarLinks,
-  sellerSidebarLinks,
-  buyerSidebarLinks,
+  ownerSidebarLinks,
+  tenantSidebarLinks,
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
 import VerifyEmailComponent from "@/components/dashboard/verify-email";
@@ -15,6 +14,7 @@ import { IconTool, IconUser } from "@tabler/icons-react";
 import SidebarNav from "@/components/dashboard/sidebar-nav";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 import { Layout, LayoutBody } from "@/components/custom/layout";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (request.url === "/settings") return redirect("/settings/profile");
@@ -24,27 +24,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 };
 
-type UserRole = "admin" | "moderator" | "seller" | "buyer";
-
 export default function DashboardLayout() {
-  const [sidebarLinks, setSidebarLinks] = React.useState<LinkProps[]>([]);
-  const userRole = "admin"; // Replace this with dynamic role determination
-  React.useEffect(() => {
-    switch (userRole as UserRole) {
-      case "admin":
-        setSidebarLinks(adminSidebarLinks);
+  const user = useDashboardStore((state) => state.user);
+  const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    switch (true) {
+      case !!user.tenant:
+        setSidebarLinks(tenantSidebarLinks);
         break;
-      case "moderator":
-        setSidebarLinks(moderatorSidebarLinks);
+      case !!user.owner:
+        setSidebarLinks(ownerSidebarLinks);
         break;
-      case "seller":
-        setSidebarLinks(sellerSidebarLinks);
-        break;
-      case "buyer":
-        setSidebarLinks(buyerSidebarLinks);
-        break;
-      default:
-        setSidebarLinks(buyerSidebarLinks);
     }
   }, []);
 

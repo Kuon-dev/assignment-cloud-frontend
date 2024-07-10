@@ -16,6 +16,7 @@ interface DatePickerProps {
   control: Control<any>;
   label: string;
   error?: FieldError;
+  disabled?: boolean;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -23,6 +24,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   control,
   label,
   error,
+  disabled = false,
 }) => {
   return (
     <Controller
@@ -43,6 +45,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               <Button
                 variant="outline"
                 className="w-full justify-start font-normal"
+                disabled={disabled}
               >
                 <CalendarDays className="w-5" />
                 <span className="ml-3">

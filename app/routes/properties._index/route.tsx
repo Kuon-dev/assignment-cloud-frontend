@@ -1,11 +1,13 @@
-import { json, LoaderFunction } from "@remix-run/node";
-import { cookieConsent } from "@/utils/cookies.server";
-import { ClientOnly } from "remix-utils/client-only";
+import { json, LoaderFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { showErrorToast } from "@/lib/handle-error";
+import { cookieConsent } from "@/utils/cookies.server";
+
+import { ClientOnly } from "remix-utils/client-only";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { showErrorToast } from "@/lib/handle-error";
+import { useDashboardStore } from "@/stores/dashboard-store";
 import { DataTable } from "@/components/custom/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./table-schema";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -16,53 +18,56 @@ export const loader: LoaderFunction = async ({ request }) => {
     // return redirect("/login");
   }
 
-  const maintenanceData: MaintenanceLoaderData = {
-    maintenances: [],
+  const leaseData: LeaseLoaderData = {
+    leases: [],
   };
 
   try {
-    const res = await fetch(
-      `${process.env.BACKEND_URL}/api/users/maintenance-requests`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
+    const res = await fetch(`${process.env.BACKEND_URL}/api/users/leases`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${authToken}`,
       },
-    );
+    });
 
     if (res.ok) {
       const data = await res.json();
-      maintenanceData.maintenances = data;
+      leaseData.leases = data;
     }
   } catch (error) {
     console.error(error);
     showErrorToast(error);
   }
-
-  return json(maintenanceData);
+  return json({
+    ...leaseData,
+  });
 };
 
-export default function Maintenances() {
+export default function Properties() {
+  const user = useDashboardStore((state) => state.user);
   const data = useLoaderData<typeof loader>();
-  const { maintenances } = data;
-  console.log(maintenances);
+  const { leases } = data;
+
+  console.log(leases);
 
   return (
-    <section className="w-full mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Maintenance Requests</h1>
+    <>
+      <h1 className="text-2xl font-semibold mb-4">Properties</h1>
+
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={maintenances} />
+              <DataTable columns={columns} data={leases} />
+
+              <div className="mt-4 flex justify-between"></div>
             </>
           )}
         </ClientOnly>
       </div>
-    </section>
+    </>
   );
 }
 

@@ -17,23 +17,15 @@ interface PropertyCardProps {
 export default function PropertyCard({ listing }: PropertyCardProps) {
   const {
     id,
-    // images,
     title,
     description,
     price,
     location,
     bedrooms,
     bathrooms,
+    imageUrls,
     views,
   } = listing;
-
-  const images = [
-    "https://picsum.photos/id/237/200/300",
-    "https://picsum.photos/id/240/200/300",
-    "https://picsum.photos/id/233/200/300",
-    "https://picsum.photos/id/235/200/300",
-    "https://picsum.photos/id/238/200/300",
-  ];
 
   return (
     <Card className="w-full mx-auto p-4 sm:p-6 md:p-8 mb-6 flex flex-col justify-between">
@@ -41,10 +33,10 @@ export default function PropertyCard({ listing }: PropertyCardProps) {
         <div>
           <Carousel className="rounded-lg overflow-hidden">
             <CarouselContent>
-              {images.map((img, index) => (
+              {imageUrls.map((url, index) => (
                 <CarouselItem key={index}>
                   <img
-                    src={img}
+                    src={url}
                     alt={
                       title
                         ? `${title} image ${index + 1}`

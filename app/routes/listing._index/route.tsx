@@ -1,17 +1,21 @@
 import { useLoaderData } from "@remix-run/react";
 import { json, LoaderFunction, redirect } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
-import { toast } from "sonner";
 
 import PropertyCard from "@/components/listing/listing-card";
 import { Shell } from "@/components/landing/shell";
 import { ClientOnly } from "remix-utils/client-only";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { useDashboardStore } from "@/stores/dashboard-store";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/custom/data-table";
+import { columns } from "./table-schema";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
+  const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
   if (!userSession || !userSession.token) {
-    toast.error("You need to be logged in to view this page");
     // return redirect("/login");
   }
 
@@ -21,19 +25,23 @@ export const loader: LoaderFunction = async ({ request }) => {
       BACKEND_URL: process.env.BACKEND_URL || "",
     },
   };
+
+  const url = authToken
+    ? `${process.env.BACKEND_URL}/api/users/listings`
+    : `${process.env.BACKEND_URL}/api/Listings`;
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/api/Listings`, {
+    const res = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: `Bearer ${userSession.token}`,
+        Authorization: `Bearer ${authToken}`,
       },
     });
 
     if (res.ok) {
       const data = await res.json();
-      listingData.listings = data.items;
+      listingData.listings = data;
     }
   } catch (error) {
     console.error(error);
@@ -46,6 +54,36 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Listings() {
+  const user = useDashboardStore((state) => state.user);
+
+  return (
+    <>
+      <section className="w-full mx-auto">
+        {user?.owner ? <OwnerComponent /> : <GuestComponent />}
+      </section>
+    </>
+  );
+}
+
+function LoadingComponent() {
+  return (
+    <div className="flex h-screen w-screen items-center justify-center">
+      <div className="flex flex-col items-center space-y-4">
+        <p className="text-gray-500 dark:text-gray-400">
+          Please wait while we are preparing the content
+        </p>
+        <div className="flex items-center space-x-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GuestComponent() {
   const data = useLoaderData<ListingsLoaderData>();
   const { listings } = data;
 
@@ -65,6 +103,29 @@ export default function Listings() {
           )}
         </ClientOnly>
       </Shell>
+    </>
+  );
+}
+
+function OwnerComponent() {
+  const data = useLoaderData<ListingsLoaderData>();
+  const { listings } = data;
+
+  return (
+    <>
+      <h1 className="text-2xl font-semibold mb-4">Listing</h1>
+
+      <div>
+        <ClientOnly fallback={<LoadingComponent />}>
+          {() => (
+            <>
+              <DataTable columns={columns} data={listings} />
+
+              <div className="mt-4 flex justify-between"></div>
+            </>
+          )}
+        </ClientOnly>
+      </div>
     </>
   );
 }
