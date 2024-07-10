@@ -62,6 +62,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     userData: user as Me,
     ENV: {
       BACKEND_URL: process.env.BACKEND_URL,
+      STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
     },
   });
 };
@@ -70,6 +71,7 @@ declare global {
   interface Window {
     ENV: {
       BACKEND_URL: string;
+      STRIPE_PUBLIC_KEY: string;
     };
   }
 }

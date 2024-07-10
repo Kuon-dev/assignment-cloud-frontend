@@ -8,10 +8,7 @@ import { ClientOnly } from "remix-utils/client-only";
 import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./table-schema";
 
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
-import { useEffect, useState } from "react";
-import CheckoutForm from "@/components/payment/form/checkout-form";
+import PaymentForm from "@/components/payment/form/payment-form";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -62,26 +59,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Payments() {
-  const data = useLoaderData<typeof loader>();
-  const { payments, totalCount, ENV } = data;
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [stripe, setStripe] = useState<Stripe | null>(null);
+  // const data = useLoaderData<typeof loader>();
+  // const { payments, totalCount, ENV } = data;
+  // const [searchParams, setSearchParams] = useSearchParams();
 
-  useEffect(() => {
-    const fetchStripe = async () => {
-      const stripeInstance = await loadStripe(ENV.STRIPE_PUBLIC_KEY);
-      setStripe(stripeInstance);
-    };
-    fetchStripe();
-  }, [ENV.STRIPE_PUBLIC_KEY]);
-
-  const handleNavigation = (page: number) => {
-    setSearchParams({ pageNumber: page.toString() });
-  };
-
-  if (!stripe) {
-    return <LoadingComponent />;
-  }
+  // const handleNavigation = (page: number) => {
+  //   setSearchParams({ pageNumber: page.toString() });
+  // };
 
   return (
     <section className="w-full mx-auto">
@@ -90,17 +74,15 @@ export default function Payments() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={payments} />
+              <PaymentForm />
+              {/* <DataTable columns={columns} data={payments} />
               <PaginationComponent
                 currentPage={parseInt(searchParams.get("pageNumber") || "1")}
                 totalPages={Math.ceil(
                   totalCount / parseInt(searchParams.get("pageSize") || "10"),
                 )}
                 onPageChange={handleNavigation}
-              />
-              <Elements stripe={stripe} options={{}}>
-                <CheckoutForm />
-              </Elements>
+              /> */}
             </>
           )}
         </ClientOnly>
