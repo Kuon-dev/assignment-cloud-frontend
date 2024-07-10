@@ -4,6 +4,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 import { Button } from "@/components/custom/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import LeaseForm from "@/components/lease/form/lease-form";
 
 interface ReviewApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
   application: Application;
@@ -64,12 +68,16 @@ export default function ReviewApplicationForm({
   className,
   ...props
 }: ReviewApplicationFormProps) {
+  const user = useDashboardStore((state) => state.user);
+  const cookies = document.cookie;
+  const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
+  console.log(application.status); /// this is enum
 
   const form = useForm<z.infer<typeof ReviewApplicationFormSchema>>({
     resolver: zodResolver(ReviewApplicationFormSchema),
     defaultValues: {
-      status: StatusType.Pending,
+      status: application ? parseInt(application.status) : StatusType.Pending,
     },
   });
 
@@ -77,8 +85,6 @@ export default function ReviewApplicationForm({
     try {
       setIsLoading(true);
 
-      const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZlMTczNDQxLTdjM2QtNGNjMS1iNDVkLTMyZTBjNmM3MjhjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QzQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiJlZGY4Njc5ZS05NGFmLTQzZGYtYjYwZC0xYTQxMGUxZDFjNjAiLCJleHAiOjE3MjA1MDg3NTYsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.RcoYDh4SDHcFSCMWqRPRy6wpMPwmItxQZG2NcaCgHEM";
       const res = await fetch(
         `${window.ENV?.BACKEND_URL}/api/Applications/${application.id}`,
         {
@@ -86,7 +92,7 @@ export default function ReviewApplicationForm({
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
             ...data,
@@ -157,6 +163,7 @@ export default function ReviewApplicationForm({
                       <Select
                         onValueChange={(value) => field.onChange(Number(value))}
                         value={field.value.toString()}
+                        disabled={!!user?.tenant}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select review status" />
@@ -175,9 +182,26 @@ export default function ReviewApplicationForm({
                 )}
               />
             </div>
-            <Button type="submit" className="mt-4" loading={isLoading}>
-              Submit Review
-            </Button>
+            {user?.owner &&
+              parseInt(application.status) === StatusType.Pending && (
+                <Button type="submit" className="mt-4" loading={isLoading}>
+                  Submit Review
+                </Button>
+              )}
+            {user?.tenant &&
+              parseInt(application.status) === StatusType.Approved && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button>Lease Now</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <LeaseForm
+                      tenantId={user.tenant.id}
+                      propertyId={application.property.id}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
           </form>
         </Form>
       </CardContent>

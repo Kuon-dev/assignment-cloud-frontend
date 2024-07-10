@@ -66,7 +66,7 @@ const LeaseFormSchema = z.object({
   isActive: z.boolean(),
 });
 
-export default function CreateLeaseForm({
+export default function LeaseForm({
   tenantId,
   propertyId,
   className,
@@ -125,188 +125,184 @@ export default function CreateLeaseForm({
     <ClientOnly>
       {() => (
         <div className={cn("mx-auto", className)} {...props}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold">
-                Create a Lease
-              </CardTitle>
-              <CardDescription>
-                Enter the details below to create a new lease.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="grid grid-cols-1 gap-6 md:gap-8"
-                >
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Controller
-                        name="startDate"
-                        control={form.control}
-                        render={({ field }) => (
-                          <FormItem className="space-y-1">
-                            <FormLabel>Start Date</FormLabel>
-                            <FormControl>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    className="w-full justify-start font-normal"
-                                  >
-                                    <CalendarDays className="w-5" />
-                                    <span className="ml-3">
-                                      {field.value
-                                        ? format(new Date(field.value), "PPP")
-                                        : "Select date"}
-                                    </span>
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
-                                  <Calendar
-                                    mode="single"
-                                    selected={
-                                      field.value
-                                        ? new Date(field.value)
-                                        : undefined
-                                    }
-                                    onSelect={(date) => {
-                                      field.onChange(
-                                        date ? date.toISOString() : undefined,
-                                      );
-                                    }}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Controller
-                        name="endDate"
-                        control={form.control}
-                        render={({ field }) => (
-                          <FormItem className="space-y-1">
-                            <FormLabel>End Date</FormLabel>
-                            <FormControl>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    className="w-full justify-start font-normal"
-                                  >
-                                    <CalendarDays className="w-5" />
-                                    <span className="ml-3">
-                                      {field.value
-                                        ? format(new Date(field.value), "PPP")
-                                        : "Select date"}
-                                    </span>
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
-                                >
-                                  <Calendar
-                                    mode="single"
-                                    selected={
-                                      field.value
-                                        ? new Date(field.value)
-                                        : undefined
-                                    }
-                                    onSelect={(date) => {
-                                      field.onChange(
-                                        date ? date.toISOString() : undefined,
-                                      );
-                                    }}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="rentAmount"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Rent Amount</FormLabel>
-                            <FormControl>
-                              <Input
-                                id="rentAmount"
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(parseInt(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="securityDeposit"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Security Deposit</FormLabel>
-                            <FormControl>
-                              <Input
-                                id="securityDeposit"
-                                type="number"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(parseInt(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <FormField
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold">Create Lease</CardTitle>
+            <CardDescription>
+              Enter the details below to create a new lease.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="grid grid-cols-1 gap-6 md:gap-8"
+              >
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Controller
+                      name="startDate"
                       control={form.control}
-                      name="isActive"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md pt-4">
+                        <FormItem className="space-y-1">
+                          <FormLabel>Start Date</FormLabel>
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-start font-normal"
+                                >
+                                  <CalendarDays className="w-5" />
+                                  <span className="ml-3">
+                                    {field.value
+                                      ? format(new Date(field.value), "PPP")
+                                      : "Select date"}
+                                  </span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={
+                                    field.value
+                                      ? new Date(field.value)
+                                      : undefined
+                                  }
+                                  onSelect={(date) => {
+                                    field.onChange(
+                                      date ? date.toISOString() : undefined,
+                                    );
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
                           </FormControl>
-                          <FormLabel>Set Active</FormLabel>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Controller
+                      name="endDate"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem className="space-y-1">
+                          <FormLabel>End Date</FormLabel>
+                          <FormControl>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full justify-start font-normal"
+                                >
+                                  <CalendarDays className="w-5" />
+                                  <span className="ml-3">
+                                    {field.value
+                                      ? format(new Date(field.value), "PPP")
+                                      : "Select date"}
+                                  </span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={
+                                    field.value
+                                      ? new Date(field.value)
+                                      : undefined
+                                  }
+                                  onSelect={(date) => {
+                                    field.onChange(
+                                      date ? date.toISOString() : undefined,
+                                    );
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  <CardFooter>
-                    <div className="flex justify-end w-full">
-                      <Button
-                        type="submit"
-                        className="w-full"
-                        loading={isLoading}
-                      >
-                        {isLoading ? "Creating Lease..." : "Create Lease"}
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="rentAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rent Amount</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="rentAmount"
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="securityDeposit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Security Deposit</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="securityDeposit"
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value))
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="isActive"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md pt-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel>Set Active</FormLabel>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <CardFooter>
+                  <div className="flex justify-end w-full">
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      loading={isLoading}
+                    >
+                      {isLoading ? "Creating Lease..." : "Create Lease"}
+                    </Button>
+                  </div>
+                </CardFooter>
+              </form>
+            </Form>
+          </CardContent>
         </div>
       )}
     </ClientOnly>

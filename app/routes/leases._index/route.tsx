@@ -1,14 +1,19 @@
-import { json, LoaderFunction } from "@remix-run/node";
-import { cookieConsent } from "@/utils/cookies.server";
-import { ClientOnly } from "remix-utils/client-only";
-import { useLoaderData } from "@remix-run/react";
+import { DataTable } from "@/components/custom/data-table";
+import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showErrorToast } from "@/lib/handle-error";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
-import { DataTable } from "@/components/custom/data-table";
+import { cookieConsent } from "@/utils/cookies.server";
+import { json, LoaderFunction } from "@remix-run/node";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { ClientOnly } from "remix-utils/client-only";
 import { columns } from "./table-schema";
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const pageNumber = url.searchParams.get("page") || "1";
+  const pageSize = url.searchParams.get("size") || "10";
+
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
@@ -16,13 +21,15 @@ export const loader: LoaderFunction = async ({ request }) => {
     // return redirect("/login");
   }
 
-  const maintenanceData: MaintenanceLoaderData = {
-    maintenances: [],
+  const leaseData: LeaseLoaderData = {
+    leases: [],
+    totalPages: 0,
+    currentPage: parseInt(pageNumber),
   };
 
   try {
     const res = await fetch(
-      `${process.env.BACKEND_URL}/api/users/maintenance-requests`,
+      `${process.env.BACKEND_URL}/api/users/leases?page=${pageNumber}&size=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -35,29 +42,45 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     if (res.ok) {
       const data = await res.json();
-      maintenanceData.maintenances = data;
+      leaseData.leases = data;
+    } else if (res.status === 404) {
+      leaseData.leases = [];
+    } else {
+      console.error(`Error ${res.status}: ${res.statusText}`);
     }
   } catch (error) {
     console.error(error);
     showErrorToast(error);
   }
 
-  return json(maintenanceData);
+  return json(leaseData);
 };
 
-export default function Maintenances() {
+export default function Leases() {
   const data = useLoaderData<typeof loader>();
-  const { maintenances } = data;
-  console.log(maintenances);
+  const { leases, currentPage, totalPages } = data;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleNavigation = (newPage: number) => {
+    setSearchParams({ pageNumber: newPage.toString() });
+  };
 
   return (
     <section className="w-full mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Maintenance Requests</h1>
+      <h1 className="text-2xl font-semibold mb-4">Leases</h1>
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={maintenances} />
+              <DataTable columns={columns} data={leases} />
+
+              <div className="mt-4 flex justify-between">
+                <PaginationComponent
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handleNavigation}
+                />
+              </div>
             </>
           )}
         </ClientOnly>

@@ -1,14 +1,18 @@
-import { json, LoaderFunction } from "@remix-run/node";
-import { cookieConsent } from "@/utils/cookies.server";
-import { ClientOnly } from "remix-utils/client-only";
-import { useLoaderData } from "@remix-run/react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { showErrorToast } from "@/lib/handle-error";
-import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { DataTable } from "@/components/custom/data-table";
+import { PaginationComponent } from "@/components/custom/data-table-pagination";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { cookieConsent } from "@/utils/cookies.server";
+import { json, LoaderFunction } from "@remix-run/node";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { ClientOnly } from "remix-utils/client-only";
+import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./table-schema";
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const pageNumber = url.searchParams.get("pageNumber") || "1";
+  const pageSize = url.searchParams.get("pageSize") || "10";
+
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
@@ -16,13 +20,14 @@ export const loader: LoaderFunction = async ({ request }) => {
     // return redirect("/login");
   }
 
-  const maintenanceData: MaintenanceLoaderData = {
-    maintenances: [],
+  const paymentData: PaymentLoaderData = {
+    payments: [],
+    totalCount: 0,
   };
 
   try {
     const res = await fetch(
-      `${process.env.BACKEND_URL}/api/users/maintenance-requests`,
+      `${process.env.BACKEND_URL}/api/Payments?page=${pageNumber}&size=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -35,29 +40,42 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     if (res.ok) {
       const data = await res.json();
-      maintenanceData.maintenances = data;
+      console.log(data);
+
+      paymentData.payments = data.payments;
+      paymentData.totalCount = data.totalCount;
     }
   } catch (error) {
     console.error(error);
-    showErrorToast(error);
+    throw new Error("Failed to fetch data");
   }
 
-  return json(maintenanceData);
+  return json(paymentData);
 };
 
-export default function Maintenances() {
+export default function Payments() {
   const data = useLoaderData<typeof loader>();
-  const { maintenances } = data;
-  console.log(maintenances);
+  const { payments, currentPage, totalPages } = data;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleNavigation = (page: number) => {
+    setSearchParams({ pageNumber: page.toString() });
+  };
+  console.log(payments);
 
   return (
     <section className="w-full mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Maintenance Requests</h1>
+      <h1 className="text-2xl font-semibold mb-4">Your Payment History</h1>
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={maintenances} />
+              <DataTable columns={columns} data={payments} />
+              <PaginationComponent
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handleNavigation}
+              />
             </>
           )}
         </ClientOnly>
