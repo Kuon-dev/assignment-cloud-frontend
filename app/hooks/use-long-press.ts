@@ -1,13 +1,13 @@
-import React from "react"
+import React from "react";
 
 export type LongPressOptions = {
   threshold?: number;
-  onStart?: (e: Event) => void;
-  onFinish?: (e: Event) => void;
-  onCancel?: (e: Event) => void;
+  onStart?: (e: React.MouseEvent | React.TouchEvent) => void;
+  onFinish?: (e: React.MouseEvent | React.TouchEvent) => void;
+  onCancel?: (e: React.MouseEvent | React.TouchEvent) => void;
 };
 
-function isTouchEvent({ nativeEvent }: React.MouseEvent | React.TouchEvent){
+function isTouchEvent({ nativeEvent }: React.MouseEvent | React.TouchEvent) {
   return window.TouchEvent
     ? nativeEvent instanceof TouchEvent
     : "touches" in nativeEvent;
@@ -17,11 +17,14 @@ function isMouseEvent(event: React.MouseEvent | React.TouchEvent) {
   return event.nativeEvent instanceof MouseEvent;
 }
 
-export function useLongPress(callback: (e: Event) => void, options: LongPressOptions = {}) {
+export function useLongPress(
+  callback: (e: React.MouseEvent | React.TouchEvent) => void,
+  options: LongPressOptions = {},
+) {
   const { threshold = 400, onStart, onFinish, onCancel } = options;
   const isLongPressActive = React.useRef(false);
   const isPressed = React.useRef(false);
-  const timerId = React.useRef();
+  const timerId = React.useRef<NodeJS.Timeout | null>(null);
 
   return React.useMemo(() => {
     if (typeof callback !== "function") {
@@ -59,7 +62,8 @@ export function useLongPress(callback: (e: Event) => void, options: LongPressOpt
       isPressed.current = false;
 
       if (timerId.current) {
-        window.clearTimeout(timerId.current);
+        clearTimeout(timerId.current);
+        timerId.current = null;
       }
     };
 
