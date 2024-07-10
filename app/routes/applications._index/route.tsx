@@ -59,6 +59,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Applications() {
   const user = useDashboardStore((state) => state.user);
+  const data = useLoaderData<typeof loader>();
 
   return (
     <>

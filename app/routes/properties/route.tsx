@@ -1,31 +1,12 @@
-import { useEffect, useState } from "react";
 import { Outlet } from "@remix-run/react";
+
 import { Layout, LayoutBody } from "@/components/custom/layout";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
-import {
-  ownerSidebarLinks,
-  tenantSidebarLinks,
-} from "@/components/dashboard/constants";
-import { useDashboardStore } from "@/stores/dashboard-store";
+import { ownerSidebarLinks } from "@/components/dashboard/constants";
 
 import { Settings } from "lucide-react";
 
-export default function MaintenanceRequestLayout() {
-  const user = useDashboardStore((state) => state.user);
-  const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
-
-  useEffect(() => {
-    if (!user) return;
-    switch (true) {
-      case !!user.tenant:
-        setSidebarLinks(tenantSidebarLinks);
-        break;
-      case !!user.owner:
-        setSidebarLinks(ownerSidebarLinks);
-        break;
-    }
-  }, []);
-
+export default function PropertiesLayout() {
   const settingsLink: LinkProps = {
     to: "/settings/profile",
     icon: <Settings className="h-5 w-5" />,
@@ -35,7 +16,7 @@ export default function MaintenanceRequestLayout() {
   return (
     <>
       <DashboardSidebar
-        sidebarLinks={sidebarLinks}
+        sidebarLinks={ownerSidebarLinks}
         settingsLink={settingsLink}
       />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">

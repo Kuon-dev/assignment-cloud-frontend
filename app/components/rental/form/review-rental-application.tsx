@@ -31,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import LeaseForm from "@/components/lease/form/lease-form";
 
 interface ReviewApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
   application: Application;
@@ -185,6 +187,20 @@ export default function ReviewApplicationForm({
                 <Button type="submit" className="mt-4" loading={isLoading}>
                   Submit Review
                 </Button>
+              )}
+            {user?.tenant &&
+              parseInt(application.status) === StatusType.Approved && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button>Lease Now</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <LeaseForm
+                      tenantId={user.tenant.id}
+                      propertyId={application.property.id}
+                    />
+                  </DialogContent>
+                </Dialog>
               )}
           </form>
         </Form>

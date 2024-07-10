@@ -184,6 +184,7 @@ type Application = {
   employmentInfo: string;
   additionalNotes: string;
   references: string;
+  property: Property;
 };
 
 type ApplicationLoaderData = {
@@ -195,26 +196,17 @@ type ApplicationLoaderData = {
 type Lease = {
   id: string;
   tenantId: string;
-  tenantFirstName: string;
-  tenantLastName: string;
-  tenantEmail: string;
   propertyId: string;
-  propertyName: string;
+  property: Property;
   startDate: string;
   endDate: string;
   rentAmount: number;
   securityDeposit: number;
   isActive: boolean;
-  applicationDate: string;
-  employmentInfo?: string;
-  additionalNotes?: string;
-  references?: string;
 };
 
 type LeaseLoaderData = {
   leases: Lease[];
-  totalPages: number;
-  currentPage: number;
 };
 
 enum PaymentStatus {
@@ -242,14 +234,19 @@ type PaymentLoaderData = {
   totalCount: number;
 };
 
+enum MaintenanceStatus {
+  Pending = "Pending",
+  InProgress = "InProgress",
+  Completed = "Completed",
+  Cancelled = "Cancelled",
+}
+
 type Maintenance = {
   id: string;
   userId: string;
   listingId: string;
-  status: string;
+  status: MaintenanceStatus;
   createdAt: string;
-  updatedAt: string;
-  isDeleted: boolean;
   tenantFirstName: string;
   tenantLastName: string;
   tenantEmail: string;
@@ -261,6 +258,28 @@ type Maintenance = {
 
 type MaintenanceLoaderData = {
   maintenances: Maintenance[];
-  totalPages: number;
-  currentPage: number;
+};
+
+type Property = {
+  id: string;
+  ownerId: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  propertyType: number;
+  bedrooms: number;
+  bathrooms: number;
+  rentAmount: number;
+  description: string | null;
+  amenities: string | null;
+  isAvailable: boolean;
+  roomType: number;
+  createdAt: string;
+  updatedAt: string | null;
+  imageUrls: string | null;
+};
+
+type PropertyLoaderData = {
+  properties: Property[];
 };
