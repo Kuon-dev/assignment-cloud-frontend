@@ -75,46 +75,65 @@
 // };
 
 // export default PropertyCarousel;
+import { HTMLAttributes, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 import Autoplay from "embla-carousel-autoplay";
-
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
-import React from "react";
+import { Card, CardContent } from "../ui/card";
 
-export default function PropertyCarousel() {
-  const plugin = React.useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true }),
-  );
+interface PropertyCarouselFormProps extends HTMLAttributes<HTMLDivElement> {
+  // slides: string[];
+}
+
+export default function PropertyCarousel({
+  // slides,
+  className,
+  ...props
+}: PropertyCarouselFormProps) {
+  const plugin = useRef(Autoplay({ delay: 2000, stopOnInteraction: true }));
+
+  const slides = [
+    "https://picsum.photos/id/237/200/300",
+    "https://picsum.photos/id/240/200/300",
+    "https://picsum.photos/id/233/200/300",
+    "https://picsum.photos/id/235/200/300",
+    "https://picsum.photos/id/238/200/300",
+  ];
 
   return (
-    <Carousel
-      plugins={[plugin.current]}
-      className="w-full max-w-xs"
-      onMouseEnter={plugin.current.stop}
-      onMouseLeave={plugin.current.reset}
-    >
-      <CarouselContent>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <CarouselItem key={index}>
-            <div className="p-1">
-              <Card>
-                <CardContent className="flex aspect-square items-center justify-center p-6">
-                  <span className="text-4xl font-semibold">{index + 1}</span>
-                </CardContent>
-              </Card>
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
+    <div className={cn(className)} {...props}>
+      <Carousel
+        plugins={[plugin.current]}
+        className="w-full"
+        onMouseEnter={plugin.current.stop}
+        onMouseLeave={plugin.current.reset}
+      >
+        <CarouselContent>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <CarouselItem
+              key={index}
+              className="pl-1 md:basis-1/2 lg:basis-1/3"
+            >
+              <div className="p-1">
+                <Card>
+                  <CardContent className="flex aspect-square items-center justify-center p-6">
+                    <img
+                      src={slides[index % slides.length]}
+                      alt={slides[index % slides.length]}
+                      className="h-64 w-full object-cover rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </div>
   );
 }
