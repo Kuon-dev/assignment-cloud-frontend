@@ -3,13 +3,14 @@ import { cookieConsent } from "@/utils/cookies.server";
 import { ClientOnly } from "remix-utils/client-only";
 import { useLoaderData } from "@remix-run/react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { showErrorToast } from "@/lib/handle-error";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { DataTable } from "@/components/custom/data-table";
+import { columns } from "./table-schema";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const url = new URL(request.url);
-  const pageNumber = url.searchParams.get("pageNumber") || "1";
-  const pageSize = url.searchParams.get("pageSize") || "10";
-
   const cookieHeader = request.headers.get("Cookie");
+  const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
   if (!userSession || !userSession.token) {
     // return redirect("/login");
@@ -17,33 +18,28 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const maintenanceData: MaintenanceLoaderData = {
     maintenances: [],
-    totalPages: 0,
-    currentPage: parseInt(pageNumber),
   };
 
   try {
     const res = await fetch(
-      `${process.env.BACKEND_URL}/api/Maintenance/request?page=${pageNumber}&size=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/users/maintenance-requests`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjZlMTczNDQxLTdjM2QtNGNjMS1iNDVkLTMyZTBjNmM3MjhjYyIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3QzQG1haWwuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiT3duZXIiLCJqdGkiOiJlZGY4Njc5ZS05NGFmLTQzZGYtYjYwZC0xYTQxMGUxZDFjNjAiLCJleHAiOjE3MjA1MDg3NTYsImlzcyI6Imt1b24iLCJhdWQiOiJrdW9uIn0.RcoYDh4SDHcFSCMWqRPRy6wpMPwmItxQZG2NcaCgHEM`,
+          Authorization: `Bearer ${authToken}`,
         },
       },
     );
 
     if (res.ok) {
       const data = await res.json();
-
-      maintenanceData.maintenances = data.items;
-      maintenanceData.currentPage = data.currentPage;
-      maintenanceData.totalPages = Math.ceil(data.totalCount / data.pageSize);
+      maintenanceData.maintenances = data;
     }
   } catch (error) {
     console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json(maintenanceData);
@@ -51,14 +47,19 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Maintenances() {
   const data = useLoaderData<typeof loader>();
-  console.log(data);
+  const { maintenances } = data;
+  console.log(maintenances);
 
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Maintenance Requests</h1>
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
-          {() => <>aba</>}
+          {() => (
+            <>
+              <DataTable columns={columns} data={maintenances} />
+            </>
+          )}
         </ClientOnly>
       </div>
     </section>

@@ -148,7 +148,7 @@ type Listing = {
   endDate: string;
   isActive: boolean;
   views: number;
-  imageUrls: string[] | null;
+  imageUrls: string[];
   location: string;
   bedrooms: number;
   bathrooms: number;
@@ -184,6 +184,7 @@ type Application = {
   employmentInfo: string;
   additionalNotes: string;
   references: string;
+  property: Property;
 };
 
 type ApplicationLoaderData = {
@@ -192,14 +193,60 @@ type ApplicationLoaderData = {
   currentPage: number;
 };
 
+type Lease = {
+  id: string;
+  tenantId: string;
+  propertyId: string;
+  property: Property;
+  startDate: string;
+  endDate: string;
+  rentAmount: number;
+  securityDeposit: number;
+  isActive: boolean;
+};
+
+type LeaseLoaderData = {
+  leases: Lease[];
+};
+
+enum PaymentStatus {
+  RequiresPaymentMethod = "RequiresPaymentMethod",
+  RequiresConfirmation = "RequiresConfirmation",
+  RequiresAction = "RequiresAction",
+  Processing = "Processing",
+  RequiresCapture = "RequiresCapture",
+  Cancelled = "Cancelled",
+  Succeeded = "Succeeded",
+}
+
+type Payment = {
+  tenantId: string;
+  tenant?: TenantModel;
+  amount: number;
+  currency: string;
+  paymentIntentId: string;
+  paymentMethodId?: string;
+  status: PaymentStatus;
+};
+
+type PaymentLoaderData = {
+  payments: Payment[];
+  totalCount: number;
+};
+
+enum MaintenanceStatus {
+  Pending = "Pending",
+  InProgress = "InProgress",
+  Completed = "Completed",
+  Cancelled = "Cancelled",
+}
+
 type Maintenance = {
   id: string;
   userId: string;
   listingId: string;
-  status: string;
+  status: MaintenanceStatus;
   createdAt: string;
-  updatedAt: string;
-  isDeleted: boolean;
   tenantFirstName: string;
   tenantLastName: string;
   tenantEmail: string;
@@ -211,6 +258,28 @@ type Maintenance = {
 
 type MaintenanceLoaderData = {
   maintenances: Maintenance[];
-  totalPages: number;
-  currentPage: number;
+};
+
+type Property = {
+  id: string;
+  ownerId: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  propertyType: number;
+  bedrooms: number;
+  bathrooms: number;
+  rentAmount: number;
+  description: string | null;
+  amenities: string | null;
+  isAvailable: boolean;
+  roomType: number;
+  createdAt: string;
+  updatedAt: string | null;
+  imageUrls: string | null;
+};
+
+type PropertyLoaderData = {
+  properties: Property[];
 };

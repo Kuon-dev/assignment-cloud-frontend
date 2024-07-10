@@ -1,26 +1,19 @@
+import { useState } from "react";
+import { useDashboardStore } from "@/stores/dashboard-store";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { TableColumn } from "@/components/custom/data-table";
+import { toast } from "sonner";
 
-import {
-  CheckCircledIcon,
-  CrossCircledIcon,
-  QuestionMarkCircledIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
+import ReviewApplicationForm from "@/components/rental/form/review-rental-application";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import ReviewApplicationForm from "@/components/rental/form/review-rental-application";
-
-export const statuses = [
-  { value: 0, label: "Pending", icon: QuestionMarkCircledIcon },
-  { value: 1, label: "Approved", icon: CheckCircledIcon },
-  { value: 2, label: "Rejected", icon: CrossCircledIcon },
-];
 
 function getStatusTextAndClass(status: string) {
   switch (status) {
@@ -66,35 +59,97 @@ export const columns: TableColumn<Application>[] = [
   },
   {
     header: "Actions",
-    accessor: (row: Application) => (
-      <>
-        <Dialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-              >
-                <DotsHorizontalIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-[160px] font-semibold"
-            >
-              <DropdownMenuItem disabled={parseInt(row.status) !== 0}>
-                <DialogTrigger>Edit Application</DialogTrigger>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-500">
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DialogContent>
-            <ReviewApplicationForm application={row} />
-          </DialogContent>
-        </Dialog>
-      </>
-    ),
+    accessor: (row) => <ActionsCell row={row} />,
   },
 ];
+
+const ActionsCell: React.FC<{ row: Application }> = ({ row }) => {
+  const [dialogContent, setDialogContent] = useState<
+    "review" | "delete" | null
+  >(null);
+  const user = useDashboardStore((state) => state.user);
+  const cookies = document.cookie;
+  const authToken = getAuthTokenFromCookie(cookies);
+
+  const onSubmit = async (application: Application) => {
+    const res = await fetch(
+      `${window.ENV?.BACKEND_URL}/api/Applications/${application.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        credentials: "include",
+      },
+    );
+
+    if (res.ok) {
+      toast.success("Application deleted successfully!");
+    } else {
+      const error = await res.json();
+      toast.error(error.data.message);
+    }
+  };
+
+  return (
+    <>
+      <Dialog
+        open={dialogContent !== null}
+        onOpenChange={(open) => !open && setDialogContent(null)}
+      >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+            >
+              <DotsHorizontalIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[160px] font-semibold">
+            <DropdownMenuItem onClick={() => setDialogContent("review")}>
+              Review Application
+            </DropdownMenuItem>
+            {user?.admin && (
+              <DropdownMenuItem
+                className="text-red-500"
+                onClick={() => setDialogContent("delete")}
+              >
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DialogContent>
+          {dialogContent === "review" && (
+            <ReviewApplicationForm application={row} />
+          )}
+          {dialogContent === "delete" && (
+            <div className="rounded-md shadow-md">
+              <p className="text-lg font-semibold mb-4">
+                Are you sure you want to delete this application?
+              </p>
+              <div className="flex gap-4">
+                <Button
+                  className="bg-red-500 text-white hover:bg-red-600"
+                  onClick={() => onSubmit(row)}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  className="bg-gray-300 text-gray-700 hover:bg-gray-400"
+                  onClick={() => setDialogContent(null)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};

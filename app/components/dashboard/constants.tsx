@@ -1,106 +1,12 @@
 import {
   Home,
-  LineChart,
-  Package,
-  ShoppingCart,
   DollarSign,
   ScanEye,
+  ReceiptText,
   Wrench,
   LayoutDashboard,
   AlignJustify,
 } from "lucide-react";
-
-// export const adminSidebarLinks = [
-//   {
-//     to: "/dashboard",
-//     icon: <Home className="h-5 w-5" />,
-//     tooltip: "Dashboard",
-//   },
-//   {
-//     to: "/repos",
-//     icon: <Package className="h-5 w-5" />,
-//     tooltip: "Your code repos",
-//   },
-//   {
-//     to: "/purchases",
-//     icon: <Package className="h-5 w-5" />,
-//     tooltip: "Your purchased repos",
-//   },
-//   {
-//     to: "/orders",
-//     icon: <ShoppingCart className="h-5 w-5" />,
-//     tooltip: "Your orders",
-//   }, // seller only
-//   {
-//     to: "/tickets",
-//     icon: <LineChart className="h-5 w-5" />,
-//     tooltip: "Tickets",
-//   },
-// ];
-
-export const moderatorSidebarLinks = [
-  {
-    to: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
-    tooltip: "Dashboard",
-  },
-  {
-    to: "/repos",
-    icon: <Package className="h-5 w-5" />,
-    tooltip: "Your code repos",
-  },
-  {
-    to: "/purchases",
-    icon: <Package className="h-5 w-5" />,
-    tooltip: "Your purchased repos",
-  },
-  {
-    to: "/tickets",
-    icon: <LineChart className="h-5 w-5" />,
-    tooltip: "Tickets",
-  },
-];
-
-export const sellerSidebarLinks = [
-  {
-    to: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
-    tooltip: "Dashboard",
-  },
-  {
-    to: "/repos",
-    icon: <Package className="h-5 w-5" />,
-    tooltip: "Your code repos",
-  },
-  {
-    to: "/purchases",
-    icon: <Package className="h-5 w-5" />,
-    tooltip: "Your purchased repos",
-  },
-  {
-    to: "/orders",
-    icon: <ShoppingCart className="h-5 w-5" />,
-    tooltip: "Your orders",
-  },
-];
-
-export const buyerSidebarLinks = [
-  {
-    to: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
-    tooltip: "Dashboard",
-  },
-  {
-    to: "/repos",
-    icon: <Package className="h-5 w-5" />,
-    tooltip: "Your code repos",
-  },
-  {
-    to: "/purchases",
-    icon: <Package className="h-5 w-5" />,
-    tooltip: "Your purchased repos",
-  },
-];
 
 export const tenantSidebarLinks = [
   {
@@ -109,14 +15,19 @@ export const tenantSidebarLinks = [
     tooltip: "Dashboard",
   },
   {
-    to: "/rentals",
-    icon: <DollarSign className="h-5 w-5" />,
-    tooltip: "Your rentals",
-  },
-  {
     to: "/applications",
     icon: <ScanEye className="h-5 w-5" />,
     tooltip: "Your application reviews",
+  },
+  {
+    to: "/leases",
+    icon: <ReceiptText className="h-5 w-5" />,
+    tooltip: "Your leases",
+  },
+  {
+    to: "/payments",
+    icon: <DollarSign className="h-5 w-5" />,
+    tooltip: "Your payments",
   },
   {
     to: "/maintenances",
@@ -137,7 +48,7 @@ export const ownerSidebarLinks = [
     tooltip: "Your properties",
   },
   {
-    to: "/listings",
+    to: "/listing",
     icon: <AlignJustify className="h-5 w-5" />,
     tooltip: "Your listings",
   },
@@ -150,6 +61,11 @@ export const ownerSidebarLinks = [
     to: "/maintenances",
     icon: <Wrench className="h-5 w-5" />,
     tooltip: "Your maintenance requests",
+  },
+  {
+    to: "/payments",
+    icon: <DollarSign className="h-5 w-5" />,
+    tooltip: "Your payments",
   },
 ];
 
