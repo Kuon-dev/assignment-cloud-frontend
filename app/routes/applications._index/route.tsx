@@ -30,7 +30,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   try {
     const res = await fetch(
-      `${process.env.BACKEND_URL}/api/users/applications?page=${pageNumber}&size=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/users/applications`,
       {
         method: "GET",
         headers: {

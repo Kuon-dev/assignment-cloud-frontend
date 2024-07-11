@@ -110,6 +110,7 @@ function GuestComponent() {
 function OwnerComponent() {
   const data = useLoaderData<ListingsLoaderData>();
   const { listings } = data;
+  console.log("listings", listings);
 
   return (
     <>

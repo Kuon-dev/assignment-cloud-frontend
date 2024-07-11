@@ -39,11 +39,9 @@ type ListingsFormErrorSchema = {
 
 const ListingFormSchema = z.object({
   title: z.string().min(1, { message: "Please enter the title" }),
-  description: z
-    .string()
-    .min(10, {
-      message: "Please enter the description of minimum 10 characters",
-    }),
+  description: z.string().min(10, {
+    message: "Please enter the description of minimum 10 characters",
+  }),
   price: z.number().min(1, { message: "Please enter a valid price" }),
   startDate: z
     .string()
@@ -153,7 +151,7 @@ export default function ListingForm({ listing, property }: ListingFormProps) {
                     <Input
                       placeholder="Property"
                       disabled
-                      value={listing?.location}
+                      value={listing?.location ?? property?.address}
                     />
                   </div>
                   <FormField
