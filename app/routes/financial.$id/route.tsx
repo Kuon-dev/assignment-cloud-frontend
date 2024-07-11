@@ -3,20 +3,24 @@ import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
 import { FilterOption } from "@/components/users/users-data-table-toolbar";
-import UserManagementComponent from "@/components/users/user-management";
-import { cookieConsent } from "@/utils/cookies.server";
 import { ClientOnly } from "remix-utils/client-only";
+import FinancialReconciliationComponent from "@/components/users/financial-reconciliation";
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const url = new URL(request.url);
   const pageNumber = url.searchParams.get("page") || "1";
   const pageSize = url.searchParams.get("size") || "10";
+  const ownerId = params.id;
+
+  if (!ownerId) {
+    throw new Error("Owner ID is not available.");
+  }
 
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
 
   const usersData = {
-    users: [],
+    payments: [],
     totalPages: 0,
     currentPage: parseInt(pageNumber),
     authToken: authToken,
@@ -24,7 +28,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/Admin/users?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/OwnerPayments/${ownerId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -34,10 +38,10 @@ export const loader: LoaderFunction = async ({ request }) => {
         },
       },
     );
-
+    console.log(response);
     if (response.ok) {
       const data = await response.json();
-      usersData.users = data.items;
+      usersData.payments = data.items;
       usersData.currentPage = data.pageNumber;
       usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
@@ -51,7 +55,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Users() {
   const data = useLoaderData<typeof loader>();
-  const { users, currentPage, totalPages, authToken } = data;
+  const { payments, currentPage, totalPages, authToken } = data;
   const [searchParams, setSearchParams] = useSearchParams();
   const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
   const pageSize = parseInt(searchParams.get("size") || "10", 10);
@@ -68,51 +72,18 @@ export default function Users() {
     setSearchParams({ size: newPageSize.toString(), page: "1" });
   };
 
-  const handleDelete = async (userId: string) => {
-    try {
-      const response = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/Admin/users/${userId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${data.authToken}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to delete user");
-      }
-
-      setSearchParams(searchParams);
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
-
   React.useEffect(() => {
     setSearchParams({
       page: (pageIndex + 1).toString(),
       size: pageSize.toString(),
     });
-  }, [searchParams]);
+  }, [pageIndex, pageSize]);
 
   return (
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
-          <UserManagementComponent
-            searchTerm="email"
-            data={data}
-            filters={filters}
-            pageIndex={pageIndex}
-            pageSize={pageSize}
-            setPageSize={handleSizeChange}
-            totalPages={totalPages}
-            setPageIndex={handlePageChange}
-            handleDelete={handleDelete}
-          />
+          <FinancialReconciliationComponent data={payments} />
         </section>
       )}
     </ClientOnly>
