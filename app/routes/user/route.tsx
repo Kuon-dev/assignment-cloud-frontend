@@ -4,7 +4,11 @@ import React, { useEffect, useState } from "react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { Layout, LayoutBody } from "@/components/custom/layout";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
-import { adminSidebarLinks } from "@/components/dashboard/constants";
+import {
+  adminSidebarLinks,
+  ownerSidebarLinks,
+  tenantSidebarLinks,
+} from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
 import { ClientOnly } from "remix-utils/client-only";
 import { cookieConsent } from "@/utils/cookies.server";
@@ -48,8 +52,15 @@ export default function UsersLayout() {
 
   useEffect(() => {
     setUserData({ user });
-    setSidebarLinks(adminSidebarLinks);
-  }, [user, setUserData]);
+
+    if (user.role === 0) {
+      setSidebarLinks(tenantSidebarLinks);
+    } else if (user.role === 1) {
+      setSidebarLinks(ownerSidebarLinks);
+    } else if (user.role === 2) {
+      setSidebarLinks(adminSidebarLinks);
+    }
+  }, [setUserData]);
 
   const settingsLink: LinkProps = {
     to: "/settings/profile",

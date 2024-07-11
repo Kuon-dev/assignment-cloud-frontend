@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Popover,
   PopoverTrigger,
@@ -22,20 +22,25 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { SaveIcon } from "lucide-react";
+import { useAdminStore } from "@/stores/admin-store";
+import { toast } from "sonner";
 
 interface Tenant {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface Payment {
   id: number;
   tenant: Tenant;
+  propertyId: string;
   month: string;
   year: number;
   rent: number;
   maintenance: number;
   utilities: number;
+  total: number;
 }
 
 const months = [
@@ -53,33 +58,15 @@ const months = [
   "December",
 ];
 
-const Component: React.FC = ({ data }) => {
-  const [payments, setPayments] = useState<Payment[]>([
-    {
-      id: 1,
-      tenant: {
-        id: 1,
-        name: "Jane Doe",
-      },
-      month: "January",
-      year: 2023,
-      rent: 5000,
-      maintenance: 500,
-      utilities: 200,
-    },
-    {
-      id: 2,
-      tenant: {
-        id: 1,
-        name: "Jane Doe",
-      },
-      month: "February",
-      year: 2023,
-      rent: 5000,
-      maintenance: 300,
-      utilities: 150,
-    },
-  ]);
+const Component: React.FC = ({ data, owner }) => {
+  const [leasesData, setLeasesData] = useState<Lease[]>(data.leases);
+  const [selectedLeasesData, setSelectedLeasesData] = useState<Lease>(
+    leasesData[0] || null,
+  );
+  const [payments, setPayments] = useState<Payment[]>(() => {
+    const savedPayments = localStorage.getItem("payments");
+    return savedPayments ? JSON.parse(savedPayments) : [];
+  });
 
   const currentDate = new Date();
   const currentMonth = months[currentDate.getMonth()];
@@ -97,6 +84,10 @@ const Component: React.FC = ({ data }) => {
     year: currentYear,
   });
 
+  useEffect(() => {
+    localStorage.setItem("payments", JSON.stringify(payments));
+  }, [payments]);
+
   const calculateOwnerPayout = (payment: Payment): number => {
     return payment.rent - payment.maintenance - payment.utilities;
   };
@@ -105,14 +96,19 @@ const Component: React.FC = ({ data }) => {
     const newPayment: Payment = {
       id: payments.length + 1,
       tenant: {
-        id: 1,
-        name: "Jane Doe",
+        id: selectedLeasesData.tenantId,
+        name:
+          selectedLeasesData.tenantFirstName +
+          " " +
+          selectedLeasesData.tenantLastName,
       },
+      propertyId: selectedLeasesData.propertyId,
       month: selectedMonth.month,
       year: selectedMonth.year,
-      rent: 0,
+      rent: selectedLeasesData.rentAmount,
       maintenance: 0,
       utilities: 0,
+      total: selectedLeasesData.rentAmount,
     };
     setPayments([...payments, newPayment]);
     setSelectedPayment(newPayment);
@@ -122,13 +118,52 @@ const Component: React.FC = ({ data }) => {
     setEditingPayment(payment);
   };
 
-  const handleSavePayment = () => {
+  const handleLocalSavePayment = () => {
     if (editingPayment) {
       const updatedPayments = payments.map((p) =>
         p.id === editingPayment.id ? editingPayment : p,
       );
       setPayments(updatedPayments);
+      localStorage.setItem("payments", JSON.stringify(updatedPayments));
       setEditingPayment(null);
+    }
+  };
+
+  const handleSavePayment = async () => {
+    const totalAmount = filteredPayments
+      .reduce((total, p) => total + calculateOwnerPayout(p), 0)
+      .toFixed(2);
+
+    const paymentToSave = {
+      ownerId: owner.id,
+      year: selectedMonth.year,
+      month: selectedMonth.month,
+      amount: parseFloat(totalAmount),
+    };
+
+    try {
+      const response = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/OwnerPayments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.authToken}`,
+          },
+          body: JSON.stringify(paymentToSave),
+        },
+      );
+
+      if (!response.ok) {
+        toast.error("Failed to save payment.");
+        return;
+      }
+
+      toast.success("Payment saved successfully.");
+
+      setEditingPayment(null);
+    } catch (error) {
+      console.error("Error saving payment:", error);
     }
   };
 
@@ -138,12 +173,19 @@ const Component: React.FC = ({ data }) => {
     setSelectedPayment(updatedPayments[0] || null);
   };
 
-  const handleInputChange = (field: keyof Payment, value: null) => {
+  const handleInputChange = (field: keyof Payment, value: number) => {
     if (editingPayment) {
-      setEditingPayment({
+      const updatedPayment = {
         ...editingPayment,
         [field]: value,
-      });
+      };
+
+      updatedPayment.total =
+        updatedPayment.rent -
+        updatedPayment.maintenance -
+        updatedPayment.utilities;
+
+      setEditingPayment(updatedPayment);
     }
   };
 
@@ -171,21 +213,6 @@ const Component: React.FC = ({ data }) => {
       payment.year === selectedMonth.year,
   );
 
-  const groupedPayments = payments.reduce<
-    Record<string, { month: string; year: number; payments: Payment[] }>
-  >((acc, payment) => {
-    const key = `${payment.month}-${payment.year}`;
-    if (!acc[key]) {
-      acc[key] = {
-        month: payment.month,
-        year: payment.year,
-        payments: [],
-      };
-    }
-    acc[key].payments.push(payment);
-    return acc;
-  }, {});
-
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-1">
       <div className="flex items-center gap-4">
@@ -201,19 +228,23 @@ const Component: React.FC = ({ data }) => {
                 className="w-[280px] justify-start text-left font-normal"
               >
                 <UserIcon className="mr-2 h-4 w-4" />
-                {selectedPayment?.tenant.name}
+                {selectedLeasesData.tenantFirstName}{" "}
+                {selectedLeasesData.tenantLastName}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent
+              className="w-auto p-0 max-h-60 overflow-y-auto"
+              align="end"
+            >
               <div className="grid gap-2 p-2">
-                {payments.map((payment) => (
+                {leasesData.map((lease) => (
                   <Button
-                    key={payment.id}
+                    key={lease.id}
                     variant="ghost"
                     className="justify-start w-full"
-                    onClick={() => setSelectedPayment(payment)}
+                    onClick={() => setSelectedLeasesData(lease)}
                   >
-                    {payment.tenant.name}
+                    {lease.tenantFirstName} {lease.tenantLastName}
                   </Button>
                 ))}
               </div>
@@ -313,17 +344,43 @@ const Component: React.FC = ({ data }) => {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      ${calculateOwnerPayout(payment).toFixed(2)}
+                      {editingPayment && editingPayment.id === payment.id ? (
+                        <Input
+                          type="number"
+                          value={editingPayment.total}
+                          onChange={(e) =>
+                            handleInputChange(
+                              "total",
+                              parseFloat(e.target.value),
+                            )
+                          }
+                          placeholder="Total"
+                          readOnly
+                        />
+                      ) : (
+                        `$${payment.total.toFixed(2)}`
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditPayment(payment)}
-                      >
-                        <FilePenIcon className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
+                      {editingPayment && editingPayment.id === payment.id ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={handleLocalSavePayment}
+                        >
+                          <SaveIcon className="h-4 w-4" />
+                          <span className="sr-only">Save</span>
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditPayment(payment)}
+                        >
+                          <FilePenIcon className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -347,8 +404,10 @@ const Component: React.FC = ({ data }) => {
           </Table>
         </div>
         <div className="flex justify-end gap-2">
-          <Button onClick={handleAddPayment}>Add Payment</Button>
-          <Button onClick={handleSavePayment}>Save</Button>
+          {selectedMonth.month === currentMonth &&
+            selectedMonth.year === currentYear && (
+              <Button onClick={handleAddPayment}>Add Payment</Button>
+            )}
         </div>
         <div className="grid gap-4">
           <Card>
@@ -398,7 +457,9 @@ const Component: React.FC = ({ data }) => {
               </div>
             </CardContent>
           </Card>
-          <Button className="justify-self-end">Submit</Button>
+          <Button className="justify-self-end" onClick={handleSavePayment}>
+            Submit
+          </Button>
         </div>
       </div>
     </main>

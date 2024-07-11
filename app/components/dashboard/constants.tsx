@@ -6,6 +6,9 @@ import {
   Wrench,
   LayoutDashboard,
   AlignJustify,
+  BadgeDollarSign,
+  BarChart3,
+  UsersRound,
 } from "lucide-react";
 
 export const tenantSidebarLinks = [
@@ -43,7 +46,7 @@ export const ownerSidebarLinks = [
     tooltip: "Dashboard",
   },
   {
-    to: "/properties",
+    to: "/properties", // create , read , update
     icon: <Home className="h-5 w-5" />,
     tooltip: "Your properties",
   },
@@ -51,11 +54,6 @@ export const ownerSidebarLinks = [
     to: "/listing",
     icon: <AlignJustify className="h-5 w-5" />,
     tooltip: "Your listings",
-  },
-  {
-    to: "/applications",
-    icon: <ScanEye className="h-5 w-5" />,
-    tooltip: "Your application reviews",
   },
   {
     to: "/maintenances",
@@ -76,14 +74,19 @@ export const adminSidebarLinks = [
     tooltip: "Dashboard",
   },
   {
-    to: "/properties",
-    icon: <Home className="h-5 w-5" />,
-    tooltip: "Your properties",
+    to: "/users",
+    icon: <UsersRound className="h-5 w-5" />,
+    tooltip: "User Management",
   },
   {
-    to: "/listings",
-    icon: <AlignJustify className="h-5 w-5" />,
-    tooltip: "Your listings",
+    to: "/financial",
+    icon: <BadgeDollarSign className="h-5 w-5" />,
+    tooltip: "Financial Reconciliation",
+  },
+  {
+    to: "/reporting",
+    icon: <BarChart3 className="h-5 w-5" />,
+    tooltip: "Reporting",
   },
   {
     to: "/maintenances",

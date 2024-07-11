@@ -203,6 +203,9 @@ type Lease = {
   rentAmount: number;
   securityDeposit: number;
   isActive: boolean;
+  tenantFirstName: string;
+  tenantLastName: string;
+  tenantEmail: string;
 };
 
 type LeaseLoaderData = {
