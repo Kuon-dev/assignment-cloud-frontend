@@ -4,7 +4,6 @@ import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import PerformanceAnalyticsComponent from "@/components/reporting/performance-analytic";
 import ListingAnalyticsComponent from "@/components/reporting/listing-analytic";
 import { ClientOnly } from "remix-utils/client-only";
-import { Button } from "@/components/custom/button";
 
 // Loader function to fetch analytics data
 export const loader: LoaderFunction = async ({ request }) => {
@@ -24,7 +23,8 @@ export const loader: LoaderFunction = async ({ request }) => {
   });
 
   if (!response.ok) {
-    return json({ error: "Failed to fetch analytics data" }, { status: 500 });
+    const error = await response.json();
+    throw new Error(error.message);
   }
 
   const data = await response.json();
