@@ -1,5 +1,7 @@
-import { TableColumn } from "@/components/custom/data-table";
 import { useState } from "react";
+import { toast } from "sonner";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { TableColumn } from "@/components/custom/data-table";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
@@ -9,51 +11,42 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import PropertyForm from "@/components/property/form/property-form";
 import ListingForm from "@/components/listing/form/listing-form";
-import { getAuthTokenFromCookie } from "@/lib/router-guard";
-import { toast } from "sonner";
 
-function getStatusTextAndClass(isActive: boolean) {
-  return isActive
-    ? { text: "Active", className: "text-green-500 font-semibold" }
-    : { text: "Inactive", className: "text-red-500 font-semibold" };
+function getStatusTextAndClass(isAvailable: boolean) {
+  return isAvailable
+    ? { text: "Available", className: "text-green-500 font-semibold" }
+    : { text: "Unavailable", className: "text-red-500 font-semibold" };
 }
 
-export const columns: TableColumn<Lease>[] = [
+export const columns: TableColumn<Property>[] = [
+  {
+    header: "Image",
+    accessor: (row) => (
+      <img
+        src={row.imageUrls[0]}
+        alt={row.address}
+        className="w-24 rounded-md"
+      />
+    ),
+  },
   {
     header: "Address",
-    accessor: (row) => row.property.address,
+    accessor: (row) => row.address,
   },
   {
     header: "City",
-    accessor: (row) => row.property.city,
-  },
-  {
-    header: "Start Date",
-    accessor: (row) =>
-      new Date(row.startDate).toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
-  },
-  {
-    header: "End Date",
-    accessor: (row) =>
-      new Date(row.endDate).toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
+    accessor: (row) => row.city,
   },
   {
     header: "Rent Amount",
-    accessor: (row) => `$${row.property.rentAmount.toFixed(2)}`,
+    accessor: (row) => `$${row.rentAmount.toFixed(2)}`,
   },
   {
     header: "Status",
     accessor: (row) => {
-      const { text, className } = getStatusTextAndClass(row.isActive);
+      const { text, className } = getStatusTextAndClass(row.isAvailable);
       return <span className={className}>{text}</span>;
     },
   },
@@ -63,16 +56,16 @@ export const columns: TableColumn<Lease>[] = [
   },
 ];
 
-const ActionsCell: React.FC<{ row: Lease }> = ({ row }) => {
-  const [dialogContent, setDialogContent] = useState<"edit" | "delete" | null>(
-    null,
-  );
+const ActionsCell: React.FC<{ row: Property }> = ({ row }) => {
+  const [dialogContent, setDialogContent] = useState<
+    "edit" | "delete" | "list" | null
+  >(null);
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
 
-  const onSubmit = async (lease: Lease) => {
+  const onSubmit = async (property: Property) => {
     const res = await fetch(
-      `${window.ENV?.BACKEND_URL}/api/Leases/${lease.id}`,
+      `${window.ENV?.BACKEND_URL}/api/Property/${property.id}`,
       {
         method: "DELETE",
         headers: {
@@ -85,7 +78,7 @@ const ActionsCell: React.FC<{ row: Lease }> = ({ row }) => {
     );
 
     if (res.ok) {
-      toast.success("Lease deleted successfully!");
+      toast.success("Property deleted successfully!");
     } else {
       const error = await res.json();
       toast.error(error.data.message);
@@ -109,23 +102,30 @@ const ActionsCell: React.FC<{ row: Lease }> = ({ row }) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px] font-semibold">
             <DropdownMenuItem onClick={() => setDialogContent("edit")}>
-              Edit Lease
+              Edit Property
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!row.isAvailable}
+              onClick={() => setDialogContent("list")}
+            >
+              List Property
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-red-500"
               onClick={() => setDialogContent("delete")}
             >
-              Delete Lease
+              Delete Property
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
         <DialogContent>
-          {dialogContent === "edit" && <ListingForm listing={row} />}
+          {dialogContent === "edit" && <PropertyForm property={row} />}
+          {dialogContent === "list" && <ListingForm property={row} />}
           {dialogContent === "delete" && (
             <div className="rounded-md shadow-md">
               <p className="text-lg font-semibold mb-4">
-                Are you sure you want to delete this lease?
+                Are you sure you want to delete this property?
               </p>
               <div className="flex gap-4">
                 <Button

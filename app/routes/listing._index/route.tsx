@@ -1,5 +1,5 @@
 import { useLoaderData } from "@remix-run/react";
-import { json, LoaderFunction, redirect } from "@remix-run/node";
+import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
 
 import PropertyCard from "@/components/listing/listing-card";
@@ -96,7 +96,7 @@ function GuestComponent() {
         <ClientOnly>
           {() => (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
-              {listings.map((listing, index) => (
+              {listings.items.map((listing, index) => (
                 <PropertyCard key={index} listing={listing} />
               ))}
             </div>

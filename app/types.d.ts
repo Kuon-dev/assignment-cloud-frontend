@@ -207,18 +207,8 @@ type Lease = {
 };
 
 type LeaseLoaderData = {
-  leases: Lease[];
+  properties: Property[];
 };
-
-enum PaymentStatus {
-  RequiresPaymentMethod = "RequiresPaymentMethod",
-  RequiresConfirmation = "RequiresConfirmation",
-  RequiresAction = "RequiresAction",
-  Processing = "Processing",
-  RequiresCapture = "RequiresCapture",
-  Cancelled = "Cancelled",
-  Succeeded = "Succeeded",
-}
 
 type Payment = {
   amount: number;
@@ -272,12 +262,12 @@ type Property = {
   bathrooms: number;
   rentAmount: number;
   description: string | null;
-  amenities: string | null;
+  amenities: string[];
   isAvailable: boolean;
   roomType: number;
   createdAt: string;
   updatedAt: string | null;
-  imageUrls: string | null;
+  imageUrls: string[];
 };
 
 type PropertyLoaderData = {
