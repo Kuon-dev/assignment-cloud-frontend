@@ -3,8 +3,7 @@ import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
 import { FilterOption } from "@/components/users/users-data-table-toolbar";
-import UserManagementComponent from "@/components/users/user-management";
-import { cookieConsent } from "@/utils/cookies.server";
+import OwnersComponent from "@/components/users/owner-list";
 import { ClientOnly } from "remix-utils/client-only";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -24,7 +23,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/Admin/users?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/Admin/owners?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -68,29 +67,6 @@ export default function Users() {
     setSearchParams({ size: newPageSize.toString(), page: "1" });
   };
 
-  const handleDelete = async (userId: string) => {
-    try {
-      const response = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/Admin/users/${userId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Bearer ${data.authToken}`,
-          },
-        },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to delete user");
-      }
-
-      setSearchParams(searchParams);
-    } catch (error) {
-      console.error("Error deleting user:", error);
-    }
-  };
-
   React.useEffect(() => {
     setSearchParams({
       page: (pageIndex + 1).toString(),
@@ -102,7 +78,7 @@ export default function Users() {
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
-          <UserManagementComponent
+          <OwnersComponent
             searchTerm="email"
             data={data}
             filters={filters}
@@ -111,7 +87,6 @@ export default function Users() {
             setPageSize={handleSizeChange}
             totalPages={totalPages}
             setPageIndex={handlePageChange}
-            handleDelete={handleDelete}
           />
         </section>
       )}
