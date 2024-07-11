@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
 
 const PaymentFormSchema = z.object({
   amount: z
@@ -27,9 +28,16 @@ const PaymentFormSchema = z.object({
 
 type PaymentFormInputs = z.infer<typeof PaymentFormSchema>;
 
-export default function PaymentForm() {
+interface PaymentFormProps {
+  lease: Lease;
+}
+
+export default function PaymentForm({ lease }: PaymentFormProps) {
+  const cookies = document.cookie;
+  const authToken = getAuthTokenFromCookie(cookies);
   const [stripe, setStripe] = useState<Stripe | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isCheckoutFormOpen, setIsCheckoutFormOpen] = useState(false);
 
   useEffect(() => {
     const fetchStripe = async () => {
@@ -42,7 +50,7 @@ export default function PaymentForm() {
   const form = useForm<PaymentFormInputs>({
     resolver: zodResolver(PaymentFormSchema),
     defaultValues: {
-      amount: 0,
+      amount: lease.rentAmount,
     },
   });
 
@@ -54,8 +62,10 @@ export default function PaymentForm() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify({ amount: data.amount }),
+          body: JSON.stringify({ amount: lease.rentAmount }),
         },
       );
 
@@ -64,9 +74,8 @@ export default function PaymentForm() {
       }
 
       const result = await response.json();
-      console.log("Result:", result);
-
       setClientSecret(result.clientSecret);
+      setIsCheckoutFormOpen(true);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -78,32 +87,85 @@ export default function PaymentForm() {
 
   return (
     <>
+      <div>
+        <h3 className="text-lg font-medium mb-2">Lease Details</h3>
+        <div className="p-4 border rounded-md flex flex-col gap-2">
+          <p>
+            <strong>Address:</strong> {lease.property.address}
+          </p>
+          <p>
+            <strong>City:</strong> {lease.property.city}
+          </p>
+          <p>
+            <strong>State:</strong> {lease.property.state}
+          </p>
+          <p>
+            <strong>Zip Code:</strong> {lease.property.zipCode}
+          </p>
+          <p>
+            <strong>Bedrooms:</strong> {lease.property.bedrooms}
+          </p>
+          <p>
+            <strong>Bathrooms:</strong> {lease.property.bathrooms}
+          </p>
+          <p>
+            <strong>Amenities:</strong>{" "}
+            {Array.isArray(lease.property.amenities)
+              ? lease.property.amenities.join(", ")
+              : lease.property.amenities}
+          </p>
+          <p>
+            <strong>Lease Start Date:</strong>{" "}
+            {new Date(lease.startDate).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+          <p>
+            <strong>Lease End Date:</strong>{" "}
+            {new Date(lease.endDate).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payment Amount</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Enter amount"
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Submit</Button>
+          <div className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter amount"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Pay Now</Button>
+          </div>
         </form>
       </Form>
       {clientSecret && (
         <Elements stripe={stripe} options={{ clientSecret }}>
-          <CheckoutForm />
+          <CheckoutForm
+            open={isCheckoutFormOpen}
+            onClose={() => setIsCheckoutFormOpen(false)}
+          />
         </Elements>
       )}
     </>

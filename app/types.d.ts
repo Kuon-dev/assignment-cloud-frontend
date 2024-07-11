@@ -221,21 +221,17 @@ enum PaymentStatus {
 }
 
 type Payment = {
-  tenantId: string;
-  tenant?: TenantModel;
   amount: number;
   currency: string;
-  paymentIntentId: string;
-  paymentMethodId?: string;
-  status: PaymentStatus;
+  id: string;
+  paymentDate: string;
+  status: number;
 };
 
 type PaymentLoaderData = {
   payments: Payment[];
-  totalCount: number;
   ENV: {
     BACKEND_URL: string;
-    STRIPE_PUBLIC_KEY: string;
   };
 };
 

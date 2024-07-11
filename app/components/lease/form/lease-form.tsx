@@ -32,9 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
-import MaintenanceRequestForm from "@/components/maintenance/form/maintenance-request-form";
 
 interface LeaseFormProps extends HTMLAttributes<HTMLDivElement> {
   lease?: Lease;
@@ -308,27 +306,17 @@ export default function LeaseForm({
                     )}
                   />
                 </div>
-                <CardFooter>
-                  {!lease && (
+                {!lease && (
+                  <CardFooter>
                     <div className="flex justify-end w-full">
                       <Button className="w-full" loading={isLoading}>
                         Create Lease
                       </Button>
                     </div>
-                  )}
-                </CardFooter>
+                  </CardFooter>
+                )}
               </form>
             </Form>
-            {lease && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="w-full">Request Maintenance</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <MaintenanceRequestForm propertyId={lease.propertyId} />
-                </DialogContent>
-              </Dialog>
-            )}
           </CardContent>
         </div>
       )}

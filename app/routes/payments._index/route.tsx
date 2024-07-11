@@ -1,20 +1,13 @@
 import { DataTable } from "@/components/custom/data-table";
-import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { cookieConsent } from "@/utils/cookies.server";
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./table-schema";
 
-import PaymentForm from "@/components/payment/form/payment-form";
-
 export const loader: LoaderFunction = async ({ request }) => {
-  const url = new URL(request.url);
-  const pageNumber = url.searchParams.get("pageNumber") || "1";
-  const pageSize = url.searchParams.get("pageSize") || "10";
-
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
@@ -24,16 +17,14 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const paymentData: PaymentLoaderData = {
     payments: [],
-    totalCount: 0,
     ENV: {
       BACKEND_URL: process.env.BACKEND_URL || "",
-      STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY || "",
     },
   };
 
   try {
     const res = await fetch(
-      `${process.env.BACKEND_URL}/api/Payments?page=${pageNumber}&size=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/users/payment-history`,
       {
         method: "GET",
         headers: {
@@ -46,9 +37,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     if (res.ok) {
       const data = await res.json();
-
-      paymentData.payments = data.payments;
-      paymentData.totalCount = data.totalCount;
+      paymentData.payments = data;
     }
   } catch (error) {
     console.error(error);
@@ -59,13 +48,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Payments() {
-  // const data = useLoaderData<typeof loader>();
-  // const { payments, totalCount, ENV } = data;
-  // const [searchParams, setSearchParams] = useSearchParams();
-
-  // const handleNavigation = (page: number) => {
-  //   setSearchParams({ pageNumber: page.toString() });
-  // };
+  const data = useLoaderData<typeof loader>();
+  const { payments } = data;
 
   return (
     <section className="w-full mx-auto">
@@ -74,15 +58,7 @@ export default function Payments() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <PaymentForm />
-              {/* <DataTable columns={columns} data={payments} />
-              <PaginationComponent
-                currentPage={parseInt(searchParams.get("pageNumber") || "1")}
-                totalPages={Math.ceil(
-                  totalCount / parseInt(searchParams.get("pageSize") || "10"),
-                )}
-                onPageChange={handleNavigation}
-              /> */}
+              <DataTable columns={columns} data={payments} />
             </>
           )}
         </ClientOnly>

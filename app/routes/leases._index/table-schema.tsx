@@ -14,6 +14,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import LeaseForm from "@/components/lease/form/lease-form";
+import MaintenanceRequestForm from "@/components/maintenance/form/maintenance-request-form";
+import PaymentForm from "@/components/payment/form/payment-form";
 
 export const columns: TableColumn<Lease>[] = [
   {
@@ -63,7 +65,7 @@ export const columns: TableColumn<Lease>[] = [
 
 const ActionsCell: React.FC<{ row: Lease }> = ({ row }) => {
   const [dialogContent, setDialogContent] = useState<
-    "review" | "delete" | null
+    "review" | "delete" | "maintenance" | "payment" | null
   >(null);
   const user = useDashboardStore((state) => state.user);
   const cookies = document.cookie;
@@ -118,6 +120,12 @@ const ActionsCell: React.FC<{ row: Lease }> = ({ row }) => {
                 Delete
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem onClick={() => setDialogContent("maintenance")}>
+              Maintenance Request
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDialogContent("payment")}>
+              Payment
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -150,6 +158,10 @@ const ActionsCell: React.FC<{ row: Lease }> = ({ row }) => {
               </div>
             </div>
           )}
+          {dialogContent === "maintenance" && (
+            <MaintenanceRequestForm propertyId={row.propertyId} />
+          )}
+          {dialogContent === "payment" && <PaymentForm lease={row} />}
         </DialogContent>
       </Dialog>
     </>
