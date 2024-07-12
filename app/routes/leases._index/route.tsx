@@ -8,6 +8,8 @@ import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { columns } from "./table-schema";
+import { useState } from "react";
+import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -57,20 +59,39 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function Leases() {
   const data = useLoaderData<typeof loader>();
   const { leases } = data;
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const handleNavigation = (newPage: number) => {
-    setSearchParams({ pageNumber: newPage.toString() });
+  const [filteredLeases, setFilteredLeases] = useState(leases);
+  const filterFunction = (lease: Lease, filter: string) => {
+    switch (filter) {
+      case "all":
+        return true;
+      case "active":
+        return lease.isActive;
+      case "inactive":
+        return !lease.isActive;
+      default:
+        return false;
+    }
   };
 
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Leases</h1>
+      <TableFilter<Lease>
+        data={leases}
+        filterFunction={filterFunction}
+        onFilter={setFilteredLeases}
+        filterOptions={[
+          { value: "all", label: "All" },
+          { value: "active", label: "Active" },
+          { value: "inactive", label: "Inactive" },
+        ]}
+      />
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={leases} />
+              <DataTable columns={columns} data={filteredLeases} />
 
               <div className="mt-4 flex justify-between">
                 {/* <PaginationComponent
@@ -104,3 +125,39 @@ function LoadingComponent() {
     </div>
   );
 }
+
+const LeaseFilter = ({
+  filter,
+  setFilter,
+}: {
+  filter: string;
+  setFilter: React.Dispatch<React.SetStateAction<string>>;
+}) => {
+  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFilter(event.target.value);
+  };
+
+  return (
+    <div className="mb-4">
+      <label htmlFor="status-filter" className="mr-2">
+        Filter Status:
+      </label>
+      <select
+        id="status-filter"
+        value={filter}
+        onChange={handleFilterChange}
+        className="p-2 border rounded bg-transparent"
+      >
+        <option value="all" className="bg-black">
+          All
+        </option>
+        <option value="active" className="bg-black">
+          Active
+        </option>
+        <option value="inactive" className="bg-black">
+          Inactive
+        </option>
+      </select>
+    </div>
+  );
+};

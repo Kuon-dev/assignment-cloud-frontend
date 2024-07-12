@@ -10,6 +10,8 @@ import { useDashboardStore } from "@/stores/dashboard-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable } from "@/components/custom/data-table";
 import { columns } from "./table-schema";
+import { useState } from "react";
+import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -110,17 +112,40 @@ function GuestComponent() {
 function OwnerComponent() {
   const data = useLoaderData<ListingsLoaderData>();
   const { listings } = data;
-  console.log("listings", listings);
+
+  const [filteredListings, setFilteredListings] = useState(listings);
+  const filterFunction = (listing: Listing, filter: string): boolean => {
+    switch (filter) {
+      case "all":
+        return true;
+      case "active":
+        return listing.isActive;
+      case "inactive":
+        return !listing.isActive;
+      default:
+        return false;
+    }
+  };
 
   return (
     <>
       <h1 className="text-2xl font-semibold mb-4">Listing</h1>
+      <TableFilter<Listing>
+        data={listings}
+        filterFunction={filterFunction}
+        onFilter={setFilteredListings}
+        filterOptions={[
+          { value: "all", label: "All" },
+          { value: "active", label: "Active" },
+          { value: "inactive", label: "Inactive" },
+        ]}
+      />
 
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={listings} />
+              <DataTable columns={columns} data={filteredListings} />
 
               <div className="mt-4 flex justify-between"></div>
             </>

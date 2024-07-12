@@ -7,13 +7,19 @@ import { Button } from "@/components/ui/button";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface CheckoutFormProps {
   open: boolean;
   onClose: () => void;
+  propertyId: string;
 }
 
-export default function CheckoutForm({ open, onClose }: CheckoutFormProps) {
+export default function CheckoutForm({
+  propertyId,
+  open,
+  onClose,
+}: CheckoutFormProps) {
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
 
@@ -35,6 +41,7 @@ export default function CheckoutForm({ open, onClose }: CheckoutFormProps) {
 
     if (result.error) {
       console.log(result.error.message);
+      showErrorToast(result.error.message);
     } else {
       const response = await fetch(
         `${window.ENV?.BACKEND_URL}/api/Payment/process-payment`,
@@ -46,6 +53,7 @@ export default function CheckoutForm({ open, onClose }: CheckoutFormProps) {
             Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
+            propertyId,
             paymentIntentId: result.paymentIntent.id,
           }),
         },

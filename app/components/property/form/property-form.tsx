@@ -32,6 +32,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import ImageUpload, { ImageFile } from "@/components/custom/image-upload";
 
 interface PropertyFormProps {
   ownerId?: string;
@@ -89,6 +90,10 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
   const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [images, setImages] = useState<ImageFile[]>(
+    property?.imageUrls?.map((url) => ({ preview: url }) as ImageFile) || [],
+  );
+
   const form = useForm<z.infer<typeof PropertyFormSchema>>({
     resolver: zodResolver(PropertyFormSchema),
     defaultValues: {
@@ -107,9 +112,47 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
     },
   });
 
+  async function blobUrlToFile(
+    blobUrl: string,
+    fileName: string,
+  ): Promise<File> {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: blob.type });
+  }
+
   async function onSubmit(data: z.infer<typeof PropertyFormSchema>) {
     try {
       setIsLoading(true);
+
+      const formData = new FormData();
+      for (const image of images) {
+        if (image.preview.startsWith("blob:")) {
+          const file = await blobUrlToFile(image.preview, image.name);
+          formData.append("images", file);
+        } else {
+          formData.append("images", image);
+        }
+      }
+
+      const imageUpload = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/Property/upload-images`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (!imageUpload.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const uploadedImageUrls: string[] = [];
+      const imageUploadData = await imageUpload.json();
+      uploadedImageUrls.push(imageUploadData.url);
 
       const url = property
         ? `${window.ENV?.BACKEND_URL}/api/Property/${property.id}`
@@ -123,6 +166,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
         },
         body: JSON.stringify({
           ...data,
+          imageUrls: uploadedImageUrls,
           ownerId,
         }),
         credentials: "include",
@@ -138,10 +182,10 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
             : "Property created successfully!",
         );
       }
+
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
         toast.error(error.message);
       }
       setIsLoading(false);
@@ -167,6 +211,13 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
                 className="grid grid-cols-1 gap-6 md:gap-8"
               >
                 <div className="grid gap-4">
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <ImageUpload images={images} setImages={setImages} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                   <FormField
                     control={form.control}
                     name="address"

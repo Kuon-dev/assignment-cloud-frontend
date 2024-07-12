@@ -165,6 +165,7 @@ export default function PaymentForm({ lease }: PaymentFormProps) {
           <CheckoutForm
             open={isCheckoutFormOpen}
             onClose={() => setIsCheckoutFormOpen(false)}
+            propertyId={lease.property.id}
           />
         </Elements>
       )}

@@ -207,7 +207,7 @@ type Lease = {
 };
 
 type LeaseLoaderData = {
-  properties: Property[];
+  leases: Lease[];
 };
 
 type Payment = {
