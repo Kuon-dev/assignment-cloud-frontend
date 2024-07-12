@@ -58,7 +58,7 @@ const months = [
   "December",
 ];
 
-const Component: React.FC = ({ data, owner }) => {
+const Component: React.FC = ({ data, payoutData }) => {
   const [leasesData, setLeasesData] = useState<Lease[]>(data.leases);
   const [selectedLeasesData, setSelectedLeasesData] = useState<Lease>(
     leasesData[0] || null,
@@ -135,15 +135,14 @@ const Component: React.FC = ({ data, owner }) => {
       .toFixed(2);
 
     const paymentToSave = {
-      ownerId: owner.id,
-      year: selectedMonth.year,
-      month: selectedMonth.month,
+      ownerId: payoutData.ownerId,
+      payoutPeriodId: payoutData.payoutPeriodId,
       amount: parseFloat(totalAmount),
     };
 
     try {
       const response = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/OwnerPayments`,
+        `${window.ENV?.BACKEND_URL}/api/Payout/owner-payouts`,
         {
           method: "POST",
           headers: {
@@ -160,8 +159,9 @@ const Component: React.FC = ({ data, owner }) => {
       }
 
       toast.success("Payment saved successfully.");
-
       setEditingPayment(null);
+      setPayments([]);
+      localStorage.removeItem("payment");
     } catch (error) {
       console.error("Error saving payment:", error);
     }
@@ -395,7 +395,7 @@ const Component: React.FC = ({ data, owner }) => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-32">
-                    No Data Available for {selectedMonth.month}{" "}
+                    No Payout That Is Not Submitted for {selectedMonth.month}{" "}
                     {selectedMonth.year}
                   </TableCell>
                 </TableRow>

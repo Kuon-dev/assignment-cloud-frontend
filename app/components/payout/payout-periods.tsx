@@ -5,37 +5,30 @@ import { useNavigate, Link } from "@remix-run/react";
 import { useAdminStore } from "@/stores/admin-store";
 import { Button } from "@/components/custom/button";
 
-interface User {
+interface payoutPeriods {
   id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: number;
-  profilePictureUrl: string;
-  passwordHash: string;
-  owner: { id: string };
-  admin: { id: string };
-  tenant: { id: string };
+  startDate: Date;
+  endDate: Date;
+  status: string;
 }
 
-const columns = (): ColumnDef<User>[] => [
+const columns = (): ColumnDef<payoutPeriods>[] => [
   {
-    accessorKey: "firstName",
-    header: "First Name",
+    accessorKey: "startDate",
+    header: "Start Date",
   },
   {
-    accessorKey: "lastName",
-    header: "Last Name",
+    accessorKey: "endDate",
+    header: "End Date",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "status",
+    header: "Status",
   },
 ];
 
-interface OwnersProps {
-  searchTerm: string;
-  data: User[];
+interface PeriodsProps {
+  data: payoutPeriods[];
   filters: FilterOption[];
   pageIndex: number;
   pageSize: number;
@@ -44,8 +37,7 @@ interface OwnersProps {
   setPageIndex: (pageIndex: number) => void;
 }
 
-export default function OwnersComponent({
-  searchTerm,
+export default function PayoutPeriodsComponent({
   data,
   filters,
   pageIndex,
@@ -53,26 +45,33 @@ export default function OwnersComponent({
   setPageSize,
   totalPages,
   setPageIndex,
-}: OwnersProps) {
+}: PeriodsProps) {
   const navigate = useNavigate();
   const [userData, setUserData] = useAdminStore((state) => [
     state.userData,
     state.setUserData,
   ]);
 
-  const navigateToFinancialReconciliation = (owner: User) => {
-    const payoutPeriodId = userData.payoutPeriodId;
-    setUserData({ payoutPeriodId: payoutPeriodId, ownerId: owner.owner.id });
-    navigate(`/payout/financial-reconciliation`);
+  const navigateToOwnerList = (payoutPeriodData: payoutPeriods) => {
+    const id = payoutPeriodData.id;
+    setUserData({ payoutPeriodId: id });
+    navigate(`/payout/owner-list`);
   };
 
   return (
     <section className="w-full mx-auto">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-semibold">Owners</h1>
+        <h1 className="text-2xl font-semibold">Payout Periods</h1>
+        <Button
+          variant="outline"
+          size="sm"
+          className="ml-auto hidden h-8 lg:flex"
+        >
+          <Link to={`/payout/new`}>Create New Period</Link>
+        </Button>
       </div>
       <AdminCustomTable
-        searchTerm={searchTerm}
+        searchTerm=""
         columns={columns()}
         data={data}
         filters={filters}
@@ -81,7 +80,7 @@ export default function OwnersComponent({
         setPageSize={setPageSize}
         totalPages={totalPages}
         setPageIndex={setPageIndex}
-        onRowClick={navigateToFinancialReconciliation}
+        onRowClick={navigateToOwnerList}
       />
     </section>
   );
