@@ -22,7 +22,7 @@ interface DataTableToolbarProps<TData> {
   filters: FilterOption[];
 }
 
-export function UsersDataTableToolbar<TData>({
+export function AdminCustomTableToolbar<TData>({
   table,
   searchTerm,
   filters,
@@ -32,16 +32,18 @@ export function UsersDataTableToolbar<TData>({
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2">
-        <Input
-          placeholder="Search Email ..."
-          value={
-            (table.getColumn(searchTerm)?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn(searchTerm)?.setFilterValue(event.target.value)
-          }
-          className="h-8 w-[150px] lg:w-[250px]"
-        />
+        {searchTerm == "email" ? (
+          <Input
+            placeholder="Search Email ..."
+            value={
+              (table.getColumn(searchTerm)?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn(searchTerm)?.setFilterValue(event.target.value)
+            }
+            className="h-8 w-[150px] lg:w-[250px]"
+          />
+        ) : null}
         <div className="flex gap-x-2">
           {filters.map(
             (filter) =>

@@ -84,9 +84,9 @@ export const adminSidebarLinks = [
     tooltip: "User Management",
   },
   {
-    to: "/financial",
+    to: "/payout",
     icon: <BadgeDollarSign className="h-5 w-5" />,
-    tooltip: "Financial Reconciliation",
+    tooltip: "Payout",
   },
   {
     to: "/reporting",

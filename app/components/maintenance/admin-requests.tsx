@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { FilterOption } from "../users/users-data-table-toolbar";
-import { UsersDataTable } from "../users/users-data-table";
+import { FilterOption } from "../custom/admin-custom-table-toolbar";
+import { AdminCustomTable } from "../custom/admin-custom-table";
 import { ColumnDef } from "@tanstack/react-table";
 
 import {
@@ -337,7 +337,7 @@ export default function AdminMaintenanceComponent({
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Maintenance Requests</h1>
       </div>
-      <UsersDataTable
+      <AdminCustomTable
         searchTerm={searchTerm}
         columns={columns(handleDelete, handleUpdate)}
         data={tableData}
