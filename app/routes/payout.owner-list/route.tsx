@@ -1,10 +1,11 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
-import { FilterOption } from "@/components/users/users-data-table-toolbar";
-import OwnersComponent from "@/components/users/owner-list";
+import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
+import OwnersComponent from "@/components/payout/owner-list";
 import { ClientOnly } from "remix-utils/client-only";
+import { Button } from "@/components/ui/button";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -55,7 +56,7 @@ export default function Users() {
   const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
   const pageSize = parseInt(searchParams.get("size") || "10", 10);
   const [filters, setFilters] = React.useState<FilterOption[]>([]);
-
+  const navigate = useNavigate();
   const handlePageChange = (newPageIndex: number) => {
     setSearchParams({
       page: (newPageIndex + 1).toString(),
@@ -78,9 +79,18 @@ export default function Users() {
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
+          <div className="flex items-center mb-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/payout")}
+            >
+              <span className="mr-2">&lt;</span> Back
+            </Button>
+          </div>
           <OwnersComponent
             searchTerm="email"
-            data={data}
+            data={users}
             filters={filters}
             pageIndex={pageIndex}
             pageSize={pageSize}

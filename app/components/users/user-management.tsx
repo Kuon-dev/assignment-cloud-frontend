@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { FilterOption } from "./users-data-table-toolbar";
-import { UsersDataTable } from "./users-data-table";
+import { FilterOption } from "../custom/admin-custom-table-toolbar";
+import { AdminCustomTable } from "../custom/admin-custom-table";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ interface User {
 const columns = (
   handleDelete: (userId: string) => void,
   navigateToEdit: (user: User) => void,
-): ColumnDef<User, any>[] => [
+): ColumnDef<User>[] => [
   {
     accessorKey: "firstName",
     header: "First Name",
@@ -52,7 +52,7 @@ const columns = (
   },
   {
     header: "Action",
-    cell: ({ row }: any) => (
+    cell: ({ row }) => (
       <Dialog>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -88,7 +88,7 @@ const columns = (
 
 interface UserManagementProps {
   searchTerm: string;
-  data: any;
+  data: [];
   filters: FilterOption[];
   pageIndex: number;
   pageSize: number;
@@ -132,7 +132,7 @@ export default function UserManagementComponent({
           <Link to={`/users/new`}>Add User</Link>
         </Button>
       </div>
-      <UsersDataTable
+      <AdminCustomTable
         searchTerm={searchTerm}
         columns={columns(handleDelete, navigateToEdit)}
         data={data.users}

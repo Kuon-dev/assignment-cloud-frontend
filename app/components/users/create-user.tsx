@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useNavigate } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { ClientOnly } from "remix-utils/client-only";
 
 interface AddUserFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -84,109 +85,120 @@ export default function AddUserForm({ className, ...props }: AddUserFormProps) {
   }
 
   return (
-    <div className={cn("grid gap-6", className)} {...props}>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="First Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Last Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Role</FormLabel>
-                  <FormControl>
-                    <div className="flex space-x-4">
-                      <label>
-                        <input
-                          type="radio"
-                          value="0"
-                          checked={field.value === "0"}
-                          onChange={() => field.onChange("0")}
-                        />
-                        Tenant
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          value="1"
-                          checked={field.value === "1"}
-                          onChange={() => field.onChange("1")}
-                        />
-                        Owner
-                      </label>
-                      <label>
-                        <input
-                          type="radio"
-                          value="2"
-                          checked={field.value === "2"}
-                          onChange={() => field.onChange("2")}
-                        />
-                        Admin
-                      </label>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button className="mt-2" loading={isLoading}>
-              Add User
-            </Button>
+    <ClientOnly>
+      {() => (
+        <div className={cn("grid gap-6", className)} {...props}>
+          <div className="container mx-auto p-4 flex-grow border">
+            <h1 className="text-2xl font-bold mb-6 text-center">Create User</h1>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="grid gap-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="First Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Last Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="name@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="********"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1">
+                        <FormLabel>Role</FormLabel>
+                        <FormControl>
+                          <div className="flex space-x-4">
+                            <label>
+                              <input
+                                type="radio"
+                                value="0"
+                                checked={field.value === "0"}
+                                onChange={() => field.onChange("0")}
+                              />
+                              Tenant
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                value="1"
+                                checked={field.value === "1"}
+                                onChange={() => field.onChange("1")}
+                              />
+                              Owner
+                            </label>
+                            <label>
+                              <input
+                                type="radio"
+                                value="2"
+                                checked={field.value === "2"}
+                                onChange={() => field.onChange("2")}
+                              />
+                              Admin
+                            </label>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button className="mt-2" loading={isLoading}>
+                    Add User
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </div>
-        </form>
-      </Form>
-    </div>
+        </div>
+      )}
+    </ClientOnly>
   );
 }

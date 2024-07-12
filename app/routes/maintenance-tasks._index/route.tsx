@@ -2,7 +2,7 @@ import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
-import { FilterOption } from "@/components/users/users-data-table-toolbar";
+import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
 import { ClientOnly } from "remix-utils/client-only";
 import AdminMaintenanceComponent from "@/components/maintenance/admin-requests";
 import { toast } from "sonner";

@@ -1,9 +1,10 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { ClientOnly } from "remix-utils/client-only";
 import FinancialReconciliationComponent from "@/components/users/financial-reconciliation";
 import { useAdminStore } from "@/stores/admin-store";
+import { Button } from "@/components/ui/button";
 
 // Define the loader function
 export const loader: LoaderFunction = async ({ request }) => {
@@ -47,15 +48,22 @@ export default function Users() {
     state.userData,
     state.setUserData,
   ]);
+  const navigate = useNavigate();
 
   return (
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
-          <FinancialReconciliationComponent
-            data={data}
-            owner={userData.owner}
-          />
+          <div className="flex items-center mb-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/payout/owner-list")}
+            >
+              <span className="mr-2">&lt;</span> Back
+            </Button>
+          </div>
+          <FinancialReconciliationComponent data={data} payoutData={userData} />
         </section>
       )}
     </ClientOnly>

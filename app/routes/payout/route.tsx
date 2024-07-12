@@ -40,7 +40,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 // Users layout component
-export default function FinancialLayout() {
+export default function PayoutLayout() {
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
 
   useEffect(() => {
