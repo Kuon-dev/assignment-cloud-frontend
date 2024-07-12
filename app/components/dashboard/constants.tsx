@@ -89,8 +89,8 @@ export const adminSidebarLinks = [
     tooltip: "Reporting",
   },
   {
-    to: "/maintenances",
+    to: "/maintenance-tasks",
     icon: <Wrench className="h-5 w-5" />,
-    tooltip: "Your maintenance requests",
+    tooltip: "Maintenance Tasks",
   },
 ];

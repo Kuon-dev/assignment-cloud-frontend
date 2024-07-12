@@ -250,6 +250,7 @@ type Maintenance = {
   listingId: string;
   status: MaintenanceStatus;
   createdAt: string;
+  propertyAddress: string;
   tenantFirstName: string;
   tenantLastName: string;
   tenantEmail: string;
