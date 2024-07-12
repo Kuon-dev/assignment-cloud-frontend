@@ -1,5 +1,5 @@
 import { HTMLAttributes, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -22,14 +22,23 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { Label } from "@/components/ui/label";
 
 const MaintenanceRequestSchema = z.object({
   description: z.string().min(1, { message: "Description is required" }),
-  // images: z.instanceof(File).array().optional(),
 });
 
 interface MaintenanceRequestFormProps extends HTMLAttributes<HTMLDivElement> {
-  maintenance: Maintenance;
+  maintenance?: Maintenance;
+  propertyId?: string;
 }
 
 type MaintenanceRequestFormErrorSchema = {
@@ -43,18 +52,27 @@ type MaintenanceRequestFormErrorSchema = {
   stackTrace?: string;
 };
 
+const statusType = [
+  "Pending",
+  "In Progress",
+  "Completed",
+  "Cancelled",
+] as const;
+
 export default function MaintenanceRequestForm({
   maintenance,
+  propertyId,
   className,
   ...props
 }: MaintenanceRequestFormProps) {
+  const cookies = document.cookie;
+  const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof MaintenanceRequestSchema>>({
     resolver: zodResolver(MaintenanceRequestSchema),
     defaultValues: {
       description: maintenance?.description || "",
-      status: maintenance?.status || 0,
     },
   });
 
@@ -62,15 +80,14 @@ export default function MaintenanceRequestForm({
     try {
       setIsLoading(true);
 
-      const token = "user_token";
       const res = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/maintenance-requests`,
+        `${window.ENV?.BACKEND_URL}/api/Maintenance/requests`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
             propertyId,
@@ -111,7 +128,7 @@ export default function MaintenanceRequestForm({
             </CardDescription>
           </CardHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)}>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
                   <FormField
@@ -124,19 +141,42 @@ export default function MaintenanceRequestForm({
                           <Textarea
                             placeholder="Enter maintenance issue description"
                             {...field}
+                            disabled={!!maintenance}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  {maintenance && (
+                    <>
+                      <Label>Status</Label>
+                      <Select
+                        value={maintenance.status.toString()}
+                        disabled={!!maintenance}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select review status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {statusType.map((type, index) => (
+                            <SelectItem key={index} value={index.toString()}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button type="submit" loading={isLoading}>
-                  Submit Request
-                </Button>
-              </CardFooter>
+              {!maintenance && (
+                <CardFooter>
+                  <Button type="submit" loading={isLoading}>
+                    Submit Request
+                  </Button>
+                </CardFooter>
+              )}
             </form>
           </Form>
         </div>

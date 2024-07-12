@@ -184,7 +184,8 @@ type Application = {
   employmentInfo: string;
   additionalNotes: string;
   references: string;
-  property: Property;
+  listingAddress: string;
+  propertyId: string;
 };
 
 type ApplicationLoaderData = {
@@ -209,32 +210,22 @@ type Lease = {
 };
 
 type LeaseLoaderData = {
-  leases: Lease[];
+  properties: Property[];
 };
 
-enum PaymentStatus {
-  RequiresPaymentMethod = "RequiresPaymentMethod",
-  RequiresConfirmation = "RequiresConfirmation",
-  RequiresAction = "RequiresAction",
-  Processing = "Processing",
-  RequiresCapture = "RequiresCapture",
-  Cancelled = "Cancelled",
-  Succeeded = "Succeeded",
-}
-
 type Payment = {
-  tenantId: string;
-  tenant?: TenantModel;
   amount: number;
   currency: string;
-  paymentIntentId: string;
-  paymentMethodId?: string;
-  status: PaymentStatus;
+  id: string;
+  paymentDate: string;
+  status: number;
 };
 
 type PaymentLoaderData = {
   payments: Payment[];
-  totalCount: number;
+  ENV: {
+    BACKEND_URL: string;
+  };
 };
 
 enum MaintenanceStatus {
@@ -250,14 +241,12 @@ type Maintenance = {
   listingId: string;
   status: MaintenanceStatus;
   createdAt: string;
+  description: string;
+  priority: string;
   propertyAddress: string;
+  tenantEmail: string;
   tenantFirstName: string;
   tenantLastName: string;
-  tenantEmail: string;
-  applicationDate: string;
-  employmentInfo: string;
-  additionalNotes: string;
-  references: string;
 };
 
 type MaintenanceLoaderData = {
@@ -276,12 +265,12 @@ type Property = {
   bathrooms: number;
   rentAmount: number;
   description: string | null;
-  amenities: string | null;
+  amenities: string[];
   isAvailable: boolean;
   roomType: number;
   createdAt: string;
   updatedAt: string | null;
-  imageUrls: string | null;
+  imageUrls: string[];
 };
 
 type PropertyLoaderData = {

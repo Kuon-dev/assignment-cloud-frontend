@@ -28,7 +28,11 @@ function getStatusTextAndClass(status: string) {
   }
 }
 
-export const columns: TableColumn<Application>[] = [
+export const ownerColumns: TableColumn<Application>[] = [
+  {
+    header: "Property Address",
+    accessor: (row) => row.listingAddress,
+  },
   {
     header: "Tenant First Name",
     accessor: (row) => row.tenantFirstName,
@@ -40,6 +44,33 @@ export const columns: TableColumn<Application>[] = [
   {
     header: "Tenant Email",
     accessor: (row) => row.tenantEmail,
+  },
+  {
+    header: "Status",
+    accessor: (row) => {
+      const { text, className } = getStatusTextAndClass(row.status.toString());
+      return <span className={className}>{text}</span>;
+    },
+  },
+  {
+    header: "Application Date",
+    accessor: (row) =>
+      new Date(row.applicationDate).toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+  },
+  {
+    header: "Actions",
+    accessor: (row) => <ActionsCell row={row} />,
+  },
+];
+
+export const tenantColumns: TableColumn<Application>[] = [
+  {
+    header: "Property Address",
+    accessor: (row) => row.listingAddress,
   },
   {
     header: "Status",

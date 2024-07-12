@@ -72,7 +72,6 @@ export default function ReviewApplicationForm({
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(application.status); /// this is enum
 
   const form = useForm<z.infer<typeof ReviewApplicationFormSchema>>({
     resolver: zodResolver(ReviewApplicationFormSchema),
@@ -127,7 +126,10 @@ export default function ReviewApplicationForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 mb-4"
+          >
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <Label>Employment Information</Label>
@@ -188,22 +190,22 @@ export default function ReviewApplicationForm({
                   Submit Review
                 </Button>
               )}
-            {user?.tenant &&
-              parseInt(application.status) === StatusType.Approved && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button>Lease Now</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <LeaseForm
-                      tenantId={user.tenant.id}
-                      propertyId={application.property.id}
-                    />
-                  </DialogContent>
-                </Dialog>
-              )}
           </form>
         </Form>
+        {user?.tenant &&
+          parseInt(application.status) === StatusType.Approved && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>Lease Now</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <LeaseForm
+                  tenantId={user.tenant.id}
+                  propertyId={application.propertyId}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
       </CardContent>
     </div>
   );

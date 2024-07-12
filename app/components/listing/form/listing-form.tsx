@@ -1,9 +1,8 @@
-import { useState, HTMLAttributes } from "react";
-import { Control, useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { ClientOnly } from "remix-utils/client-only";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 
@@ -18,18 +17,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/custom/date.picker.client";
+import { Label } from "@/components/ui/label";
 
-interface ListingFormProps extends HTMLAttributes<HTMLDivElement> {
+interface ListingFormProps {
   listing?: Listing;
+  property?: Property;
 }
 
 type ListingsFormErrorSchema = {
@@ -45,8 +39,9 @@ type ListingsFormErrorSchema = {
 
 const ListingFormSchema = z.object({
   title: z.string().min(1, { message: "Please enter the title" }),
-  description: z.string().min(1, { message: "Please enter the description" }),
-  property: z.string().min(1, { message: "Please select a property" }),
+  description: z.string().min(10, {
+    message: "Please enter the description of minimum 10 characters",
+  }),
   price: z.number().min(1, { message: "Please enter a valid price" }),
   startDate: z
     .string()
@@ -57,22 +52,16 @@ const ListingFormSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export default function ListingForm({
-  listing,
-  className,
-  ...props
-}: ListingFormProps) {
+export default function ListingForm({ listing, property }: ListingFormProps) {
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(listing);
 
   const form = useForm<z.infer<typeof ListingFormSchema>>({
     resolver: zodResolver(ListingFormSchema),
     defaultValues: {
       title: listing?.title || "",
       description: listing?.description || "",
-      // property: "",
       price: listing?.price || 0,
       startDate: listing?.startDate || undefined,
       endDate: listing?.endDate || undefined,
@@ -80,14 +69,14 @@ export default function ListingForm({
     },
   });
 
-  const properties = ["Property 1", "Property 2", "Property 3", "Property 4"];
-  // Need to get unlisted properties from owner
   const onSubmit = async (data: z.infer<typeof ListingFormSchema>) => {
     try {
       setIsLoading(true);
 
-      const propertyId = "174599ab-a263-4168-ae49-45073715ab71";
-      const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Listings`, {
+      const url = listing
+        ? `${window.ENV?.BACKEND_URL}/api/Listings/${listing.id}`
+        : `${window.ENV?.BACKEND_URL}/api/Listings`;
+      const res = await fetch(url, {
         method: listing ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
@@ -95,7 +84,7 @@ export default function ListingForm({
           Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          propertyId,
+          propertyId: property?.id,
           ...data,
         }),
         credentials: "include",
@@ -120,7 +109,7 @@ export default function ListingForm({
   return (
     <ClientOnly>
       {() => (
-        <div className={cn("grid gap-6", className)} {...props}>
+        <div className="grid gap-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="grid gap-4">
@@ -155,34 +144,16 @@ export default function ListingForm({
                   )}
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="property"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel>Property</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={!!listing}
-                          >
-                            <SelectTrigger className="border rounded-md p-2 w-full">
-                              <SelectValue placeholder="Select a property" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {properties.map((prop, index) => (
-                                <SelectItem key={index} value={prop}>
-                                  {prop}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div>
+                    <div className="mb-1">
+                      <Label>Property</Label>
+                    </div>
+                    <Input
+                      placeholder="Property"
+                      disabled
+                      value={listing?.location ?? property?.address}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="price"
@@ -207,14 +178,14 @@ export default function ListingForm({
                 <div className="grid grid-cols-2 gap-4">
                   <DatePicker
                     name="startDate"
-                    control={form.control as unknown as Control<any>}
+                    control={form.control}
                     label="Start Date"
                     error={form.formState.errors.startDate}
                     disabled={!!listing}
                   />
                   <DatePicker
                     name="endDate"
-                    control={form.control as unknown as Control<any>}
+                    control={form.control}
                     label="End Date"
                     error={form.formState.errors.endDate}
                     disabled={!!listing}

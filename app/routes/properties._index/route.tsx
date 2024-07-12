@@ -1,14 +1,18 @@
-import { json, LoaderFunction, redirect } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { useLoaderData } from "@remix-run/react";
+import { useDashboardStore } from "@/stores/dashboard-store";
 
 import { ClientOnly } from "remix-utils/client-only";
-import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { showErrorToast } from "@/lib/handle-error";
-import { useDashboardStore } from "@/stores/dashboard-store";
 import { DataTable } from "@/components/custom/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./table-schema";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import PropertyForm from "@/components/property/form/property-form";
+import { Plus } from "lucide-react";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -18,39 +22,40 @@ export const loader: LoaderFunction = async ({ request }) => {
     // return redirect("/login");
   }
 
-  const leaseData: LeaseLoaderData = {
-    leases: [],
+  const propertyData: PropertyLoaderData = {
+    properties: [],
   };
 
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/api/users/leases`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${authToken}`,
+    const res = await fetch(
+      `${process.env.BACKEND_URL}/api/users/owned-property`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
       },
-    });
+    );
 
     if (res.ok) {
       const data = await res.json();
-      leaseData.leases = data;
+      propertyData.properties = data;
     }
   } catch (error) {
     console.error(error);
     showErrorToast(error);
   }
   return json({
-    ...leaseData,
+    ...propertyData,
   });
 };
 
 export default function Properties() {
   const user = useDashboardStore((state) => state.user);
   const data = useLoaderData<typeof loader>();
-  const { leases } = data;
-
-  console.log(leases);
+  const { properties } = data;
 
   return (
     <>
@@ -60,9 +65,23 @@ export default function Properties() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={leases} />
+              <div className="flex justify-end">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="link">
+                      <span>
+                        <Plus className="w-5 h-5 mr-2" />
+                      </span>
+                      Add Property
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <PropertyForm ownerId={user.owner.id} />
+                  </DialogContent>
+                </Dialog>
+              </div>
 
-              <div className="mt-4 flex justify-between"></div>
+              <DataTable columns={columns} data={properties} />
             </>
           )}
         </ClientOnly>
