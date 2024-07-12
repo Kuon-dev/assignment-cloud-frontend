@@ -1,4 +1,4 @@
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
 import { Shell } from "@/components/landing/shell";
@@ -80,64 +80,70 @@ export default function ListingDetail() {
   const { listing } = data;
 
   return (
-    <Shell>
-      <PropertyCarousel slides={listing.imageUrls} />
-      <div className="flex flex-col gap-2 p-2 bg">
-        <h1 className="text-3xl font-semibold text-gray-600 mb-4">
-          Rent ${listing.price.toFixed(2)}
-        </h1>
-        <h2 className="text-2xl font-bold mb-2">{listing.title}</h2>
-        <p className="text-md mb-2 font-semibold">{listing.location}</p>
-        <p className="text-lg mb-4">{listing.description}</p>
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="flex items-center">
-            <BedIcon className="text-xl mr-1" />
-            <span>{listing.bedrooms} Bedrooms</span>
-          </div>
-          <div className="flex items-center">
-            <BathIcon className="text-xl mr-1" />
-            <span>{listing.bathrooms} Bathrooms</span>
-          </div>
-        </div>
-        <div className="mb-4">
-          <h3 className="text-xl font-bold mb-2">Amenities</h3>
-
-          {listing.amenities.length > 0 ? (
-            <div className="flex gap-2">
-              {listing.amenities.map((amenity, index) => (
-                <Badge key={index} className="text-md font-semibold">
-                  {amenity}
-                </Badge>
-              ))}
+    <>
+      <Link to="/dashboard">
+        <Button variant="link">&larr; Back</Button>
+      </Link>
+      <Shell>
+        <PropertyCarousel slides={listing.imageUrls} />
+        <div className="flex flex-col gap-2 p-2 bg">
+          <h1 className="text-3xl font-semibold text-gray-600 mb-4">
+            Rent ${listing.price.toFixed(2)}
+          </h1>
+          <h2 className="text-2xl font-bold mb-2">{listing.title}</h2>
+          <p className="text-md mb-2 font-semibold">{listing.location}</p>
+          <p className="text-lg mb-4">{listing.description}</p>
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="flex items-center">
+              <BedIcon className="text-xl mr-1" />
+              <span>{listing.bedrooms} Bedrooms</span>
             </div>
-          ) : (
-            <p className="text-md">No amenities available.</p>
+            <div className="flex items-center">
+              <BathIcon className="text-xl mr-1" />
+              <span>{listing.bathrooms} Bathrooms</span>
+            </div>
+          </div>
+          <div className="mb-4">
+            <h3 className="text-xl font-bold mb-2">Amenities</h3>
+
+            {listing.amenities.length > 0 ? (
+              <div className="flex gap-2">
+                {listing.amenities.map((amenity, index) => (
+                  <Badge key={index} className="text-md font-semibold">
+                    {amenity}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-md">No amenities available.</p>
+            )}
+          </div>
+
+          {user?.tenant && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="inline-flex items-center font-semibold">
+                  Apply Now
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Apply to rent this property</DialogTitle>
+                  <DialogDescription>
+                    Please fill out the form below to apply to rent this
+                    property.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <RentalApplicationForm
+                  tenantId={user?.tenant.id}
+                  listingId={listing.id}
+                />
+              </DialogContent>
+            </Dialog>
           )}
         </div>
-
-        {user?.tenant && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="inline-flex items-center font-semibold">
-                Apply Now
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Apply to rent this property</DialogTitle>
-                <DialogDescription>
-                  Please fill out the form below to apply to rent this property.
-                </DialogDescription>
-              </DialogHeader>
-
-              <RentalApplicationForm
-                tenantId={user?.tenant.id}
-                listingId={listing.id}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    </Shell>
+      </Shell>
+    </>
   );
 }

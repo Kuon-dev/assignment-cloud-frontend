@@ -23,8 +23,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const leaseData: LeaseLoaderData = {
     leases: [],
-    totalPages: 0,
-    currentPage: parseInt(pageNumber),
   };
 
   try {
@@ -58,7 +56,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Leases() {
   const data = useLoaderData<typeof loader>();
-  const { leases, currentPage, totalPages } = data;
+  const { leases } = data;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handleNavigation = (newPage: number) => {
@@ -75,11 +73,11 @@ export default function Leases() {
               <DataTable columns={columns} data={leases} />
 
               <div className="mt-4 flex justify-between">
-                <PaginationComponent
+                {/* <PaginationComponent
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handleNavigation}
-                />
+                /> */}
               </div>
             </>
           )}

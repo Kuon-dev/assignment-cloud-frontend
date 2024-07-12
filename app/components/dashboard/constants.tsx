@@ -58,9 +58,9 @@ export const ownerSidebarLinks = [
     tooltip: "Your application reviews",
   },
   {
-    to: "/maintenances",
+    to: "/tasks",
     icon: <Wrench className="h-5 w-5" />,
-    tooltip: "Your maintenance requests",
+    tooltip: "Your maintenance tasks",
   },
   {
     to: "/payments",

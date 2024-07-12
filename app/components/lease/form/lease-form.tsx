@@ -15,7 +15,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Card,
   CardHeader,
   CardTitle,
   CardDescription,
@@ -33,8 +32,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { getAuthTokenFromCookie } from "@/lib/router-guard";
 
 interface LeaseFormProps extends HTMLAttributes<HTMLDivElement> {
+  lease?: Lease;
   tenantId: string;
   propertyId: string;
 }
@@ -67,21 +68,29 @@ const LeaseFormSchema = z.object({
 });
 
 export default function LeaseForm({
+  lease,
   tenantId,
   propertyId,
   className,
   ...props
 }: LeaseFormProps) {
+  const cookies = document.cookie;
+  const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
+  const disable = !!lease;
 
   const form = useForm<z.infer<typeof LeaseFormSchema>>({
     resolver: zodResolver(LeaseFormSchema),
     defaultValues: {
-      startDate: undefined,
-      endDate: undefined,
-      rentAmount: 0,
-      securityDeposit: 0,
-      isActive: true,
+      startDate: lease?.startDate
+        ? new Date(lease.startDate).toISOString()
+        : undefined,
+      endDate: lease?.endDate
+        ? new Date(lease.endDate).toISOString()
+        : undefined,
+      rentAmount: lease?.rentAmount || 0,
+      securityDeposit: lease?.securityDeposit || 0,
+      isActive: lease?.isActive || false,
     },
   });
 
@@ -89,13 +98,12 @@ export default function LeaseForm({
     try {
       setIsLoading(true);
 
-      const token = "jwt_token";
       const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Lease`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           tenantId,
@@ -126,9 +134,13 @@ export default function LeaseForm({
       {() => (
         <div className={cn("mx-auto", className)} {...props}>
           <CardHeader>
-            <CardTitle className="text-3xl font-bold">Create Lease</CardTitle>
+            <CardTitle className="text-3xl font-bold">
+              {lease ? "Review Lease" : "Create Lease"}
+            </CardTitle>
             <CardDescription>
-              Enter the details below to create a new lease.
+              {lease
+                ? "Review the lease details before submitting"
+                : "Fill in the form to create a new lease"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -151,6 +163,7 @@ export default function LeaseForm({
                                 <Button
                                   variant="outline"
                                   className="w-full justify-start font-normal"
+                                  disabled={disable}
                                 >
                                   <CalendarDays className="w-5" />
                                   <span className="ml-3">
@@ -196,6 +209,7 @@ export default function LeaseForm({
                                 <Button
                                   variant="outline"
                                   className="w-full justify-start font-normal"
+                                  disabled={disable}
                                 >
                                   <CalendarDays className="w-5" />
                                   <span className="ml-3">
@@ -245,6 +259,7 @@ export default function LeaseForm({
                               onChange={(e) =>
                                 field.onChange(parseInt(e.target.value))
                               }
+                              disabled={disable}
                             />
                           </FormControl>
                           <FormMessage />
@@ -265,6 +280,7 @@ export default function LeaseForm({
                               onChange={(e) =>
                                 field.onChange(parseInt(e.target.value))
                               }
+                              disabled={disable}
                             />
                           </FormControl>
                           <FormMessage />
@@ -281,6 +297,7 @@ export default function LeaseForm({
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            disabled={disable}
                           />
                         </FormControl>
                         <FormLabel>Set Active</FormLabel>
@@ -289,17 +306,15 @@ export default function LeaseForm({
                     )}
                   />
                 </div>
-                <CardFooter>
-                  <div className="flex justify-end w-full">
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      loading={isLoading}
-                    >
-                      {isLoading ? "Creating Lease..." : "Create Lease"}
-                    </Button>
-                  </div>
-                </CardFooter>
+                {!lease && (
+                  <CardFooter>
+                    <div className="flex justify-end w-full">
+                      <Button className="w-full" loading={isLoading}>
+                        Create Lease
+                      </Button>
+                    </div>
+                  </CardFooter>
+                )}
               </form>
             </Form>
           </CardContent>
