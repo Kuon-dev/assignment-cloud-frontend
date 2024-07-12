@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { FilterOption } from "./users-data-table-toolbar";
 import { UsersDataTable } from "./users-data-table";
-import { useNavigate , Link } from "@remix-run/react";
+import { useNavigate, Link } from "@remix-run/react";
 import { useAdminStore } from "@/stores/admin-store";
 import { Button } from "@/components/custom/button";
 
@@ -61,6 +61,7 @@ export default function OwnersComponent({
   ]);
 
   const navigateToFinancialReconciliation = (user: User) => {
+    setUserData(user);
     navigate(`/financial/${user.owner.id}`);
   };
 

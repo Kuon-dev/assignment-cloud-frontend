@@ -1,34 +1,23 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
-import * as React from "react";
-import { FilterOption } from "@/components/users/users-data-table-toolbar";
 import { ClientOnly } from "remix-utils/client-only";
 import FinancialReconciliationComponent from "@/components/users/financial-reconciliation";
+import { useAdminStore } from "@/stores/admin-store";
 
-export const loader: LoaderFunction = async ({ request, params }) => {
-  const url = new URL(request.url);
-  const pageNumber = url.searchParams.get("page") || "1";
-  const pageSize = url.searchParams.get("size") || "10";
-  const ownerId = params.id;
-
-  if (!ownerId) {
-    throw new Error("Owner ID is not available.");
-  }
-
+// Define the loader function
+export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
 
-  const usersData = {
-    payments: [],
-    totalPages: 0,
-    currentPage: parseInt(pageNumber),
+  const leaseData = {
+    leases: [],
     authToken: authToken,
   };
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/OwnerPayments/${ownerId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/Lease/activeWithTenantNames`,
       {
         method: "GET",
         headers: {
@@ -38,52 +27,35 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         },
       },
     );
-    console.log(response);
+
     if (response.ok) {
       const data = await response.json();
-      usersData.payments = data.items;
-      usersData.currentPage = data.pageNumber;
-      usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
+      leaseData.leases = data;
     }
   } catch (error) {
     console.error(error);
     throw new Error("Failed to fetch data");
   }
 
-  return json(usersData);
+  return json(leaseData);
 };
 
+// Update the Users component
 export default function Users() {
   const data = useLoaderData<typeof loader>();
-  const { payments, currentPage, totalPages, authToken } = data;
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
-  const pageSize = parseInt(searchParams.get("size") || "10", 10);
-  const [filters, setFilters] = React.useState<FilterOption[]>([]);
-
-  const handlePageChange = (newPageIndex: number) => {
-    setSearchParams({
-      page: (newPageIndex + 1).toString(),
-      size: pageSize.toString(),
-    });
-  };
-
-  const handleSizeChange = (newPageSize: number) => {
-    setSearchParams({ size: newPageSize.toString(), page: "1" });
-  };
-
-  React.useEffect(() => {
-    setSearchParams({
-      page: (pageIndex + 1).toString(),
-      size: pageSize.toString(),
-    });
-  }, [pageIndex, pageSize]);
+  const [userData, setUserData] = useAdminStore((state) => [
+    state.userData,
+    state.setUserData,
+  ]);
 
   return (
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
-          <FinancialReconciliationComponent data={payments} />
+          <FinancialReconciliationComponent
+            data={data}
+            owner={userData.owner}
+          />
         </section>
       )}
     </ClientOnly>

@@ -93,11 +93,13 @@ export function UsersDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <UsersDataTableToolbar
-        table={table}
-        searchTerm={searchTerm}
-        filters={filters}
-      />
+      {searchTerm !== "address" && (
+        <UsersDataTableToolbar
+          table={table}
+          searchTerm={searchTerm}
+          filters={filters}
+        />
+      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>

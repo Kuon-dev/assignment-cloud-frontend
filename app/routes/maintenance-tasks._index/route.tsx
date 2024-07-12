@@ -3,8 +3,9 @@ import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
 import { FilterOption } from "@/components/users/users-data-table-toolbar";
-import UserManagementComponent from "@/components/users/user-management";
 import { ClientOnly } from "remix-utils/client-only";
+import AdminMaintenanceComponent from "@/components/maintenance/admin-requests";
+import { toast } from "sonner";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -14,8 +15,8 @@ export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
 
-  const usersData = {
-    users: [],
+  const maintenanceData = {
+    maintenances: [],
     totalPages: 0,
     currentPage: parseInt(pageNumber),
     authToken: authToken,
@@ -23,7 +24,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/Admin/users?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/Admin/maintenance-requests?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -36,21 +37,21 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     if (response.ok) {
       const data = await response.json();
-      usersData.users = data.items;
-      usersData.currentPage = data.pageNumber;
-      usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
+      maintenanceData.maintenances = data.items;
+      maintenanceData.currentPage = data.pageNumber;
+      maintenanceData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
     console.error(error);
     throw new Error("Failed to fetch data");
   }
 
-  return json(usersData);
+  return json(maintenanceData);
 };
 
-export default function Users() {
+export default function Miantenance() {
   const data = useLoaderData<typeof loader>();
-  const { users, currentPage, totalPages, authToken } = data;
+  const { maintenances, currentPage, totalPages, authToken } = data;
   const [searchParams, setSearchParams] = useSearchParams();
   const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
   const pageSize = parseInt(searchParams.get("size") || "10", 10);
@@ -67,26 +68,26 @@ export default function Users() {
     setSearchParams({ size: newPageSize.toString(), page: "1" });
   };
 
-  const handleDelete = async (userId: string) => {
+  const handleDelete = async (maintenanceId: string) => {
     try {
       const response = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/Admin/users/${userId}`,
+        `${window.ENV?.BACKEND_URL}/api/Admin/maintenance-requests/${maintenanceId}`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/json",
             Authorization: `Bearer ${data.authToken}`,
           },
         },
       );
       if (!response.ok) {
-        throw new Error("Failed to delete user");
+        throw new Error("Failed to delete maintenance");
       }
+      toast.success("Maintenance request and task is deleted successfully.");
 
       setSearchParams(searchParams);
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting maintenance:", error);
     }
   };
 
@@ -101,9 +102,9 @@ export default function Users() {
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
-          <UserManagementComponent
-            searchTerm="email"
-            data={data}
+          <AdminMaintenanceComponent
+            searchTerm="address"
+            data={maintenances}
             filters={filters}
             pageIndex={pageIndex}
             pageSize={pageSize}

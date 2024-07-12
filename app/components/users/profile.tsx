@@ -44,7 +44,7 @@ export default function ProfileComponent() {
       setPreview(userData.user.profilePictureUrl);
     }
   }, []);
-  console.log(userData);
+
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {

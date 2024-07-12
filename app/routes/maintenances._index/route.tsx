@@ -11,10 +11,6 @@ import { columns } from "./table-schema";
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
-  const userSession = await cookieConsent.parse(cookieHeader);
-  if (!userSession || !userSession.token) {
-    // return redirect("/login");
-  }
 
   const maintenanceData: MaintenanceLoaderData = {
     maintenances: [],
