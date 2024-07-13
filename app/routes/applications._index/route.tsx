@@ -115,22 +115,21 @@ function TenantComponent() {
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Applications</h1>
-      <TableFilter<Application>
-        data={applications}
-        filterFunction={filterFunction}
-        onFilter={setFilteredApplications}
-        filterOptions={[
-          { value: "all", label: "All" },
-          { value: "pending", label: "Pending" },
-          { value: "approved", label: "Approved" },
-          { value: "rejected", label: "Rejected" },
-        ]}
-      />
-
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
+              <TableFilter<Application>
+                data={applications}
+                filterFunction={filterFunction}
+                onFilter={setFilteredApplications}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "pending", label: "Pending" },
+                  { value: "approved", label: "Approved" },
+                  { value: "rejected", label: "Rejected" },
+                ]}
+              />
               <DataTable columns={tenantColumns} data={filteredApplications} />
 
               <div className="mt-4 flex justify-between">
@@ -158,22 +157,21 @@ function OwnerComponent() {
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Applications</h1>
-      <TableFilter<Application>
-        data={applications}
-        filterFunction={filterFunction}
-        onFilter={setFilteredApplications}
-        filterOptions={[
-          { value: "all", label: "All" },
-          { value: "pending", label: "Pending" },
-          { value: "approved", label: "Approved" },
-          { value: "rejected", label: "Rejected" },
-        ]}
-      />
-
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
+              <TableFilter<Application>
+                data={applications}
+                filterFunction={filterFunction}
+                onFilter={setFilteredApplications}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "pending", label: "Pending" },
+                  { value: "approved", label: "Approved" },
+                  { value: "rejected", label: "Rejected" },
+                ]}
+              />
               <DataTable columns={ownerColumns} data={filteredApplications} />
 
               <div className="mt-4 flex justify-between">

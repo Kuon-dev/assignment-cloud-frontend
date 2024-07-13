@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { FilterOption } from "./users-data-table-toolbar";
-import { UsersDataTable } from "./users-data-table";
-import { useNavigate , Link } from "@remix-run/react";
+import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
+import { AdminCustomTable } from "@/components/custom/admin-custom-table";
+import { useNavigate, Link } from "@remix-run/react";
 import { useAdminStore } from "@/stores/admin-store";
 import { Button } from "@/components/custom/button";
 
@@ -60,8 +60,10 @@ export default function OwnersComponent({
     state.setUserData,
   ]);
 
-  const navigateToFinancialReconciliation = (user: User) => {
-    navigate(`/financial/${user.owner.id}`);
+  const navigateToFinancialReconciliation = (owner: User) => {
+    const payoutPeriodId = userData.payoutPeriodId;
+    setUserData({ payoutPeriodId: payoutPeriodId, ownerId: owner.owner.id });
+    navigate(`/payout/financial-reconciliation`);
   };
 
   return (
@@ -69,10 +71,10 @@ export default function OwnersComponent({
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold">Owners</h1>
       </div>
-      <UsersDataTable
+      <AdminCustomTable
         searchTerm={searchTerm}
         columns={columns()}
-        data={data.users}
+        data={data}
         filters={filters}
         pageIndex={pageIndex}
         pageSize={pageSize}

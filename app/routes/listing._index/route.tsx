@@ -130,21 +130,20 @@ function OwnerComponent() {
   return (
     <>
       <h1 className="text-2xl font-semibold mb-4">Listing</h1>
-      <TableFilter<Listing>
-        data={listings}
-        filterFunction={filterFunction}
-        onFilter={setFilteredListings}
-        filterOptions={[
-          { value: "all", label: "All" },
-          { value: "active", label: "Active" },
-          { value: "inactive", label: "Inactive" },
-        ]}
-      />
-
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
+              <TableFilter<Listing>
+                data={listings}
+                filterFunction={filterFunction}
+                onFilter={setFilteredListings}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ]}
+              />
               <DataTable columns={columns} data={filteredListings} />
 
               <div className="mt-4 flex justify-between"></div>

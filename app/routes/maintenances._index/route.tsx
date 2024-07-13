@@ -13,10 +13,6 @@ import { TableFilter } from "@/components/custom/data-table-filter";
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
-  const userSession = await cookieConsent.parse(cookieHeader);
-  if (!userSession || !userSession.token) {
-    // return redirect("/login");
-  }
 
   const maintenanceData: MaintenanceLoaderData = {
     maintenances: [],
@@ -76,22 +72,22 @@ export default function Maintenances() {
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Maintenance Requests</h1>
-      <TableFilter<Maintenance>
-        data={maintenances}
-        filterFunction={filterFunction}
-        onFilter={setFilteredMaintenances}
-        filterOptions={[
-          { value: "all", label: "All" },
-          { value: "pending", label: "Pending" },
-          { value: "inProgress", label: "In Progress" },
-          { value: "completed", label: "Completed" },
-          { value: "cancelled", label: "Cancelled" },
-        ]}
-      />
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
+              <TableFilter<Maintenance>
+                data={maintenances}
+                filterFunction={filterFunction}
+                onFilter={setFilteredMaintenances}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "pending", label: "Pending" },
+                  { value: "inProgress", label: "In Progress" },
+                  { value: "completed", label: "Completed" },
+                  { value: "cancelled", label: "Cancelled" },
+                ]}
+              />
               <DataTable columns={columns} data={filteredMaintenances} />
             </>
           )}

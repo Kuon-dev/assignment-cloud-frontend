@@ -77,20 +77,20 @@ export default function Leases() {
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Leases</h1>
-      <TableFilter<Lease>
-        data={leases}
-        filterFunction={filterFunction}
-        onFilter={setFilteredLeases}
-        filterOptions={[
-          { value: "all", label: "All" },
-          { value: "active", label: "Active" },
-          { value: "inactive", label: "Inactive" },
-        ]}
-      />
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
+              <TableFilter<Lease>
+                data={leases}
+                filterFunction={filterFunction}
+                onFilter={setFilteredLeases}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ]}
+              />
               <DataTable columns={columns} data={filteredLeases} />
 
               <div className="mt-4 flex justify-between">

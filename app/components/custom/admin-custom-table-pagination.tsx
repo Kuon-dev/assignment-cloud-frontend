@@ -24,7 +24,7 @@ interface DataTablePaginationProps<TData> {
   setPageSize: (pageSize: number) => void;
 }
 
-export function UsersDataTablePagination<TData>({
+export function AdminCustomTablePagination<TData>({
   table,
   pageIndex,
   pageSize,

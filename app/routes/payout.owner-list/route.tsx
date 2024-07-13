@@ -1,26 +1,22 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
-import { FilterOption } from "@/components/users/users-data-table-toolbar";
+import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
+import OwnersComponent from "@/components/payout/owner-list";
 import { ClientOnly } from "remix-utils/client-only";
-import FinancialReconciliationComponent from "@/components/users/financial-reconciliation";
+import { Button } from "@/components/ui/button";
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const pageNumber = url.searchParams.get("page") || "1";
   const pageSize = url.searchParams.get("size") || "10";
-  const ownerId = params.id;
-
-  if (!ownerId) {
-    throw new Error("Owner ID is not available.");
-  }
 
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
 
   const usersData = {
-    payments: [],
+    users: [],
     totalPages: 0,
     currentPage: parseInt(pageNumber),
     authToken: authToken,
@@ -28,7 +24,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/OwnerPayments/${ownerId}?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      `${process.env.BACKEND_URL}/api/Admin/owners?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -38,10 +34,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         },
       },
     );
-    console.log(response);
+
     if (response.ok) {
       const data = await response.json();
-      usersData.payments = data.items;
+      usersData.users = data.items;
       usersData.currentPage = data.pageNumber;
       usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
@@ -55,12 +51,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 export default function Users() {
   const data = useLoaderData<typeof loader>();
-  const { payments, currentPage, totalPages, authToken } = data;
+  const { users, currentPage, totalPages, authToken } = data;
   const [searchParams, setSearchParams] = useSearchParams();
   const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
   const pageSize = parseInt(searchParams.get("size") || "10", 10);
   const [filters, setFilters] = React.useState<FilterOption[]>([]);
-
+  const navigate = useNavigate();
   const handlePageChange = (newPageIndex: number) => {
     setSearchParams({
       page: (newPageIndex + 1).toString(),
@@ -77,13 +73,31 @@ export default function Users() {
       page: (pageIndex + 1).toString(),
       size: pageSize.toString(),
     });
-  }, [pageIndex, pageSize]);
+  }, [searchParams]);
 
   return (
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
-          <FinancialReconciliationComponent data={payments} />
+          <div className="flex items-center mb-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/payout")}
+            >
+              <span className="mr-2">&lt;</span> Back
+            </Button>
+          </div>
+          <OwnersComponent
+            searchTerm="email"
+            data={users}
+            filters={filters}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            setPageSize={handleSizeChange}
+            totalPages={totalPages}
+            setPageIndex={handlePageChange}
+          />
         </section>
       )}
     </ClientOnly>

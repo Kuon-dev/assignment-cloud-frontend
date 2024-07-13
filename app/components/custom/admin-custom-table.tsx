@@ -13,7 +13,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-// import type {  DataTableFacetedFilterProps } from '@tanstack/react-table'
 
 import {
   Table,
@@ -24,11 +23,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { UsersDataTablePagination } from "./users-data-table-pagination";
+import { AdminCustomTablePagination } from "./admin-custom-table-pagination";
 import {
-  UsersDataTableToolbar,
+  AdminCustomTableToolbar,
   FilterOption,
-} from "./users-data-table-toolbar";
+} from "./admin-custom-table-toolbar";
 
 interface DataTableProps<TData, TValue> {
   searchTerm: string;
@@ -43,7 +42,7 @@ interface DataTableProps<TData, TValue> {
   setPageSize: (pageSize: number) => void;
 }
 
-export function UsersDataTable<TData, TValue>({
+export function AdminCustomTable<TData, TValue>({
   columns,
   data,
   searchTerm,
@@ -87,13 +86,13 @@ export function UsersDataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    manualPagination: true, // Enable manual pagination
+    manualPagination: true,
     pageCount: totalPages,
   });
 
   return (
     <div className="space-y-4">
-      <UsersDataTableToolbar
+      <AdminCustomTableToolbar
         table={table}
         searchTerm={searchTerm}
         filters={filters}
@@ -150,7 +149,7 @@ export function UsersDataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <UsersDataTablePagination
+      <AdminCustomTablePagination
         table={table}
         pageIndex={pageIndex}
         pageSize={pageSize}

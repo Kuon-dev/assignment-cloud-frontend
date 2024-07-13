@@ -2,9 +2,8 @@ import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import * as React from "react";
-import { FilterOption } from "@/components/users/users-data-table-toolbar";
+import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
 import UserManagementComponent from "@/components/users/user-management";
-import { cookieConsent } from "@/utils/cookies.server";
 import { ClientOnly } from "remix-utils/client-only";
 
 export const loader: LoaderFunction = async ({ request }) => {
