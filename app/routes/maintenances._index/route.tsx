@@ -7,6 +7,8 @@ import { showErrorToast } from "@/lib/handle-error";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { DataTable } from "@/components/custom/data-table";
 import { columns } from "./table-schema";
+import { useState } from "react";
+import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -45,6 +47,28 @@ export default function Maintenances() {
   const data = useLoaderData<typeof loader>();
   const { maintenances } = data;
 
+  const [filteredMaintenances, setFilteredMaintenances] =
+    useState(maintenances);
+  const filterFunction = (
+    maintenance: Maintenance,
+    filter: string,
+  ): boolean => {
+    switch (filter) {
+      case "all":
+        return true;
+      case "pending":
+        return parseInt(maintenance.status) === 0;
+      case "inProgress":
+        return parseInt(maintenance.status) === 1;
+      case "completed":
+        return parseInt(maintenance.status) === 2;
+      case "cancelled":
+        return parseInt(maintenance.status) === 3;
+      default:
+        return false;
+    }
+  };
+
   return (
     <section className="w-full mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Maintenance Requests</h1>
@@ -52,7 +76,19 @@ export default function Maintenances() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={columns} data={maintenances} />
+              <TableFilter<Maintenance>
+                data={maintenances}
+                filterFunction={filterFunction}
+                onFilter={setFilteredMaintenances}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "pending", label: "Pending" },
+                  { value: "inProgress", label: "In Progress" },
+                  { value: "completed", label: "Completed" },
+                  { value: "cancelled", label: "Cancelled" },
+                ]}
+              />
+              <DataTable columns={columns} data={filteredMaintenances} />
             </>
           )}
         </ClientOnly>

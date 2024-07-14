@@ -1,7 +1,7 @@
 import React, { ChangeEvent, DragEvent } from "react";
 import { X, Upload } from "lucide-react";
 
-interface ImageFile extends File {
+export interface ImageFile extends File {
   preview: string;
 }
 

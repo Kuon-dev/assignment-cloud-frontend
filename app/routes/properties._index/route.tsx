@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import PropertyForm from "@/components/property/form/property-form";
 import { Plus } from "lucide-react";
+import { useState } from "react";
+import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -57,6 +59,20 @@ export default function Properties() {
   const data = useLoaderData<typeof loader>();
   const { properties } = data;
 
+  const [filteredProperties, setFilteredProperties] = useState(properties);
+  const filterFunction = (property: Property, filter: string): boolean => {
+    switch (filter) {
+      case "all":
+        return true;
+      case "available":
+        return property.isAvailable;
+      case "unavailable":
+        return !property.isAvailable;
+      default:
+        return false;
+    }
+  };
+
   return (
     <>
       <h1 className="text-2xl font-semibold mb-4">Properties</h1>
@@ -65,7 +81,18 @@ export default function Properties() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <div className="flex justify-end">
+              <div className="flex justify-between">
+                <TableFilter<Property>
+                  data={properties}
+                  filterFunction={filterFunction}
+                  onFilter={setFilteredProperties}
+                  filterOptions={[
+                    { value: "all", label: "All" },
+                    { value: "available", label: "Available" },
+                    { value: "unavailable", label: "Unavailable" },
+                  ]}
+                />
+
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="link">
@@ -81,7 +108,7 @@ export default function Properties() {
                 </Dialog>
               </div>
 
-              <DataTable columns={columns} data={properties} />
+              <DataTable columns={columns} data={filteredProperties} />
             </>
           )}
         </ClientOnly>

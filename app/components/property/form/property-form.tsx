@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-//import { ClientOnly } from "remix-utils/client-only";
+
 import { z } from "zod";
 import {
   CardHeader,
@@ -9,7 +9,6 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-  Card,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-//import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -31,10 +29,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
-import { Switch } from "@radix-ui/react-switch";
-import { Badge, X } from "lucide-react";
+import ImageUpload, { ImageFile } from "@/components/custom/image-upload";
+import { Switch } from "@/components/ui/switch";
+import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import React, { useState } from "react";
-import { Spinner } from "@/components/custom/spinner";
 import SearchAddress from "@/components/custom/search-address.client";
 
 interface PropertyFormProps {
@@ -98,6 +97,10 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
   const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [images, setImages] = useState<ImageFile[]>(
+    property?.imageUrls?.map((url) => ({ preview: url }) as ImageFile) || [],
+  );
+
   const [amenitiesInput, setAmenitiesInput] = React.useState("");
   const form = useForm<z.infer<typeof PropertyFormSchema>>({
     resolver: zodResolver(PropertyFormSchema),
@@ -107,7 +110,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
       state: property?.state || "",
       zipCode: property?.zipCode || "",
       propertyType: property?.propertyType || PropertyType.Apartment,
-      roomType: property?.roomType,
+      roomType: property?.roomType || RoomType.MasterBedroom,
       bedrooms: property?.bedrooms || 1,
       bathrooms: property?.bathrooms || 1,
       rentAmount: property?.rentAmount || 0,
@@ -117,6 +120,14 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
     },
   });
 
+  async function blobUrlToFile(
+    blobUrl: string,
+    fileName: string,
+  ): Promise<File> {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: blob.type });
+  }
   const handleAmenitiesInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -150,6 +161,35 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
     try {
       setIsLoading(true);
 
+      const formData = new FormData();
+      for (const image of images) {
+        if (image.preview.startsWith("blob:")) {
+          const file = await blobUrlToFile(image.preview, image.name);
+          formData.append("images", file);
+        } else {
+          formData.append("images", image);
+        }
+      }
+
+      const imageUpload = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/Property/upload-images`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: formData,
+        },
+      );
+
+      if (!imageUpload.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const uploadedImageUrls: string[] = [];
+      const imageUploadData = await imageUpload.json();
+      uploadedImageUrls.push(imageUploadData.url);
+
       const url = property
         ? `${window.ENV?.BACKEND_URL}/api/Property/${property.id}`
         : `${window.ENV?.BACKEND_URL}/api/Property`;
@@ -162,6 +202,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
         },
         body: JSON.stringify({
           ...data,
+          imageUrls: uploadedImageUrls,
           ownerId,
         }),
         credentials: "include",
@@ -177,10 +218,10 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
             : "Property created successfully!",
         );
       }
+
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
         toast.error(error.message);
       }
       setIsLoading(false);
@@ -188,7 +229,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
   }
 
   return (
-    <Card className="max-w-4xl mx-auto p-6 sm:p-8 md:p-10">
+    <div className="max-w-4xl max-h-[80vh] mx-auto overflow-y-scroll">
       <CardHeader>
         <CardTitle className="text-3xl font-bold">
           Create a New Property
@@ -200,7 +241,14 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
+              <FormItem>
+                <FormLabel>Image</FormLabel>
+                <FormControl>
+                  <ImageUpload images={images} setImages={setImages} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
@@ -382,7 +430,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
                             {field.value?.map((amenity, index) => (
                               <Badge
                                 key={index}
-                                className="flex items-center gap-1"
+                                className="flex items-center gap-1 h-7"
                               >
                                 {amenity}
                                 <X
@@ -396,25 +444,6 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
                         </div>
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="isAvailable"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Is Available
-                        </FormLabel>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
                     </FormItem>
                   )}
                 />
@@ -447,17 +476,31 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="isAvailable"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <FormLabel>Is Available</FormLabel>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              <span>Create Property</span>
-              <Spinner />
+              Create Property
             </Button>
           </CardFooter>
         </form>
       </Form>
-    </Card>
+    </div>
   );
 }
