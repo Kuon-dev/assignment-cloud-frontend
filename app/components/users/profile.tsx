@@ -29,31 +29,23 @@ const profileFormSchema = z.object({
 export default function ProfileComponent() {
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
-  const [userData, setUserData] = useAdminStore((state) => [
-    state.userData,
-    state.setUserData,
-  ]);
-
+  const [userData] = useAdminStore((state) => [state.userData]);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(
-    userData?.profilePictureUrl || null,
+    userData.profilePictureUrl || null,
   );
-
-  useEffect(() => {
-    if (userData.user.profilePictureUrl) {
-      setPreview(userData.user.profilePictureUrl);
-    }
-  }, []);
 
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      firstName: userData.user.firstName || "",
-      lastName: userData.user.lastName || "",
-      phoneNumber: userData.user.phoneNumber || "",
+      firstName: userData.firstName || "",
+      lastName: userData.lastName || "",
+      phoneNumber: userData.phoneNumber || "",
       profilePicture: null,
     },
   });
+
+  useEffect(() => {}, [userData]);
 
   const uploadProfilePicture = async (file: File): Promise<string | null> => {
     const formData = new FormData();
@@ -219,11 +211,11 @@ export default function ProfileComponent() {
               <FormControl>
                 <Input
                   value={
-                    userData?.user?.role === 0
+                    userData?.role === 0
                       ? "Tenant"
-                      : userData?.user?.role === 1
+                      : userData?.role === 1
                         ? "Owner"
-                        : userData?.user?.role === 2
+                        : userData?.role === 2
                           ? "Admin"
                           : "undefined"
                   }

@@ -7,23 +7,23 @@ import PayoutPeriodsComponent from "@/components/payout/payout-periods";
 import { ClientOnly } from "remix-utils/client-only";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  // const url = new URL(request.url);
-  // const pageNumber = url.searchParams.get("page") || "1";
-  // const pageSize = url.searchParams.get("size") || "10";
+  const url = new URL(request.url);
+  const pageNumber = url.searchParams.get("page") || "1";
+  const pageSize = url.searchParams.get("size") || "10";
 
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
 
   const payoutPeriodData = {
     periods: [],
-    // totalPages: 0,
-    // currentPage: parseInt(pageNumber),
+    totalPages: 0,
+    currentPage: parseInt(pageNumber),
     authToken: authToken,
   };
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/Payout/periods`,
+      `${process.env.BACKEND_URL}/api/Payout/periods?pageNumber=${pageNumber}&pageSize=${pageSize}`,
       {
         method: "GET",
         headers: {
@@ -37,8 +37,8 @@ export const loader: LoaderFunction = async ({ request }) => {
     if (response.ok) {
       const data = await response.json();
       payoutPeriodData.periods = data;
-      // payoutPeriodData.currentPage = data.pageNumber;
-      // payoutPeriodData.totalPages = Math.ceil(data.totalCount / data.pageSize);
+      payoutPeriodData.currentPage = data.pageNumber;
+      payoutPeriodData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
     console.error(error);
@@ -51,40 +51,41 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function PayoutPeriods() {
   const data = useLoaderData<typeof loader>();
   const { periods, currentPage, totalPages, authToken } = data;
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
-  // const pageSize = parseInt(searchParams.get("size") || "10", 10);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pageIndex = parseInt(searchParams.get("page") || "1", 10) - 1;
+  const pageSize = parseInt(searchParams.get("size") || "10", 10);
   const [filters, setFilters] = React.useState<FilterOption[]>([]);
 
   const handlePageChange = (newPageIndex: number) => {
-    //   setSearchParams({
-    //     page: (newPageIndex + 1).toString(),
-    //     size: pageSize.toString(),
-    //   });
+    setSearchParams({
+      page: (newPageIndex + 1).toString(),
+      size: pageSize.toString(),
+    });
   };
 
   const handleSizeChange = (newPageSize: number) => {
-    // setSearchParams({ size: newPageSize.toString(), page: "1" });
+    setSearchParams({ size: newPageSize.toString(), page: "1" });
   };
 
-  // React.useEffect(() => {
-  //   setSearchParams({
-  //     page: (pageIndex + 1).toString(),
-  //     size: pageSize.toString(),
-  //   });
-  // }, [searchParams]);
+  React.useEffect(() => {
+    setSearchParams({
+      page: (pageIndex + 1).toString(),
+      size: pageSize.toString(),
+    });
+  }, [searchParams]);
 
   return (
     <ClientOnly>
       {() => (
         <section className="w-full mx-auto">
           <PayoutPeriodsComponent
+            searchTerm={"status"}
             data={periods}
             filters={filters}
-            pageIndex={1}
-            pageSize={10}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
             setPageSize={handleSizeChange}
-            totalPages={1}
+            totalPages={totalPages}
             setPageIndex={handlePageChange}
           />
         </section>

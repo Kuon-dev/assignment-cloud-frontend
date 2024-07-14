@@ -41,12 +41,11 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json(leaseData);
 };
 
-// Update the Users component
-export default function Users() {
+export default function PayoutTenantLeases() {
   const data = useLoaderData<typeof loader>();
-  const [userData, setUserData] = useAdminStore((state) => [
-    state.userData,
-    state.setUserData,
+  const [payoutData, setPayoutData] = useAdminStore((state) => [
+    state.payoutData,
+    state.setPayoutData,
   ]);
   const navigate = useNavigate();
 
@@ -63,7 +62,10 @@ export default function Users() {
               <span className="mr-2">&lt;</span> Back
             </Button>
           </div>
-          <FinancialReconciliationComponent data={data} payoutData={userData} />
+          <FinancialReconciliationComponent
+            data={data}
+            payoutData={payoutData}
+          />
         </section>
       )}
     </ClientOnly>

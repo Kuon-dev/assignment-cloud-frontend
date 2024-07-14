@@ -4,6 +4,13 @@ import { AdminCustomTable } from "@/components/custom/admin-custom-table";
 import { useNavigate, Link } from "@remix-run/react";
 import { useAdminStore } from "@/stores/admin-store";
 import { Button } from "@/components/custom/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
 interface User {
   id: string;
@@ -18,7 +25,9 @@ interface User {
   tenant: { id: string };
 }
 
-const columns = (): ColumnDef<User>[] => [
+const columns = (
+  navigateToFinancialReconciliation: (ownerData: User) => void,
+): ColumnDef<User>[] => [
   {
     accessorKey: "firstName",
     header: "First Name",
@@ -30,6 +39,28 @@ const columns = (): ColumnDef<User>[] => [
   {
     accessorKey: "email",
     header: "Email",
+  },
+  {
+    header: "Actions",
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+          >
+            <DotsHorizontalIcon className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => navigateToFinancialReconciliation(row.original)}
+          >
+            Create Owner Payout
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
   },
 ];
 
@@ -55,14 +86,14 @@ export default function OwnersComponent({
   setPageIndex,
 }: OwnersProps) {
   const navigate = useNavigate();
-  const [userData, setUserData] = useAdminStore((state) => [
-    state.userData,
-    state.setUserData,
+  const [payoutData, setPayoutData] = useAdminStore((state) => [
+    state.payoutData,
+    state.setPayoutData,
   ]);
 
   const navigateToFinancialReconciliation = (owner: User) => {
-    const payoutPeriodId = userData.payoutPeriodId;
-    setUserData({ payoutPeriodId: payoutPeriodId, ownerId: owner.owner.id });
+    const payoutPeriodId = payoutData.payoutPeriodId;
+    setPayoutData({ payoutPeriodId: payoutPeriodId, ownerId: owner.owner.id });
     navigate(`/payout/financial-reconciliation`);
   };
 
@@ -73,7 +104,7 @@ export default function OwnersComponent({
       </div>
       <AdminCustomTable
         searchTerm={searchTerm}
-        columns={columns()}
+        columns={columns(navigateToFinancialReconciliation)}
         data={data}
         filters={filters}
         pageIndex={pageIndex}

@@ -64,14 +64,12 @@ const columns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px] font-semibold">
-            <DropdownMenuItem asChild>
-              <button
-                onClick={() => {
-                  navigateToEdit(row.original);
-                }}
-              >
-                Edit User
-              </button>
+            <DropdownMenuItem
+              onClick={() => {
+                navigateToEdit(row.original);
+              }}
+            >
+              Edit User
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-red-500"
@@ -111,12 +109,12 @@ export default function UserManagementComponent({
 }: UserManagementProps) {
   const navigate = useNavigate();
 
-  const [userData, setUserData] = useAdminStore((state) => [
-    state.userData,
-    state.setUserData,
+  const [editingData, setEditingData] = useAdminStore((state) => [
+    state.editingData,
+    state.setEditingData,
   ]);
   const navigateToEdit = (user: User) => {
-    setUserData(user);
+    setEditingData(user);
     navigate(`/users/edit`);
   };
 

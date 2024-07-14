@@ -6,12 +6,17 @@ import { useNavigate } from "@remix-run/react";
 
 export default function UserIndex() {
   const navigate = useNavigate();
+
   return (
     <ClientOnly>
       {() => (
         <div className="container mx-auto p-4 flex-grow">
           <div className="flex items-center mb-6">
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/dashboard")}
+            >
               <span className="mr-2">&lt;</span> Back
             </Button>
           </div>

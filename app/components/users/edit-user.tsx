@@ -30,17 +30,17 @@ const profileFormSchema = z.object({
 export default function EditUserComponent() {
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
-  const [userData, setUserData] = useAdminStore((state) => [
-    state.userData,
-    state.setUserData,
+  const [editingData, setEditingData] = useAdminStore((state) => [
+    state.editingData,
+    state.setEditingData,
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const defaultValues = {
-    firstName: userData?.firstName || "",
-    lastName: userData?.lastName || "",
-    email: userData?.email || "",
-    role: userData?.role !== undefined ? userData.role.toString() : "",
+    firstName: editingData?.firstName || "",
+    lastName: editingData?.lastName || "",
+    email: editingData?.email || "",
+    role: editingData?.role !== undefined ? editingData.role.toString() : "",
   };
 
   const form = useForm<z.infer<typeof profileFormSchema>>({
@@ -54,12 +54,12 @@ export default function EditUserComponent() {
       const formData = {
         ...data,
         role: data.role,
-        user: userData.id,
+        user: editingData.id,
         updatedAt: new Date().toISOString(),
       };
 
       const response = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/Admin/users/${userData.id}`,
+        `${window.ENV?.BACKEND_URL}/api/Admin/users/${editingData.id}`,
         {
           method: "PUT",
           headers: {
