@@ -52,23 +52,27 @@ const columns = (
   {
     accessorKey: "maintenanceRequest.description",
     header: "Description",
-    cell: ({ cell }) => (
-      <DescriptionCell description={cell.getValue() as string} />
+    cell: ({ row }) => (
+      <DescriptionCell
+        description={row.original.maintenanceRequest.description}
+      />
     ),
   },
   {
     accessorKey: "maintenanceRequest.status",
     header: "Status",
-    cell: ({ cell }) => {
-      const { text, className } = getStatusTextAndClass(cell.getValue());
+    cell: ({ row }) => {
+      const { text, className } = getStatusTextAndClass(
+        row.original.maintenanceRequest.status,
+      );
       return <span className={className}>{text}</span>;
     },
   },
   {
     accessorKey: "maintenanceRequest.createdAt",
     header: "Created At",
-    cell: ({ cell }) =>
-      new Date(cell.getValue()).toLocaleDateString("en-US", {
+    cell: ({ row }) =>
+      new Date(row.original.createdAt).toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -85,35 +89,43 @@ const columns = (
   {
     accessorKey: "tasks.0.estimatedCost",
     header: "Estimated Cost",
-    cell: ({ cell }) => `$${cell.getValue()?.toFixed(2) || "N/A"}`,
+    cell: ({ row }) =>
+      `$${row.original.tasks[0].estimatedCost?.toFixed(2) || "N/A"}`,
   },
   {
     accessorKey: "tasks.0.actualCost",
     header: "Actual Cost",
-    cell: ({ cell }) => `$${cell.getValue()?.toFixed(2) || "N/A"}`,
+    cell: ({ row }) =>
+      `$${row.original.tasks[0].actualCost?.toFixed(2) || "N/A"}`,
   },
   {
     accessorKey: "tasks.0.startDate",
     header: "Start Date",
-    cell: ({ cell }) =>
-      cell.getValue()
-        ? new Date(cell.getValue()).toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
+    cell: ({ row }) =>
+      row.original.tasks[0].startDate
+        ? new Date(row.original.tasks[0].startDate).toLocaleDateString(
+            "en-US",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            },
+          )
         : "N/A",
   },
   {
     accessorKey: "tasks.0.completionDate",
     header: "Completion Date",
-    cell: ({ cell }) =>
-      cell.getValue()
-        ? new Date(cell.getValue()).toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
+    cell: ({ row }) =>
+      row.original.tasks[0].completionDate
+        ? new Date(row.original.tasks[0].completionDate).toLocaleDateString(
+            "en-US",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            },
+          )
         : "N/A",
   },
   {

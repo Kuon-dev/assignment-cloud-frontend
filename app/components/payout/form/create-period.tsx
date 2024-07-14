@@ -1,29 +1,32 @@
 import React, { HTMLAttributes, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { ClientOnly } from "remix-utils/client-only";
 
 import { Button } from "@/components/custom/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { useNavigate } from "@remix-run/react";
-import { Interface } from "readline";
+import { DatePicker } from "@/components/custom/date.picker.client";
 
-const NewPeriodSchema = z.object({
-  startDate: z.date({ required_error: "Start Date is required" }),
-  endDate: z.date({ required_error: "End Date is required" }),
-});
+const NewPeriodSchema = z
+  .object({
+    startDate: z.string({ required_error: "Start Date is required" }),
+    endDate: z.string({ required_error: "End Date is required" }),
+  })
+  .refine((data) => new Date(data.startDate) < new Date(data.endDate), {
+    message: "End date must be after start date",
+    path: ["endDate"],
+  });
 
 interface NewPeriodFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -44,8 +47,8 @@ export default function NewPeriodForm({
     try {
       setIsLoading(true);
       const formData = {
-        startDate: data.startDate?.toISOString(),
-        endDate: data.endDate?.toISOString(),
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: new Date(data.endDate).toISOString(),
       };
       const res = await fetch(`${window.ENV?.BACKEND_URL}/api/Payout/periods`, {
         method: "POST",
@@ -92,23 +95,19 @@ export default function NewPeriodForm({
                         <FormItem>
                           <FormLabel>Start Date</FormLabel>
                           <FormControl>
-                            <Input
-                              type="date"
-                              placeholder="Enter start date"
-                              {...field}
-                              value={
-                                field.value
-                                  ? new Date(field.value)
-                                      .toISOString()
-                                      .split("T")[0]
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                field.onChange(new Date(e.target.value))
-                              }
+                            <Controller
+                              name="startDate"
+                              control={form.control}
+                              render={({ field }) => (
+                                <DatePicker
+                                  name="startDate"
+                                  control={form.control}
+                                  error={form.formState.errors.startDate}
+                                  onChange={(date) => field.onChange(date)}
+                                />
+                              )}
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -119,30 +118,28 @@ export default function NewPeriodForm({
                         <FormItem>
                           <FormLabel>End Date</FormLabel>
                           <FormControl>
-                            <Input
-                              type="date"
-                              placeholder="Enter end date"
-                              {...field}
-                              value={
-                                field.value
-                                  ? new Date(field.value)
-                                      .toISOString()
-                                      .split("T")[0]
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                field.onChange(new Date(e.target.value))
-                              }
+                            <Controller
+                              name="endDate"
+                              control={form.control}
+                              render={({ field }) => (
+                                <DatePicker
+                                  name="endDate"
+                                  control={form.control}
+                                  error={form.formState.errors.endDate}
+                                  onChange={(date) => field.onChange(date)}
+                                />
+                              )}
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit">Create Period</Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Creating..." : "Create Period"}
+                  </Button>
                 </CardFooter>
               </Card>
             </form>

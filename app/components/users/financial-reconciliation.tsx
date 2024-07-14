@@ -23,7 +23,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { SaveIcon } from "lucide-react";
-import { useAdminStore } from "@/stores/admin-store";
 import { toast } from "sonner";
 
 interface Tenant {

@@ -11,7 +11,6 @@ import {
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
 import { ClientOnly } from "remix-utils/client-only";
-import { cookieConsent } from "@/utils/cookies.server";
 import { useAdminStore } from "@/stores/admin-store";
 
 // Loader function to verify user role
@@ -36,14 +35,13 @@ export const loader: LoaderFunction = async ({ request }) => {
     return redirect("/login");
   }
 
-  const user = await profileResponse.json();
-
-  return json({ user });
+  const result = await profileResponse.json();
+  return json({ result });
 };
 
 // Users layout component
 export default function UsersLayout() {
-  const { user, authToken } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
   const [userData, setUserData] = useAdminStore((state) => [
     state.userData,
@@ -51,16 +49,15 @@ export default function UsersLayout() {
   ]);
 
   useEffect(() => {
-    setUserData({ user });
-
-    if (user.role === 0) {
+    setUserData(data.result);
+    if (data.result.role === 0) {
       setSidebarLinks(tenantSidebarLinks);
-    } else if (user.role === 1) {
+    } else if (data.result.role === 1) {
       setSidebarLinks(ownerSidebarLinks);
-    } else if (user.role === 2) {
+    } else if (data.result.role === 2) {
       setSidebarLinks(adminSidebarLinks);
     }
-  }, [setUserData]);
+  }, [data]);
 
   const settingsLink: LinkProps = {
     to: "/settings/profile",

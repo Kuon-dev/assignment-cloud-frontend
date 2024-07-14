@@ -64,7 +64,7 @@ export default function DashboardSidebar({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    to={settingsLink.to}
+                    to="/user"
                     className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   >
                     {settingsLink.icon}
@@ -105,7 +105,7 @@ function DashboardSidebarFallback({
       </nav>
       <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
         <Link
-          to={settingsLink.to}
+          to="/user"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground md:h-8 md:w-8"
         >
           {settingsLink.icon}
