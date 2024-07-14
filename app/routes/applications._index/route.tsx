@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { showErrorToast } from "@/lib/handle-error";
 import { useDashboardStore } from "@/stores/dashboard-store";
+import { useState } from "react";
+import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -88,14 +90,27 @@ function LoadingComponent() {
   );
 }
 
+const filterFunction = (application: Application, filter: string): boolean => {
+  switch (filter) {
+    case "all":
+      return true;
+    case "pending":
+      return parseInt(application.status) === 0;
+    case "approved":
+      return parseInt(application.status) === 1;
+    case "rejected":
+      return parseInt(application.status) === 2;
+    default:
+      return false;
+  }
+};
+
 function TenantComponent() {
   const data = useLoaderData<typeof loader>();
-  const { applications, currentPage, totalPages } = data;
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { applications } = data;
 
-  const handleNavigation = (newPage: number) => {
-    setSearchParams({ pageNumber: newPage.toString() });
-  };
+  const [filteredApplications, setFilteredApplications] =
+    useState(applications);
 
   return (
     <section className="w-full mx-auto">
@@ -104,14 +119,25 @@ function TenantComponent() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={tenantColumns} data={applications} />
+              <TableFilter<Application>
+                data={applications}
+                filterFunction={filterFunction}
+                onFilter={setFilteredApplications}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "pending", label: "Pending" },
+                  { value: "approved", label: "Approved" },
+                  { value: "rejected", label: "Rejected" },
+                ]}
+              />
+              <DataTable columns={tenantColumns} data={filteredApplications} />
 
               <div className="mt-4 flex justify-between">
-                <PaginationComponent
+                {/* <PaginationComponent
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handleNavigation}
-                />
+                /> */}
               </div>
             </>
           )}
@@ -123,12 +149,10 @@ function TenantComponent() {
 
 function OwnerComponent() {
   const data = useLoaderData<typeof loader>();
-  const { applications, currentPage, totalPages } = data;
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { applications } = data;
 
-  const handleNavigation = (newPage: number) => {
-    setSearchParams({ pageNumber: newPage.toString() });
-  };
+  const [filteredApplications, setFilteredApplications] =
+    useState(applications);
 
   return (
     <section className="w-full mx-auto">
@@ -137,14 +161,25 @@ function OwnerComponent() {
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
             <>
-              <DataTable columns={ownerColumns} data={applications} />
+              <TableFilter<Application>
+                data={applications}
+                filterFunction={filterFunction}
+                onFilter={setFilteredApplications}
+                filterOptions={[
+                  { value: "all", label: "All" },
+                  { value: "pending", label: "Pending" },
+                  { value: "approved", label: "Approved" },
+                  { value: "rejected", label: "Rejected" },
+                ]}
+              />
+              <DataTable columns={ownerColumns} data={filteredApplications} />
 
               <div className="mt-4 flex justify-between">
-                <PaginationComponent
+                {/* <PaginationComponent
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handleNavigation}
-                />
+                /> */}
               </div>
             </>
           )}

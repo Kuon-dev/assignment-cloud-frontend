@@ -49,7 +49,7 @@ export const columns: TableColumn<Lease>[] = [
     accessor: (row) => `$${row.securityDeposit.toFixed(2)}`,
   },
   {
-    header: "Active",
+    header: "Status",
     accessor: (row) =>
       row.isActive ? (
         <span className="text-green-500 font-semibold">Active</span>
