@@ -14,6 +14,7 @@ import { useDashboardStore } from "@/stores/dashboard-store";
 export default function DashboardLayout() {
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
   const user = useDashboardStore((state) => state.user);
+  console.log(user);
 
   useEffect(() => {
     if (!user) return;

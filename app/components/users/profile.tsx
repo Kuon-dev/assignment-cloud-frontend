@@ -32,20 +32,25 @@ export default function ProfileComponent() {
   const [userData] = useAdminStore((state) => [state.userData]);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(
-    userData.profilePictureUrl || null,
+    userData?.profilePictureUrl || null,
   );
 
   const form = useForm({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      firstName: userData.firstName || "",
-      lastName: userData.lastName || "",
-      phoneNumber: userData.phoneNumber || "",
+      firstName: userData?.firstName || "",
+      lastName: userData?.lastName || "",
+      phoneNumber: userData?.phoneNumber || "",
       profilePicture: null,
     },
   });
 
-  useEffect(() => {}, [userData]);
+  useEffect(() => {
+    // set form values with user data loaded
+    form.setValue("firstName", userData?.firstName || "");
+    form.setValue("lastName", userData?.lastName || "");
+    form.setValue("phoneNumber", userData?.phoneNumber || "");
+  }, [userData, form]);
 
   const uploadProfilePicture = async (file: File): Promise<string | null> => {
     const formData = new FormData();

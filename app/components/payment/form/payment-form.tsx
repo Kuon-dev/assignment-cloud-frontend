@@ -65,7 +65,10 @@ export default function PaymentForm({ lease }: PaymentFormProps) {
             Accept: "application/json",
             Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify({ amount: lease.rentAmount }),
+          body: JSON.stringify({
+            amount: lease.rentAmount,
+            propertyId: lease.propertyId,
+          }),
         },
       );
 
