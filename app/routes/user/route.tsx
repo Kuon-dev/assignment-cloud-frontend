@@ -13,7 +13,6 @@ import { Settings } from "lucide-react";
 import { ClientOnly } from "remix-utils/client-only";
 import { useAdminStore } from "@/stores/admin-store";
 
-// Loader function to verify user role
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
@@ -39,25 +38,28 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json({ result });
 };
 
-// Users layout component
 export default function UsersLayout() {
   const data = useLoaderData<typeof loader>();
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
-  const [userData, setUserData] = useAdminStore((state) => [
-    state.userData,
-    state.setUserData,
-  ]);
+  const { userData, setUserData } = useAdminStore();
 
   useEffect(() => {
-    setUserData(data.result);
-    if (data.result.role === 0) {
-      setSidebarLinks(tenantSidebarLinks);
-    } else if (data.result.role === 1) {
-      setSidebarLinks(ownerSidebarLinks);
-    } else if (data.result.role === 2) {
-      setSidebarLinks(adminSidebarLinks);
+    if (data.result) {
+      setUserData(data.result);
     }
-  }, [data]);
+  }, [data.result, setUserData]);
+
+  useEffect(() => {
+    if (userData) {
+      if (userData.role === 0) {
+        setSidebarLinks(tenantSidebarLinks);
+      } else if (userData.role === 1) {
+        setSidebarLinks(ownerSidebarLinks);
+      } else if (userData.role === 2) {
+        setSidebarLinks(adminSidebarLinks);
+      }
+    }
+  }, [userData]);
 
   const settingsLink: LinkProps = {
     to: "/settings/profile",
@@ -65,8 +67,13 @@ export default function UsersLayout() {
     tooltip: "Settings",
   };
 
+  if (!data || !data.result) {
+    console.log("No data or data.result. Rendering loading state.");
+    return <div>Loading...</div>;
+  }
+
   return (
-    <ClientOnly>
+    <ClientOnly fallback={<div>Loading...</div>}>
       {() => (
         <React.Fragment>
           <DashboardSidebar
