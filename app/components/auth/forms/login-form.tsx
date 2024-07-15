@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
+import { useAdminStore } from "@/stores/admin-store";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -49,6 +50,7 @@ const formSchema = z.object({
 export default function LoginForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const nav = useNavigate();
+  const { userData, setUserData } = useAdminStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,6 +89,25 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
         document.cookie = `auth_token=${token}; path=/; secure; SameSite=Strict; expires=${expires}`;
 
         toast.success("Login successful!");
+        const profileResponse = await fetch(
+          `${window.ENV?.BACKEND_URL}/api/users/profile`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (!profileResponse.ok) {
+          throw new Error("Failed to fetch profile");
+        }
+
+        const profileData = await profileResponse.json();
+        setUserData(profileData);
+
         nav("/dashboard");
         // redirect
       }

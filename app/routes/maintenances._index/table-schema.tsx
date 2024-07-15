@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import MaintenanceRequestForm from "@/components/maintenance/form/maintenance-request-form";
+import MaintenanceTaskForm from "@/components/maintenance/form/maintenance-task-form";
 
 function getStatusTextAndClass(status: number) {
   switch (status) {
@@ -34,7 +35,7 @@ export const columns: TableColumn<Maintenance>[] = [
   {
     header: "Created At",
     accessor: (row) =>
-      new Date(row.createdAt).toLocaleDateString("en-US", {
+      new Date(row.maintenanceRequest.createdAt).toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -42,12 +43,14 @@ export const columns: TableColumn<Maintenance>[] = [
   },
   {
     header: "Property Address",
-    accessor: (row) => row.propertyAddress,
+    accessor: (row) => row.maintenanceRequest.propertyAddress,
   },
   {
     header: "Status",
     accessor: (row) => {
-      const { text, className } = getStatusTextAndClass(parseInt(row.status));
+      const { text, className } = getStatusTextAndClass(
+        parseInt(row.maintenanceRequest.status),
+      );
       return <span className={className}>{text}</span>;
     },
   },
@@ -117,10 +120,13 @@ const ActionsCell: React.FC<{ row: Maintenance }> = ({ row }) => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DialogContent>
-          {dialogContent === "review" && (
-            <MaintenanceRequestForm maintenance={row} />
-          )}
+        <DialogContent className="max-h-96 my-6 mb-10 overflow-auto custom-scrollbar">
+          {dialogContent === "review" &&
+            (user?.role === 1 ? ( // Assuming role 1 is the owner role
+              <MaintenanceTaskForm maintenance={row} isAdmin={false} />
+            ) : (
+              <MaintenanceRequestForm maintenance={row} />
+            ))}
           {dialogContent === "delete" && (
             <div className="rounded-md shadow-md">
               <p className="text-lg font-semibold mb-4">
@@ -147,3 +153,25 @@ const ActionsCell: React.FC<{ row: Maintenance }> = ({ row }) => {
     </>
   );
 };
+const customScrollbarStyles = `
+    .custom-scrollbar::-webkit-scrollbar{
+        width: 6px;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track{
+        background: none;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb{ 
+        background: rgb(255 255 255 / 10%);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover{ 
+        background: rgb(255 255 255 / 15%);
+    }
+`;
+
+if (typeof window !== "undefined") {
+  const styleElement = document.createElement("style");
+  styleElement.textContent = customScrollbarStyles;
+  document.head.appendChild(styleElement);
+}

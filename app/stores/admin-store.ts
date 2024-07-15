@@ -1,10 +1,31 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+
+type ProfileData = {
+  id: string;
+  email: string | null;
+  firstName: string;
+  isVerified: boolean;
+  lastName: string;
+  phoneNumber: string | null;
+  profilePictureUrl: string;
+  role: number;
+  admin: {
+    id: string;
+  } | null;
+  owner: {
+    id: string;
+  } | null;
+  tenant: {
+    id: string;
+  } | null;
+};
+
 type UserData = Record<string, unknown>;
 
 interface AdminState {
-  userData: UserData | null;
-  setUserData: (data: UserData) => void;
+  userData: ProfileData | null;
+  setUserData: (data: ProfileData) => void;
   payoutData: UserData | null;
   setPayoutData: (data: UserData) => void;
   editingData: UserData | null;

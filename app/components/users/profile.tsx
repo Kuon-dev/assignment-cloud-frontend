@@ -17,36 +17,68 @@ import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 
-const profileFormSchema = z.object({
-  firstName: z.string().min(1, { message: "Please enter your first name" }),
-  lastName: z.string().min(1, { message: "Please enter your last name" }),
-  phoneNumber: z
-    .string()
-    .min(10, { message: "Please enter a valid phone number" }),
-  profilePicture: z.any(),
-});
+const profileFormSchema = z
+  .object({
+    firstName: z.string().min(1, { message: "Please enter your first name" }),
+    lastName: z.string().min(1, { message: "Please enter your last name" }),
+    phoneNumber: z
+      .string()
+      .min(10, { message: "Please enter a valid phone number" }),
+    profilePicture: z.any(),
+    currentPassword: z.string().optional(),
+    newPassword: z.string().optional(),
+    confirmNewPassword: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.newPassword || data.confirmNewPassword) {
+        return data.newPassword === data.confirmNewPassword;
+      }
+      return true;
+    },
+    {
+      message: "New passwords must match",
+      path: ["confirmNewPassword"],
+    },
+  );
+
+type ProfileFormSchema = z.infer<typeof profileFormSchema>;
+
+interface ProfileFormData {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  profilePictureUrl: string;
+  currentPassword?: string;
+  newPassword?: string;
+}
 
 export default function ProfileComponent() {
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
-  const [userData] = useAdminStore((state) => [state.userData]);
+  const [userData, setUserData] = useAdminStore((state) => [
+    state.userData,
+    state.setUserData,
+  ]);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(
     userData?.profilePictureUrl || null,
   );
 
-  const form = useForm({
+  const form = useForm<ProfileFormSchema>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       firstName: userData?.firstName || "",
       lastName: userData?.lastName || "",
       phoneNumber: userData?.phoneNumber || "",
       profilePicture: null,
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
     },
   });
 
   useEffect(() => {
-    // set form values with user data loaded
     form.setValue("firstName", userData?.firstName || "");
     form.setValue("lastName", userData?.lastName || "");
     form.setValue("phoneNumber", userData?.phoneNumber || "");
@@ -81,8 +113,7 @@ export default function ProfileComponent() {
   };
 
   const onSubmit = async (data: z.infer<typeof profileFormSchema>) => {
-    let profilePictureUrl = userData?.user?.profilePictureUrl;
-
+    let profilePictureUrl: string = userData?.profilePictureUrl || "";
     if (profilePicture) {
       const uploadedImageUrl = await uploadProfilePicture(profilePicture);
       if (!uploadedImageUrl) {
@@ -92,12 +123,17 @@ export default function ProfileComponent() {
       profilePictureUrl = uploadedImageUrl;
     }
 
-    const formData = {
+    const formData: ProfileFormData = {
       firstName: data.firstName,
       lastName: data.lastName,
       phoneNumber: data.phoneNumber,
-      profilePictureUrl,
+      profilePictureUrl: profilePictureUrl || "",
     };
+
+    if (data.newPassword) {
+      formData.currentPassword = data.currentPassword;
+      formData.newPassword = data.newPassword;
+    }
 
     try {
       const response = await fetch(
@@ -113,9 +149,23 @@ export default function ProfileComponent() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update profile");
+        const result = await response.json();
+        toast.error("Failed to update profile" + result[0].description);
+        return;
       }
-
+      setUserData({
+        id: userData?.id,
+        email: userData?.email,
+        firstName: data.firstName,
+        isVerified: userData?.isVerified,
+        lastName: data.lastName,
+        phoneNumber: data.phoneNumber,
+        profilePictureUrl: profilePictureUrl || "",
+        role: userData?.role,
+        admin: userData?.admin,
+        owner: userData?.owner,
+        tenant: userData?.tenant,
+      });
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -228,6 +278,57 @@ export default function ProfileComponent() {
                 />
               </FormControl>
             </FormItem>
+            <FormField
+              control={form.control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel>Current Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Current Password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="New Password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmNewPassword"
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Confirm New Password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button className="mt-2" type="submit">
               Save
             </Button>
