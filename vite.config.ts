@@ -7,6 +7,11 @@ installGlobals();
 
 export default defineConfig({
   plugins: [remix(), tsconfigPaths()],
+  build: {
+    rollupOptions: {
+      external: ["@stripe/react-stripe-js", "@stripe/stripe-js"],
+    },
+  },
   ssr: {
     noExternal: [
       // "@radix-ui/react-dialog",
