@@ -1,5 +1,5 @@
 import React, { HTMLAttributes, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -33,135 +33,158 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
-
-const MaintenanceTaskSchema = z.object({
-  requestDescription: z.string().min(1, { message: "Description is required" }),
-  requestStatus: z.enum(["0", "1", "2", "3"]),
-  taskDescription: z.string().min(1, { message: "Description is required" }),
-  estimatedCost: z
-    .number()
-    .min(0.0, { message: "Estimated cost must be non-negative" }),
-  actualCost: z
-    .number()
-    .min(0.0, { message: "Estimated cost must be non-negative" })
-    .optional(),
-  startDate: z.date().optional(),
-  completionDate: z.date().optional(),
-  taskStatus: z.enum(["0", "1", "2", "3"]),
-});
-
-interface MaintenanceRequestWithTasks {
-  id: string;
-  tenantId: string;
-  propertyId: string;
-  description: string;
-  status: MaintenanceStatus;
-  createdAt: string;
-  updatedAt: string;
-  propertyAddress: string;
-  tenantFirstName: string;
-  tenantLastName: string;
-  tenantEmail: string;
-  tasks: MaintenanceTask[];
-}
-
-interface MaintenanceTask {
-  id: string;
-  requestId: string;
-  description: string;
-  estimatedCost: number;
-  actualCost: number;
-  startDate: Date;
-  completionDate: Date;
-  status: MaintenanceStatus;
-}
+import { DatePicker } from "@/components/custom/date.picker.client";
+import { useAdminStore } from "@/stores/admin-store";
 
 interface MaintenanceTaskFormProps extends HTMLAttributes<HTMLDivElement> {
-  maintenance: MaintenanceRequestWithTasks;
-  onSuccess: (updatedData: MaintenanceRequestWithTasks) => void;
+  maintenance?: Maintenance;
+  onSuccess: (updatedData: Maintenance) => void;
+  isAdmin: boolean;
 }
 
-type MaintenanceTaskFormErrorSchema = {
-  data: {
-    message: string;
-    details?: string;
-    timestamp?: string;
-  };
-  statusCode: number;
-  error: string;
-  stackTrace?: string;
-};
+const maintenanceStatus = [
+  "Pending",
+  "InProgress",
+  "Completed",
+  "Cancelled",
+] as const;
+
+enum MaintenanceStatus {
+  Pending = 0,
+  InProgress,
+  Completed,
+  Cancelled,
+}
+
+const MaintenanceTaskSchema = z
+  .object({
+    requestDescription: z
+      .string()
+      .min(1, { message: "Description is required" }),
+    requestStatus: z.enum(["Pending", "InProgress", "Completed", "Cancelled"], {
+      message: "Status is required",
+    }),
+    taskDescription: z.string().min(1, { message: "Description is required" }),
+    estimatedCost: z
+      .number()
+      .min(0.0, { message: "Estimated cost must be non-negative" }),
+    actualCost: z
+      .number()
+      .min(0.0, { message: "Estimated cost must be non-negative" })
+      .optional(),
+    taskStatus: z.enum(["Pending", "InProgress", "Completed", "Cancelled"], {
+      message: "Status is required",
+    }),
+    startDate: z.string().optional(),
+    completionDate: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      const startDate = data.startDate ? new Date(data.startDate) : null;
+      const completionDate = data.completionDate
+        ? new Date(data.completionDate)
+        : null;
+      if (startDate && completionDate) {
+        return startDate < completionDate;
+      }
+      return true;
+    },
+    {
+      message: "Completion date must be after start date",
+      path: ["completionDate"],
+    },
+  );
 
 export default function MaintenanceTaskForm({
   maintenance,
   onSuccess,
+  isAdmin,
   className,
   ...props
 }: MaintenanceTaskFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
+  const [userData] = useAdminStore((state) => [state.userData]);
 
   const form = useForm<z.infer<typeof MaintenanceTaskSchema>>({
     resolver: zodResolver(MaintenanceTaskSchema),
     defaultValues: {
-      requestDescription: maintenance.maintenanceRequest.description || "",
+      requestDescription: maintenance?.maintenanceRequest.description || "",
       requestStatus:
-        maintenance.maintenanceRequest.status.toString() || "Pending",
-      taskDescription: maintenance.tasks[0]?.description || "",
-      estimatedCost: maintenance.tasks[0]?.estimatedCost || 0.0,
-      actualCost: maintenance.tasks[0]?.actualCost || 0.0,
-      startDate: maintenance.tasks[0]?.startDate
-        ? new Date(maintenance.tasks[0]?.startDate)
+        maintenance?.maintenanceRequest.status !== undefined
+          ? MaintenanceStatus[maintenance?.maintenanceRequest.status]
+          : "Pending",
+      taskDescription: maintenance?.tasks[0]?.description || "",
+      estimatedCost: maintenance?.tasks[0]?.estimatedCost || 0.0,
+      actualCost: maintenance?.tasks[0]?.actualCost || 0.0,
+      startDate: maintenance?.tasks[0]?.startDate
+        ? new Date(maintenance?.tasks[0]?.startDate).toISOString()
         : undefined,
-      completionDate: maintenance.tasks[0]?.completionDate
-        ? new Date(maintenance.tasks[0]?.completionDate)
+      completionDate: maintenance?.tasks[0]?.completionDate
+        ? new Date(maintenance?.tasks[0]?.completionDate).toISOString()
         : undefined,
-      taskStatus: maintenance.tasks[0]?.status.toString() || "Pending",
+      taskStatus:
+        maintenance?.tasks[0]?.status !== undefined
+          ? MaintenanceStatus[maintenance?.tasks[0]?.status]
+          : "Pending",
     },
   });
 
   useEffect(() => {
     if (maintenance) {
       form.reset({
-        requestDescription: maintenance.maintenanceRequest.description,
-        requestStatus: maintenance.maintenanceRequest.status.toString(),
-        taskDescription: maintenance.tasks[0]?.description,
-        estimatedCost: maintenance.tasks[0]?.estimatedCost,
-        actualCost: maintenance.tasks[0]?.actualCost,
-        startDate: maintenance.tasks[0]?.startDate
-          ? new Date(maintenance.tasks[0]?.startDate)
+        requestDescription: maintenance?.maintenanceRequest.description,
+        requestStatus:
+          maintenance?.maintenanceRequest.status !== undefined
+            ? MaintenanceStatus[maintenance?.maintenanceRequest.status]
+            : "Pending",
+        taskDescription: maintenance?.tasks[0]?.description,
+        estimatedCost: maintenance?.tasks[0]?.estimatedCost,
+        actualCost: maintenance?.tasks[0]?.actualCost,
+        startDate: maintenance?.tasks[0]?.startDate
+          ? new Date(maintenance?.tasks[0]?.startDate).toISOString()
           : undefined,
-        completionDate: maintenance.tasks[0]?.completionDate
-          ? new Date(maintenance.tasks[0]?.completionDate)
+        completionDate: maintenance?.tasks[0]?.completionDate
+          ? new Date(maintenance?.tasks[0]?.completionDate).toISOString()
           : undefined,
-        taskStatus: maintenance.tasks[0]?.status.toString(),
+        taskStatus:
+          maintenance?.tasks[0]?.status !== undefined
+            ? MaintenanceStatus[maintenance?.tasks[0]?.status]
+            : "Pending",
       });
     }
   }, [maintenance]);
 
+  const statusToEnum = (status: string): number => {
+    return MaintenanceStatus[status as keyof typeof MaintenanceStatus];
+  };
+
+  const enumToStatus = (enumValue: number): string => {
+    return MaintenanceStatus[enumValue] as string;
+  };
+
   async function onSubmit(data: z.infer<typeof MaintenanceTaskSchema>) {
     try {
       setIsLoading(true);
-
       const payload = {
         maintenanceRequest: {
-          id: maintenance.maintenanceRequest.id,
+          id: maintenance?.maintenanceRequest.id,
           description: data.requestDescription,
-          status: parseInt(data.requestStatus),
+          status: statusToEnum(data.requestStatus),
         },
         maintenanceTask: {
           description: data.taskDescription,
           estimatedCost: data.estimatedCost,
           actualCost: data.actualCost,
-          startDate: data.startDate?.toISOString() || null,
-          completionDate: data.completionDate?.toISOString() || null,
-          status: parseInt(data.taskStatus),
+          startDate: data.startDate || null,
+          completionDate: data.completionDate || null,
+          status: statusToEnum(data.taskStatus),
         },
       };
-
+      console.log(payload);
       const res = await fetch(
-        `${window.ENV?.BACKEND_URL}/api/Admin/maintenance-requests/${maintenance.maintenanceRequest.id}`,
+        `${window.ENV?.BACKEND_URL}/api/Admin/maintenance-requests/${maintenance?.maintenanceRequest.id}`,
         {
           method: "PUT",
           headers: {
@@ -173,13 +196,78 @@ export default function MaintenanceTaskForm({
       );
       if (res.ok) {
         setIsLoading(false);
-        onSuccess(payload);
-
+        window.location.reload();
         toast.success(`Maintenance request updated successfully!`);
       }
     } catch (error) {
       console.error("Error updating maintenance request:", error);
       toast.error("Error updating maintenance request.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleApprove() {
+    try {
+      setIsLoading(true);
+      const payload = {
+        ownerId: userData?.id,
+        maintenanceRequestId: maintenance?.maintenanceRequest.id,
+        approve: true,
+      };
+      const res = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/users/owner/update-status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (res.ok) {
+        setIsLoading(false);
+        window.location.reload();
+        toast.success(`Maintenance request updated successfully!`);
+      }
+    } catch (error) {
+      console.error("Error approving maintenance request:", error);
+      toast.error("Error approving maintenance request.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleReject() {
+    try {
+      setIsLoading(true);
+      const payload = {
+        ownerId: userData?.id,
+        maintenanceRequestId: maintenance?.maintenanceRequest.id,
+        approve: false,
+      };
+      const res = await fetch(
+        `${window.ENV?.BACKEND_URL}/api/users/owner/update-status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (res.ok) {
+        setIsLoading(false);
+        window.location.reload();
+        toast.success(`Maintenance request updated successfully!`);
+      }
+    } catch (error) {
+      console.error("Error rejecting maintenance request:", error);
+      toast.error("Error rejecting maintenance request.");
     } finally {
       setIsLoading(false);
     }
@@ -214,6 +302,7 @@ export default function MaintenanceTaskForm({
                               className="custom-scrollbar"
                               placeholder="Enter request description"
                               {...field}
+                              readOnly={!isAdmin}
                             />
                           </FormControl>
                           <FormMessage />
@@ -230,15 +319,17 @@ export default function MaintenanceTaskForm({
                             <Select
                               value={field.value}
                               onValueChange={field.onChange}
+                              disabled={!isAdmin}
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="0">Pending</SelectItem>
-                                <SelectItem value="1">In Progress</SelectItem>
-                                <SelectItem value="2">Completed</SelectItem>
-                                <SelectItem value="3">Cancelled</SelectItem>
+                                {maintenanceStatus.map((status, index) => (
+                                  <SelectItem key={index} value={status}>
+                                    {status}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -256,6 +347,7 @@ export default function MaintenanceTaskForm({
                             <Textarea
                               placeholder="Enter task description"
                               {...field}
+                              readOnly={!isAdmin}
                             />
                           </FormControl>
                           <FormMessage />
@@ -274,6 +366,7 @@ export default function MaintenanceTaskForm({
                               step="any"
                               placeholder="Enter estimated cost"
                               {...field}
+                              readOnly={!isAdmin}
                               onChange={(e) =>
                                 field.onChange(
                                   parseFloat(
@@ -299,6 +392,7 @@ export default function MaintenanceTaskForm({
                               step="any"
                               placeholder="Enter actual cost"
                               {...field}
+                              readOnly={!isAdmin}
                               onChange={(e) =>
                                 field.onChange(
                                   parseFloat(
@@ -319,23 +413,15 @@ export default function MaintenanceTaskForm({
                         <FormItem>
                           <FormLabel>Start Date</FormLabel>
                           <FormControl>
-                            <Input
-                              type="date"
-                              placeholder="Enter start date"
+                            <DatePicker
+                              name="startDate"
+                              label=""
+                              control={form.control}
+                              error={form.formState.errors.startDate}
+                              disabled={!isAdmin}
                               {...field}
-                              value={
-                                field.value
-                                  ? new Date(field.value)
-                                      .toISOString()
-                                      .split("T")[0]
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                field.onChange(new Date(e.target.value))
-                              }
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -346,23 +432,15 @@ export default function MaintenanceTaskForm({
                         <FormItem>
                           <FormLabel>Completion Date</FormLabel>
                           <FormControl>
-                            <Input
-                              type="date"
-                              placeholder="Enter completion date"
+                            <DatePicker
+                              name="completionDate"
+                              label=""
+                              control={form.control}
+                              error={form.formState.errors.completionDate}
+                              disabled={!isAdmin}
                               {...field}
-                              value={
-                                field.value
-                                  ? new Date(field.value)
-                                      .toISOString()
-                                      .split("T")[0]
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                field.onChange(new Date(e.target.value))
-                              }
                             />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -376,15 +454,17 @@ export default function MaintenanceTaskForm({
                             <Select
                               value={field.value}
                               onValueChange={field.onChange}
+                              disabled={!isAdmin}
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select status" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="0">Pending</SelectItem>
-                                <SelectItem value="1">In Progress</SelectItem>
-                                <SelectItem value="2">Completed</SelectItem>
-                                <SelectItem value="3">Cancelled</SelectItem>
+                                {maintenanceStatus.map((status, index) => (
+                                  <SelectItem key={index} value={status}>
+                                    {status}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </FormControl>
@@ -395,9 +475,28 @@ export default function MaintenanceTaskForm({
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" loading={isLoading}>
-                    Save Changes
-                  </Button>
+                  {!isAdmin ? (
+                    <div className="flex justify-between w-full">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={handleReject}
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleApprove}
+                      >
+                        Approve
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button type="submit" loading={isLoading}>
+                      Save Changes
+                    </Button>
+                  )}
                 </CardFooter>
               </form>
             </Form>

@@ -4,9 +4,11 @@ import { create } from "zustand";
 interface DashboardStoreState {
   user: BackendUser | null;
   setUser: (user: BackendUser) => void;
+  clearUser: () => void;
 }
 
 export const useDashboardStore = create<DashboardStoreState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
+  clearUser: () => set({ user: null }),
 }));

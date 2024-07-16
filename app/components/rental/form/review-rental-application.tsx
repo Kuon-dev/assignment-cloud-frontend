@@ -36,6 +36,7 @@ import LeaseForm from "@/components/lease/form/lease-form";
 
 interface ReviewApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
   application: Application;
+  fetchApplications: () => void;
 }
 
 const statusType = ["Pending", "Approve", "Reject"] as const;
@@ -65,6 +66,7 @@ type ReviewApplicationFormErrorSchema = {
 
 export default function ReviewApplicationForm({
   application,
+  fetchApplications,
   className,
   ...props
 }: ReviewApplicationFormProps) {
@@ -104,6 +106,7 @@ export default function ReviewApplicationForm({
         const error = (await res.json()) as ReviewApplicationFormErrorSchema;
         throw new Error(error.data.message);
       } else {
+        fetchApplications();
         toast.success("Application submitted successfully!");
       }
       setIsLoading(false);

@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 interface ListingFormProps {
   listing?: Listing;
   property?: Property;
+  fetchListings: () => void;
 }
 
 type ListingsFormErrorSchema = {
@@ -52,7 +53,11 @@ const ListingFormSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
-export default function ListingForm({ listing, property }: ListingFormProps) {
+export default function ListingForm({
+  listing,
+  property,
+  fetchListings,
+}: ListingFormProps) {
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +99,7 @@ export default function ListingForm({ listing, property }: ListingFormProps) {
         const error = (await res.json()) as ListingsFormErrorSchema;
         throw new Error(error.data.message);
       } else {
+        fetchListings();
         toast.success("Property listed successfully");
       }
       setIsLoading(false);
