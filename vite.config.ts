@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [remix(), tsconfigPaths()],
   build: {
     rollupOptions: {
-      external: ["@stripe/react-stripe-js", "@stripe/stripe-js"],
+      external: ["@stripe/react-stripe-js", "@stripe/stripe-js", "leaflet-geosearch"],
     },
   },
   ssr: {
