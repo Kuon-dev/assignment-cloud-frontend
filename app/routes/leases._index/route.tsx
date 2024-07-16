@@ -1,44 +1,31 @@
 import { DataTable } from "@/components/custom/data-table";
-import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showErrorToast } from "@/lib/handle-error";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
-import { cookieConsent } from "@/utils/cookies.server";
 import { json, LoaderFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { columns } from "./table-schema";
 import { useState } from "react";
 import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const url = new URL(request.url);
-  const pageNumber = url.searchParams.get("page") || "1";
-  const pageSize = url.searchParams.get("size") || "10";
-
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
-  const userSession = await cookieConsent.parse(cookieHeader);
-  if (!userSession || !userSession.token) {
-    // return redirect("/login");
-  }
 
   const leaseData: LeaseLoaderData = {
     leases: [],
   };
 
   try {
-    const res = await fetch(
-      `${process.env.BACKEND_URL}/api/users/leases?page=${pageNumber}&size=${pageSize}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
+    const res = await fetch(`${process.env.BACKEND_URL}/api/users/leases`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${authToken}`,
       },
-    );
+    });
 
     if (res.ok) {
       const data = await res.json();
@@ -92,14 +79,6 @@ export default function Leases() {
                 ]}
               />
               <DataTable columns={columns} data={filteredLeases} />
-
-              <div className="mt-4 flex justify-between">
-                {/* <PaginationComponent
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handleNavigation}
-                /> */}
-              </div>
             </>
           )}
         </ClientOnly>
@@ -126,38 +105,38 @@ function LoadingComponent() {
   );
 }
 
-const LeaseFilter = ({
-  filter,
-  setFilter,
-}: {
-  filter: string;
-  setFilter: React.Dispatch<React.SetStateAction<string>>;
-}) => {
-  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilter(event.target.value);
-  };
+// const LeaseFilter = ({
+//   filter,
+//   setFilter,
+// }: {
+//   filter: string;
+//   setFilter: React.Dispatch<React.SetStateAction<string>>;
+// }) => {
+//   const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+//     setFilter(event.target.value);
+//   };
 
-  return (
-    <div className="mb-4">
-      <label htmlFor="status-filter" className="mr-2">
-        Filter Status:
-      </label>
-      <select
-        id="status-filter"
-        value={filter}
-        onChange={handleFilterChange}
-        className="p-2 border rounded bg-transparent"
-      >
-        <option value="all" className="bg-black">
-          All
-        </option>
-        <option value="active" className="bg-black">
-          Active
-        </option>
-        <option value="inactive" className="bg-black">
-          Inactive
-        </option>
-      </select>
-    </div>
-  );
-};
+//   return (
+//     <div className="mb-4">
+//       <label htmlFor="status-filter" className="mr-2">
+//         Filter Status:
+//       </label>
+//       <select
+//         id="status-filter"
+//         value={filter}
+//         onChange={handleFilterChange}
+//         className="p-2 border rounded bg-transparent"
+//       >
+//         <option value="all" className="bg-black">
+//           All
+//         </option>
+//         <option value="active" className="bg-black">
+//           Active
+//         </option>
+//         <option value="inactive" className="bg-black">
+//           Inactive
+//         </option>
+//       </select>
+//     </div>
+//   );
+// };

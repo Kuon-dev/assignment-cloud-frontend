@@ -123,7 +123,7 @@ function LoadingComponent() {
 }
 
 type GuestComponentProps = {
-  listings: Listing[];
+  listings: { items: Listing[] };
 };
 
 function GuestComponent({ listings }: GuestComponentProps) {

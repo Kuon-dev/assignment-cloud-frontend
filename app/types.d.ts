@@ -292,3 +292,21 @@ type Property = {
 type PropertyLoaderData = {
   properties: Property[];
 };
+
+type Period = {
+  endDate: string;
+  id: string;
+  startDate: string;
+  status: string;
+};
+
+type Payout = {
+  id: string;
+  amount: number;
+  currency: string;
+  status: number;
+  createdAt: string;
+  propertyId: string;
+  propertyAddress: string;
+  tenantName: string;
+};
