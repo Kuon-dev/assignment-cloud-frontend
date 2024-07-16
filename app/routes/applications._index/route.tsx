@@ -1,22 +1,17 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
-import { DataTable } from "@/components/custom/data-table";
+import { DataTable, TableColumn } from "@/components/custom/data-table";
 import { ownerColumns, tenantColumns } from "./table-schema";
-import { PaginationComponent } from "@/components/custom/data-table-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { showErrorToast } from "@/lib/handle-error";
 import { useDashboardStore } from "@/stores/dashboard-store";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const url = new URL(request.url);
-  const pageNumber = url.searchParams.get("page") || "1";
-  const pageSize = url.searchParams.get("size") || "10";
-
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
   const userSession = await cookieConsent.parse(cookieHeader);
@@ -26,8 +21,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const applicationData: ApplicationLoaderData = {
     applications: [],
-    totalPages: 0,
-    currentPage: parseInt(pageNumber),
+    ENV: {
+      BACKEND_URL: process.env.BACKEND_URL || "",
+    },
   };
 
   try {
@@ -61,12 +57,61 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Applications() {
   const user = useDashboardStore((state) => state.user);
+  const initialData = useLoaderData<ApplicationLoaderData>();
+  const [applications, setApplications] = useState<Application[]>(
+    initialData.applications,
+  );
+
+  const fetchApplications = useCallback(async () => {
+    const cookieHeader = document.cookie;
+    const authToken = getAuthTokenFromCookie(cookieHeader);
+
+    try {
+      const res = await fetch(
+        `${initialData.ENV.BACKEND_URL}/api/users/applications`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setApplications(data);
+      } else {
+        console.error(`Error ${res.status}: ${res.statusText}`);
+      }
+    } catch (error) {
+      console.error(error);
+      showErrorToast(error);
+    }
+  }, [initialData.ENV.BACKEND_URL]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   return (
     <>
       <section className="w-full mx-auto">
-        {user?.owner && <OwnerComponent />}
-        {user?.tenant && <TenantComponent />}
+        {user?.owner && (
+          <ApplicationsComponent
+            applications={applications}
+            columns={ownerColumns(fetchApplications)}
+            title="Applications"
+          />
+        )}
+        {user?.tenant && (
+          <ApplicationsComponent
+            applications={applications}
+            columns={tenantColumns(fetchApplications)}
+            title="Applications"
+          />
+        )}
       </section>
     </>
   );
@@ -90,6 +135,12 @@ function LoadingComponent() {
   );
 }
 
+type ApplicationsComponentProps = {
+  applications: Application[];
+  columns: TableColumn<Application>[];
+  title: string;
+};
+
 const filterFunction = (application: Application, filter: string): boolean => {
   switch (filter) {
     case "all":
@@ -105,16 +156,17 @@ const filterFunction = (application: Application, filter: string): boolean => {
   }
 };
 
-function TenantComponent() {
-  const data = useLoaderData<typeof loader>();
-  const { applications } = data;
-
+const ApplicationsComponent: React.FC<ApplicationsComponentProps> = ({
+  applications,
+  columns,
+  title,
+}) => {
   const [filteredApplications, setFilteredApplications] =
-    useState(applications);
+    useState<Application[]>(applications);
 
   return (
     <section className="w-full mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Applications</h1>
+      <h1 className="text-2xl font-semibold mb-4">{title}</h1>
       <div>
         <ClientOnly fallback={<LoadingComponent />}>
           {() => (
@@ -130,61 +182,11 @@ function TenantComponent() {
                   { value: "rejected", label: "Rejected" },
                 ]}
               />
-              <DataTable columns={tenantColumns} data={filteredApplications} />
-
-              <div className="mt-4 flex justify-between">
-                {/* <PaginationComponent
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handleNavigation}
-                /> */}
-              </div>
+              <DataTable columns={columns} data={filteredApplications} />
             </>
           )}
         </ClientOnly>
       </div>
     </section>
   );
-}
-
-function OwnerComponent() {
-  const data = useLoaderData<typeof loader>();
-  const { applications } = data;
-
-  const [filteredApplications, setFilteredApplications] =
-    useState(applications);
-
-  return (
-    <section className="w-full mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Applications</h1>
-      <div>
-        <ClientOnly fallback={<LoadingComponent />}>
-          {() => (
-            <>
-              <TableFilter<Application>
-                data={applications}
-                filterFunction={filterFunction}
-                onFilter={setFilteredApplications}
-                filterOptions={[
-                  { value: "all", label: "All" },
-                  { value: "pending", label: "Pending" },
-                  { value: "approved", label: "Approved" },
-                  { value: "rejected", label: "Rejected" },
-                ]}
-              />
-              <DataTable columns={ownerColumns} data={filteredApplications} />
-
-              <div className="mt-4 flex justify-between">
-                {/* <PaginationComponent
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handleNavigation}
-                /> */}
-              </div>
-            </>
-          )}
-        </ClientOnly>
-      </div>
-    </section>
-  );
-}
+};

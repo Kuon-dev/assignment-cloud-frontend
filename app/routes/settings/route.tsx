@@ -74,6 +74,7 @@ export function SettingsHeader() {
   const navigate = useNavigate();
   const cookies = document.cookie;
   const authToken = getAuthTokenFromCookie(cookies);
+  const clearUser = useDashboardStore((state) => state.clearUser);
 
   const handleLogout = async () => {
     try {
@@ -93,6 +94,7 @@ export function SettingsHeader() {
           const [name] = cookie.split("=");
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         });
+        await clearUser();
         navigate("/");
       } else {
         toast.error("Logout failed");

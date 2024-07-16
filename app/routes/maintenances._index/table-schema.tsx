@@ -70,7 +70,7 @@ const ActionsCell: React.FC<{ row: Maintenance }> = ({ row }) => {
 
   const onSubmit = async (maintenance: Maintenance) => {
     const res = await fetch(
-      `${window.ENV?.BACKEND_URL}/api/Maintenances/${maintenance.id}`,
+      `${window.ENV?.BACKEND_URL}/api/Maintenances/${maintenance.maintenanceRequest.id}`,
       {
         method: "DELETE",
         headers: {
@@ -122,7 +122,7 @@ const ActionsCell: React.FC<{ row: Maintenance }> = ({ row }) => {
 
         <DialogContent className="max-h-96 my-6 mb-10 overflow-auto custom-scrollbar">
           {dialogContent === "review" &&
-            (user?.role === 1 ? ( // Assuming role 1 is the owner role
+            (user?.role === 1 ? (
               <MaintenanceTaskForm maintenance={row} isAdmin={false} />
             ) : (
               <MaintenanceRequestForm maintenance={row} />
