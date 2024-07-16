@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [remix(), tsconfigPaths()],
   build: {
     rollupOptions: {
-      external: ["@stripe/react-stripe-js"],
+      external: ["@stripe/react-stripe-js", "@stripe/stripe-js"],
     },
   },
   ssr: {
@@ -31,7 +31,6 @@ export default defineConfig({
       "@radix-ui/react-menubar",
       "@radix-ui/react-navigation-menu",
       "@radix-ui/react-popover",
-      "@stripe/react-stripe-js",
       // "@radix-ui/react-progress",
       "@radix-ui/react-radio-group",
       "@radix-ui/react-scroll-area",
