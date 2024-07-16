@@ -190,8 +190,9 @@ type Application = {
 
 type ApplicationLoaderData = {
   applications: Application[];
-  totalPages: number;
-  currentPage: number;
+  ENV: {
+    BACKEND_URL: string;
+  };
 };
 
 type Lease = {
@@ -235,18 +236,33 @@ enum MaintenanceStatus {
   Cancelled = "Cancelled",
 }
 
-type Maintenance = {
+type MaintenanceRequest = {
   id: string;
-  userId: string;
-  listingId: string;
   status: MaintenanceStatus;
   createdAt: string;
   description: string;
   priority: string;
+  propertyId: string;
   propertyAddress: string;
   tenantEmail: string;
   tenantFirstName: string;
   tenantLastName: string;
+};
+
+type Task = {
+  id: string;
+  requestId: string;
+  description: string;
+  estimatedCost: number;
+  actualCost: number;
+  startDate: string;
+  completionDate: string;
+  status: MaintenanceStatus;
+};
+
+type Maintenance = {
+  maintenanceRequest: MaintenanceRequest;
+  tasks: Task[];
 };
 
 type MaintenanceLoaderData = {
@@ -275,4 +291,22 @@ type Property = {
 
 type PropertyLoaderData = {
   properties: Property[];
+};
+
+type Period = {
+  endDate: string;
+  id: string;
+  startDate: string;
+  status: string;
+};
+
+type Payout = {
+  id: string;
+  amount: number;
+  currency: string;
+  status: number;
+  createdAt: string;
+  propertyId: string;
+  propertyAddress: string;
+  tenantName: string;
 };

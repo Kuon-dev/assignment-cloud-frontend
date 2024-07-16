@@ -45,6 +45,14 @@ interface MaintenanceTask {
   status: string;
 }
 
+const flattenData = (data: MaintenanceRequestWithTasks[]) => {
+  return data.map((item) => ({
+    ...item,
+    propertyAddress: item.maintenanceRequest.propertyAddress,
+    tenantEmail: item.maintenanceRequest.tenantEmail,
+  }));
+};
+
 const columns = (
   handleDelete: (maintenanceId: string) => void,
   handleUpdate: (updatedData: MaintenanceRequestWithTasks) => void,
@@ -72,19 +80,24 @@ const columns = (
     accessorKey: "maintenanceRequest.createdAt",
     header: "Created At",
     cell: ({ row }) =>
-      new Date(row.original.createdAt).toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
+      new Date(row.original.maintenanceRequest.createdAt).toLocaleDateString(
+        "en-US",
+        {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        },
+      ),
   },
   {
-    accessorKey: "maintenanceRequest.propertyAddress",
+    accessorKey: "propertyAddress",
     header: "Property Address",
+    cell: ({ row }) => row.original.propertyAddress || "N/A",
   },
   {
-    accessorKey: "maintenanceRequest.tenantEmail",
+    accessorKey: "tenantEmail",
     header: "Tenant Email",
+    cell: ({ row }) => row.original.tenantEmail || "N/A",
   },
   {
     accessorKey: "tasks.0.estimatedCost",
@@ -240,6 +253,7 @@ const ActionsCell: React.FC<{
               <MaintenanceTaskForm
                 maintenance={row}
                 onSuccess={handleSuccess}
+                isAdmin={true}
               />
             </>
           )}
@@ -296,7 +310,8 @@ export default function AdminMaintenanceComponent({
   setPageIndex,
   handleDelete,
 }: MaintenanceProps) {
-  const [tableData, setTableData] = useState(data);
+  const [tableData, setTableData] = useState(flattenData(data));
+
   const handleUpdate = (updatedData: MaintenanceRequestWithTasks) => {
     setTableData((prevData) =>
       prevData.map((item) =>
@@ -311,6 +326,12 @@ export default function AdminMaintenanceComponent({
                 status:
                   updatedData.maintenanceRequest.status ??
                   item.maintenanceRequest.status,
+                propertyAddress:
+                  updatedData.maintenanceRequest.propertyAddress ??
+                  item.maintenanceRequest.propertyAddress,
+                tenantEmail:
+                  updatedData.maintenanceRequest.tenantEmail ??
+                  item.maintenanceRequest.tenantEmail,
               },
               tasks: [
                 {
@@ -341,7 +362,7 @@ export default function AdminMaintenanceComponent({
   };
 
   useEffect(() => {
-    setTableData(data);
+    setTableData(flattenData(data));
   }, [data]);
 
   return (

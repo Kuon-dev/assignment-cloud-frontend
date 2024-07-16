@@ -19,7 +19,7 @@ function getStatusTextAndClass(isActive: boolean) {
     : { text: "Inactive", className: "text-red-500 font-semibold" };
 }
 
-export const columns: TableColumn<Listing>[] = [
+export const columns = (fetchListings: () => void): TableColumn<Listing>[] => [
   {
     header: "Image",
     accessor: (row) => (
@@ -65,11 +65,16 @@ export const columns: TableColumn<Listing>[] = [
   },
   {
     header: "Actions",
-    accessor: (row) => <ActionsCell row={row} />,
+    accessor: (row) => <ActionsCell row={row} fetchListings={fetchListings} />,
   },
 ];
 
-const ActionsCell: React.FC<{ row: Listing }> = ({ row }) => {
+type ActionsCellProps = {
+  row: Listing;
+  fetchListings: () => void;
+};
+
+const ActionsCell: React.FC<ActionsCellProps> = ({ row, fetchListings }) => {
   const [dialogContent, setDialogContent] = useState<"edit" | "delete" | null>(
     null,
   );
@@ -91,6 +96,7 @@ const ActionsCell: React.FC<{ row: Listing }> = ({ row }) => {
     );
 
     if (res.ok) {
+      fetchListings();
       toast.success("Application deleted successfully!");
     } else {
       const error = await res.json();
@@ -127,7 +133,9 @@ const ActionsCell: React.FC<{ row: Listing }> = ({ row }) => {
         </DropdownMenu>
 
         <DialogContent>
-          {dialogContent === "edit" && <ListingForm listing={row} />}
+          {dialogContent === "edit" && (
+            <ListingForm listing={row} fetchListings={fetchListings} />
+          )}
           {dialogContent === "delete" && (
             <div className="rounded-md shadow-md">
               <p className="text-lg font-semibold mb-4">

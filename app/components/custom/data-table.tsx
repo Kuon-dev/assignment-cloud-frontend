@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface TableColumn<T> {
   header: string;
   accessor: (row: T) => JSX.Element | string;

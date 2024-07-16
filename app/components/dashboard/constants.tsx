@@ -41,11 +41,6 @@ export const tenantSidebarLinks = [
 
 export const ownerSidebarLinks = [
   {
-    to: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5" />,
-    tooltip: "Dashboard",
-  },
-  {
     to: "/properties", // create , read , update
     icon: <Home className="h-5 w-5" />,
     tooltip: "Your properties",
@@ -61,7 +56,7 @@ export const ownerSidebarLinks = [
     tooltip: "Your application reviews",
   },
   {
-    to: "/tasks",
+    to: "/maintenances",
     icon: <Wrench className="h-5 w-5" />,
     tooltip: "Your maintenance tasks",
   },
@@ -73,11 +68,6 @@ export const ownerSidebarLinks = [
 ];
 
 export const adminSidebarLinks = [
-  {
-    to: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5" />,
-    tooltip: "Dashboard",
-  },
   {
     to: "/users",
     icon: <UsersRound className="h-5 w-5" />,

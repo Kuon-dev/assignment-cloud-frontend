@@ -28,7 +28,9 @@ function getStatusTextAndClass(status: string) {
   }
 }
 
-export const ownerColumns: TableColumn<Application>[] = [
+export const ownerColumns = (
+  fetchApplications: () => void,
+): TableColumn<Application>[] => [
   {
     header: "Property Address",
     accessor: (row) => row.listingAddress,
@@ -63,11 +65,15 @@ export const ownerColumns: TableColumn<Application>[] = [
   },
   {
     header: "Actions",
-    accessor: (row) => <ActionsCell row={row} />,
+    accessor: (row) => (
+      <ActionsCell row={row} fetchApplications={fetchApplications} />
+    ),
   },
 ];
 
-export const tenantColumns: TableColumn<Application>[] = [
+export const tenantColumns = (
+  fetchApplications: () => void,
+): TableColumn<Application>[] => [
   {
     header: "Property Address",
     accessor: (row) => row.listingAddress,
@@ -90,11 +96,21 @@ export const tenantColumns: TableColumn<Application>[] = [
   },
   {
     header: "Actions",
-    accessor: (row) => <ActionsCell row={row} />,
+    accessor: (row) => (
+      <ActionsCell row={row} fetchApplications={fetchApplications} />
+    ),
   },
 ];
 
-const ActionsCell: React.FC<{ row: Application }> = ({ row }) => {
+type ActionsCellProps = {
+  row: Application;
+  fetchApplications: () => void;
+};
+
+const ActionsCell: React.FC<ActionsCellProps> = ({
+  row,
+  fetchApplications,
+}) => {
   const [dialogContent, setDialogContent] = useState<
     "review" | "delete" | null
   >(null);
@@ -117,6 +133,7 @@ const ActionsCell: React.FC<{ row: Application }> = ({ row }) => {
     );
 
     if (res.ok) {
+      fetchApplications();
       toast.success("Application deleted successfully!");
     } else {
       const error = await res.json();
@@ -156,7 +173,10 @@ const ActionsCell: React.FC<{ row: Application }> = ({ row }) => {
 
         <DialogContent>
           {dialogContent === "review" && (
-            <ReviewApplicationForm application={row} />
+            <ReviewApplicationForm
+              application={row}
+              fetchApplications={fetchApplications}
+            />
           )}
           {dialogContent === "delete" && (
             <div className="rounded-md shadow-md">

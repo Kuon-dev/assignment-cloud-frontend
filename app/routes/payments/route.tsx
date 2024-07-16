@@ -3,7 +3,6 @@ import { Outlet } from "@remix-run/react";
 import { Layout, LayoutBody } from "@/components/custom/layout";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 import {
-  adminSidebarLinks,
   ownerSidebarLinks,
   tenantSidebarLinks,
 } from "@/components/dashboard/constants";
@@ -18,9 +17,6 @@ export default function RentalLayout() {
   useEffect(() => {
     if (!user) return;
     switch (true) {
-      case !!user.admin:
-        setSidebarLinks(adminSidebarLinks);
-        break;
       case !!user.tenant:
         setSidebarLinks(tenantSidebarLinks);
         break;

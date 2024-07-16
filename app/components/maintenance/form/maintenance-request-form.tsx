@@ -72,7 +72,7 @@ export default function MaintenanceRequestForm({
   const form = useForm<z.infer<typeof MaintenanceRequestSchema>>({
     resolver: zodResolver(MaintenanceRequestSchema),
     defaultValues: {
-      description: maintenance?.description || "",
+      description: maintenance?.maintenanceRequest.description || "",
     },
   });
 
@@ -152,7 +152,7 @@ export default function MaintenanceRequestForm({
                     <>
                       <Label>Status</Label>
                       <Select
-                        value={maintenance.status.toString()}
+                        value={maintenance.maintenanceRequest.status.toString()}
                         disabled={!!maintenance}
                       >
                         <SelectTrigger>

@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import { useLoaderData } from "@remix-run/react";
 import { json, LoaderFunction } from "@remix-run/node";
 import { cookieConsent } from "@/utils/cookies.server";
@@ -10,7 +11,6 @@ import { useDashboardStore } from "@/stores/dashboard-store";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable } from "@/components/custom/data-table";
 import { columns } from "./table-schema";
-import { useState } from "react";
 import { TableFilter } from "@/components/custom/data-table-filter";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -57,11 +57,48 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function Listings() {
   const user = useDashboardStore((state) => state.user);
+  const initialData = useLoaderData<ListingsLoaderData>();
+  const [listings, setListings] = useState<Listing[]>(initialData.listings);
+
+  const fetchListings = useCallback(async () => {
+    const cookieHeader = document.cookie;
+    const authToken = getAuthTokenFromCookie(cookieHeader);
+
+    const url = authToken
+      ? `${initialData.ENV.BACKEND_URL}/api/users/listings`
+      : `${initialData.ENV.BACKEND_URL}/api/Listings`;
+    try {
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setListings(data);
+      }
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed to fetch data");
+    }
+  }, [initialData.ENV.BACKEND_URL]);
+
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
   return (
     <>
       <section className="w-full mx-auto">
-        {user?.owner ? <OwnerComponent /> : <GuestComponent />}
+        {user?.owner ? (
+          <OwnerComponent listings={listings} fetchListings={fetchListings} />
+        ) : (
+          <GuestComponent listings={listings} />
+        )}
       </section>
     </>
   );
@@ -85,10 +122,11 @@ function LoadingComponent() {
   );
 }
 
-function GuestComponent() {
-  const data = useLoaderData<ListingsLoaderData>();
-  const { listings } = data;
+type GuestComponentProps = {
+  listings: { items: Listing[] };
+};
 
+function GuestComponent({ listings }: GuestComponentProps) {
   return (
     <>
       <Shell>
@@ -109,11 +147,13 @@ function GuestComponent() {
   );
 }
 
-function OwnerComponent() {
-  const data = useLoaderData<ListingsLoaderData>();
-  const { listings } = data;
+type OwnerComponentProps = {
+  listings: Listing[];
+  fetchListings: () => void;
+};
 
-  const [filteredListings, setFilteredListings] = useState(listings);
+function OwnerComponent({ listings, fetchListings }: OwnerComponentProps) {
+  const [filteredListings, setFilteredListings] = useState<Listing[]>(listings);
   const filterFunction = (listing: Listing, filter: string): boolean => {
     switch (filter) {
       case "all":
@@ -144,7 +184,10 @@ function OwnerComponent() {
                   { value: "inactive", label: "Inactive" },
                 ]}
               />
-              <DataTable columns={columns} data={filteredListings} />
+              <DataTable
+                columns={columns(fetchListings)}
+                data={filteredListings}
+              />
 
               <div className="mt-4 flex justify-between"></div>
             </>

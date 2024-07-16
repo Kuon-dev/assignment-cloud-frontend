@@ -23,7 +23,7 @@ interface DataTableToolbarProps<TData> {
 }
 
 const searchTermMapping: { [key: string]: string } = {
-  address: "maintenanceRequest.propertyAddress",
+  address: "propertyAddress",
   email: "email",
   date: "startDate",
 };
