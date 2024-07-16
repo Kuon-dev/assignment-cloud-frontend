@@ -108,7 +108,15 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
         const profileData = await profileResponse.json();
         setUserData(profileData);
 
-        nav("/dashboard");
+        if (profileData.role === 0) {
+          nav("/dashboard");
+        } else if (profileData.role === 2) {
+          nav("/reporting");
+        } else if (profileData.role === 1) {
+          nav("/properties");
+        } else {
+          nav("/dashboard"); // Default fallback
+        }
         // redirect
       }
       setIsLoading(false);
