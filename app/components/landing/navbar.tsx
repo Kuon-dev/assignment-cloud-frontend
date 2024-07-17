@@ -8,7 +8,6 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/Listing", label: "Listing" },
-  { to: "/support/ticket", label: "Contact" },
 ];
 
 export default function Navbar() {

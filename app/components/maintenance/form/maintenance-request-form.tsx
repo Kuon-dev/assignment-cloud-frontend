@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { Label } from "@/components/ui/label";
+import { showErrorToast } from "@/lib/handle-error";
 
 const MaintenanceRequestSchema = z.object({
   description: z.string().min(1, { message: "Description is required" }),
@@ -105,11 +106,8 @@ export default function MaintenanceRequestForm({
       }
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
-      }
       setIsLoading(false);
+      showErrorToast(error);
     }
   }
 

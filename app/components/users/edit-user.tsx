@@ -85,7 +85,7 @@ export default function EditUserComponent() {
 
   return (
     <div className="container mx-auto p-4 flex-grow border">
-      <h1 className="text-2xl font-bold mb-6 text-center">Edit Profile</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Edit User</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid gap-2">
