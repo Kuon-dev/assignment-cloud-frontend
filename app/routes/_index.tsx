@@ -17,8 +17,8 @@ import Footer from "@/components/landing/footer";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Rent Ease" },
+    { name: "description", content: "Rent your next property with us" },
   ];
 };
 

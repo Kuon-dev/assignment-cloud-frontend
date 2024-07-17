@@ -17,6 +17,7 @@ import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
 import { useAdminStore } from "@/stores/admin-store";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -86,7 +87,7 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
         const expires = expiryDate.toUTCString();
 
         // Set the cookie with the expiration time
-        document.cookie = `auth_token=${token}; path=/; secure; SameSite=Strict; expires=${expires}`;
+        document.cookie = `auth_token=${token}; path=/; expires=${expires}`;
 
         toast.success("Login successful!");
         const profileResponse = await fetch(
@@ -121,12 +122,7 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
       }
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
-      // if it is a type of error
-      if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
-      }
+      showErrorToast(error)
       // else toast.error('something went wrong, please try again')
       setIsLoading(false);
     }

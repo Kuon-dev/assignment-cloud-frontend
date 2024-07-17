@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "@remix-run/react";
 import { Layout, LayoutBody } from "@/components/custom/layout";
-import { useDashboardStore } from "@/stores/dashboard-store";
-
-import { Settings } from "lucide-react";
+import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 import {
   ownerSidebarLinks,
   tenantSidebarLinks,
 } from "@/components/dashboard/constants";
-import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
 
-export default function LeaseLayout() {
-  const user = useDashboardStore((state) => state.user);
+import { Settings } from "lucide-react";
+import { useDashboardStore } from "@/stores/dashboard-store";
+
+export default function RentalLayout() {
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
+  const user = useDashboardStore((state) => state.user);
 
   useEffect(() => {
     if (!user) return;
@@ -24,7 +24,7 @@ export default function LeaseLayout() {
         setSidebarLinks(ownerSidebarLinks);
         break;
     }
-  }, []);
+  }, [user]);
 
   const settingsLink: LinkProps = {
     to: "/settings/profile",
