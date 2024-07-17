@@ -24,7 +24,7 @@ export default function ApplicationLayout() {
         setSidebarLinks(ownerSidebarLinks);
         break;
     }
-  }, []);
+  }, [user]);
 
   const settingsLink: LinkProps = {
     to: "/settings/profile",
