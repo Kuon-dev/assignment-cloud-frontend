@@ -24,7 +24,7 @@ export default function LeaseLayout() {
         setSidebarLinks(ownerSidebarLinks);
         break;
     }
-  }, []);
+  }, [user]);
 
   const settingsLink: LinkProps = {
     to: "/settings/profile",
