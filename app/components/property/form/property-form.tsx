@@ -91,6 +91,9 @@ const PropertyFormSchema = z.object({
   amenities: z.array(z.string()).optional(),
   isAvailable: z.boolean(),
   roomType: z.nativeEnum(RoomType, { required_error: "Room type is required" }),
+  images: z
+    .array(z.any())
+    .min(1, { message: "At least one image is required" }),
 });
 
 export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
@@ -118,6 +121,9 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
       description: property?.description || "",
       amenities: property?.amenities || [],
       isAvailable: property?.isAvailable || false,
+      images:
+        property?.imageUrls?.map((url) => ({ preview: url }) as ImageFile) ||
+        [],
     },
   });
 
@@ -241,13 +247,25 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent>
             <div className="grid grid-cols-1 gap-6">
-              <FormItem>
-                <FormLabel>Image</FormLabel>
-                <FormControl>
-                  <ImageUpload images={images} setImages={setImages} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="images"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <ImageUpload
+                        images={images}
+                        setImages={(newImages) => {
+                          setImages(newImages);
+                          field.onChange(newImages);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
