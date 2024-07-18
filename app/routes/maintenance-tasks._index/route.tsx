@@ -43,9 +43,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       maintenanceData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json(maintenanceData);
@@ -89,9 +87,7 @@ export default function Miantenance() {
 
       setSearchParams(searchParams);
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   };
 

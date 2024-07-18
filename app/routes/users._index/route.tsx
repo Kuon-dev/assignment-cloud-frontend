@@ -42,9 +42,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json(usersData);
@@ -88,9 +86,7 @@ export default function Users() {
 
       setSearchParams(searchParams);
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   };
 

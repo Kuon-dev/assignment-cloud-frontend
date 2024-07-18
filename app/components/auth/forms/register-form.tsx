@@ -93,9 +93,7 @@ export default function RegisterForm({
       setIsLoading(false);
       toast.success("Registration successful!");
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

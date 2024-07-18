@@ -76,9 +76,7 @@ export default function AddUserForm({ className, ...props }: AddUserFormProps) {
       toast.success("User added successfully!");
       navigate("/users");
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

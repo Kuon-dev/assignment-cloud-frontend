@@ -87,9 +87,7 @@ export default function RentalApplicationForm({
       }
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

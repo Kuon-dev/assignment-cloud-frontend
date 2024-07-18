@@ -122,9 +122,7 @@ export default function LeaseForm({
       }
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

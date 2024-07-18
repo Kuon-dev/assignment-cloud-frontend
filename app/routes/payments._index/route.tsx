@@ -46,9 +46,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       paymentData.payments = data;
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json(paymentData);
@@ -129,9 +127,7 @@ function OwnerComponent() {
         setPeriods(data.items);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   }, [ENV.BACKEND_URL]);
 
@@ -159,9 +155,7 @@ function OwnerComponent() {
           setPayouts(data);
         }
       } catch (error) {
-        if (error instanceof Error) {
-          showErrorToast(error.message);
-        }
+        showErrorToast(error);
       } finally {
         setLoading(false);
       }

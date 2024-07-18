@@ -81,9 +81,7 @@ export default function PaymentForm({ lease }: PaymentFormProps) {
       setClientSecret(result.clientSecret);
       setIsCheckoutFormOpen(true);
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   };
 

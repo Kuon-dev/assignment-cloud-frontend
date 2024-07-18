@@ -35,9 +35,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       leaseData.leases = data;
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json(leaseData);

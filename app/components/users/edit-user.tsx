@@ -77,9 +77,7 @@ export default function EditUserComponent() {
       toast.success("User updated successfully!");
       navigate("/users");
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     } finally {
       setIsLoading(false);
     }

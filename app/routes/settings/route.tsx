@@ -101,9 +101,7 @@ export function SettingsHeader() {
         toast.error("Logout failed");
       }
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   };
 

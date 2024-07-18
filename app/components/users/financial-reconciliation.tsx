@@ -163,9 +163,7 @@ const Component: React.FC = ({ data, payoutData }) => {
       setPayments([]);
       localStorage.removeItem("payment");
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   };
 

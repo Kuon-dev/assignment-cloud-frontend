@@ -108,9 +108,7 @@ export default function ProfileComponent() {
       const result = await response.json();
       return result.imageUrl;
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       return null;
     }
   };
@@ -171,9 +169,7 @@ export default function ProfileComponent() {
       });
       toast.success("Profile updated successfully");
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
     }
   };
 

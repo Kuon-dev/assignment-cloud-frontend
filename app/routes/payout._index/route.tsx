@@ -42,9 +42,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       payoutPeriodData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json(payoutPeriodData);

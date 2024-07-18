@@ -222,9 +222,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
 
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

@@ -68,9 +68,7 @@ export default function NewPeriodForm({
       toast.success("Payout period created successfully!");
       navigate("/payout");
     } catch (error) {
-      if (error instanceof Error) {
-        showErrorToast(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

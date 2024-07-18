@@ -36,9 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       listingData.listings = data.items;
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json({

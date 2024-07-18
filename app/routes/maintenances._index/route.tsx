@@ -36,9 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       maintenanceData.maintenances = data;
     }
   } catch (error) {
-    if (error instanceof Error) {
-      showErrorToast(error.message);
-    }
+    showErrorToast(error);
   }
 
   return json(maintenanceData);
