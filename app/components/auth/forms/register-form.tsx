@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
 import { cn } from "@/lib/utils";
+import { showErrorToast } from "@/lib/handle-error";
 // import { ActionFunctionArgs, redirect } from '@remix-run/node'
 
 interface UserRegistrationFormProps extends HTMLAttributes<HTMLDivElement> {}
@@ -92,10 +93,8 @@ export default function RegisterForm({
       setIsLoading(false);
       toast.success("Registration successful!");
     } catch (error) {
-      console.log(error);
       if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
+        showErrorToast(error.message);
       }
       setIsLoading(false);
     }

@@ -48,8 +48,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       console.error(`Error ${res.status}: ${res.statusText}`);
     }
   } catch (error) {
-    console.error(error);
-    showErrorToast(error);
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json(applicationData);
@@ -86,8 +87,9 @@ export default function Applications() {
         console.error(`Error ${res.status}: ${res.statusText}`);
       }
     } catch (error) {
-      console.error(error);
-      showErrorToast(error);
+      if (error instanceof Error) {
+        showErrorToast(error.message);
+      }
     }
   }, [initialData.ENV.BACKEND_URL]);
 

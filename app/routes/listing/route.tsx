@@ -1,5 +1,5 @@
 import { Link, Outlet } from "@remix-run/react";
-import { useDashboardStore } from "@/stores/dashboard-store";
+import { useAdminStore } from "@/stores/admin-store";
 
 import { Layout, LayoutBody } from "@/components/custom/layout";
 import DashboardSidebar, { LinkProps } from "@/components/dashboard/sidebar";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 
 export default function ListingLayout() {
-  const user = useDashboardStore((state) => state.user);
+  const user = useAdminStore((state) => state.userData);
 
   return (
     <>

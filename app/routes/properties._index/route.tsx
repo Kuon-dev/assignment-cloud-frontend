@@ -15,14 +15,11 @@ import PropertyForm from "@/components/property/form/property-form";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { TableFilter } from "@/components/custom/data-table-filter";
+import { useAdminStore } from "@/stores/admin-store";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
-  const userSession = await cookieConsent.parse(cookieHeader);
-  if (!userSession || !userSession.token) {
-    // return redirect("/login");
-  }
 
   const propertyData: PropertyLoaderData = {
     properties: [],
@@ -46,8 +43,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       propertyData.properties = data;
     }
   } catch (error) {
-    console.error(error);
-    showErrorToast(error);
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
   return json({
     ...propertyData,
@@ -55,7 +53,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Properties() {
-  const user = useDashboardStore((state) => state.user);
+  const user = useAdminStore((state) => state.userData);
   const data = useLoaderData<typeof loader>();
   const { properties } = data;
 
@@ -103,7 +101,7 @@ export default function Properties() {
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <PropertyForm ownerId={user.owner.id} />
+                    <PropertyForm ownerId={user?.owner?.id} />
                   </DialogContent>
                 </Dialog>
               </div>

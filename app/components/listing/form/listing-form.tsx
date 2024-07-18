@@ -20,6 +20,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/custom/date.picker.client";
 import { Label } from "@/components/ui/label";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface ListingFormProps {
   listing?: Listing;
@@ -105,8 +106,7 @@ export default function ListingForm({
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
+        showErrorToast(error.message);
       }
       setIsLoading(false);
     }

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import RentalApplicationForm from "@/components/rental/form/rental-application-form";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -65,8 +66,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       listingDetailData.listing = data;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json({

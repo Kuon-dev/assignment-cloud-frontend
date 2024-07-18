@@ -17,6 +17,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { useNavigate } from "@remix-run/react";
 import { DatePicker } from "@/components/custom/date.picker.client";
+import { showErrorToast } from "@/lib/handle-error";
 
 const NewPeriodSchema = z
   .object({
@@ -67,10 +68,8 @@ export default function NewPeriodForm({
       toast.success("Payout period created successfully!");
       navigate("/payout");
     } catch (error) {
-      console.log(error);
       if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
+        showErrorToast(error.message);
       }
       setIsLoading(false);
     }

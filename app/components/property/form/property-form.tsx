@@ -35,6 +35,7 @@ import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import React, { useState } from "react";
 import SearchAddress from "@/components/custom/search-address.client";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface PropertyFormProps {
   ownerId?: string;
@@ -222,7 +223,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message);
+        showErrorToast(error.message);
       }
       setIsLoading(false);
     }
@@ -232,7 +233,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
     <div className="max-w-4xl max-h-[80vh] mx-auto overflow-y-scroll">
       <CardHeader>
         <CardTitle className="text-3xl font-bold">
-          Create a New Property
+          {property ? "Edit Property" : "Create Property"}
         </CardTitle>
         <CardDescription>
           Fill out the details below to list your property.
@@ -496,7 +497,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              Create Property
+              {property ? "Update Property" : "Create Property"}
             </Button>
           </CardFooter>
         </form>

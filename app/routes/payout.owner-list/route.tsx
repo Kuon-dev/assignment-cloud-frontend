@@ -6,6 +6,7 @@ import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
 import OwnersComponent from "@/components/payout/owner-list";
 import { ClientOnly } from "remix-utils/client-only";
 import { Button } from "@/components/ui/button";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -42,8 +43,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json(usersData);

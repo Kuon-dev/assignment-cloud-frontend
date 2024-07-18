@@ -5,6 +5,7 @@ import { ClientOnly } from "remix-utils/client-only";
 import FinancialReconciliationComponent from "@/components/users/financial-reconciliation";
 import { useAdminStore } from "@/stores/admin-store";
 import { Button } from "@/components/ui/button";
+import { showErrorToast } from "@/lib/handle-error";
 
 // Define the loader function
 export const loader: LoaderFunction = async ({ request }) => {
@@ -34,8 +35,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       leaseData.leases = data;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json(leaseData);

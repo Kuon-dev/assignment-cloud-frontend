@@ -6,12 +6,12 @@ import {
   ownerSidebarLinks,
   tenantSidebarLinks,
 } from "@/components/dashboard/constants";
-import { useDashboardStore } from "@/stores/dashboard-store";
+import { useAdminStore } from "@/stores/admin-store";
 
 import { Settings } from "lucide-react";
 
 export default function ApplicationLayout() {
-  const user = useDashboardStore((state) => state.user);
+  const user = useAdminStore((state) => state.userData);
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
 
   useEffect(() => {

@@ -108,6 +108,7 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
 
         const profileData = await profileResponse.json();
         setUserData(profileData);
+        console.log(profileData);
 
         if (profileData.role === 0) {
           nav("/dashboard");
@@ -122,7 +123,7 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
       }
       setIsLoading(false);
     } catch (error) {
-      showErrorToast(error)
+      showErrorToast(error);
       // else toast.error('something went wrong, please try again')
       setIsLoading(false);
     }

@@ -16,6 +16,7 @@ import { useAdminStore } from "@/stores/admin-store";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { toast } from "sonner";
 import { useNavigate } from "@remix-run/react";
+import { showErrorToast } from "@/lib/handle-error";
 
 const profileFormSchema = z.object({
   firstName: z.string().min(1, { message: "Please enter your first name" }),
@@ -76,8 +77,9 @@ export default function EditUserComponent() {
       toast.success("User updated successfully!");
       navigate("/users");
     } catch (error) {
-      console.error("Error updating user:", error);
-      toast.error("Error updating user.");
+      if (error instanceof Error) {
+        showErrorToast(error.message);
+      }
     } finally {
       setIsLoading(false);
     }

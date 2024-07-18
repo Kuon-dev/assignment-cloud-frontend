@@ -46,8 +46,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       listingData.listings = data;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json({
@@ -82,8 +83,9 @@ export default function Listings() {
         setListings(data);
       }
     } catch (error) {
-      console.error(error);
-      throw new Error("Failed to fetch data");
+      if (error instanceof Error) {
+        showErrorToast(error.message);
+      }
     }
   }, [initialData.ENV.BACKEND_URL]);
 

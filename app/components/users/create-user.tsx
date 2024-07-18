@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useNavigate } from "@remix-run/react";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { ClientOnly } from "remix-utils/client-only";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface AddUserFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -75,10 +76,8 @@ export default function AddUserForm({ className, ...props }: AddUserFormProps) {
       toast.success("User added successfully!");
       navigate("/users");
     } catch (error) {
-      console.log(error);
       if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
+        showErrorToast(error.message);
       }
       setIsLoading(false);
     }

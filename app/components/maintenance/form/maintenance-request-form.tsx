@@ -106,8 +106,10 @@ export default function MaintenanceRequestForm({
       }
       setIsLoading(false);
     } catch (error) {
+      if (error instanceof Error) {
+        showErrorToast(error.message);
+      }
       setIsLoading(false);
-      showErrorToast(error);
     }
   }
 

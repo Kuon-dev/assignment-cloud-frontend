@@ -33,6 +33,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import LeaseForm from "@/components/lease/form/lease-form";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface ReviewApplicationFormProps extends HTMLAttributes<HTMLDivElement> {
   application: Application;
@@ -112,8 +113,7 @@ export default function ReviewApplicationForm({
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
+        showErrorToast(error.message);
       }
       setIsLoading(false);
     }
@@ -168,7 +168,7 @@ export default function ReviewApplicationForm({
                       <Select
                         onValueChange={(value) => field.onChange(Number(value))}
                         value={field.value.toString()}
-                        disabled={!!user?.tenant}
+                        disabled={!!user?.tenant || field.value !== 0}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select review status" />

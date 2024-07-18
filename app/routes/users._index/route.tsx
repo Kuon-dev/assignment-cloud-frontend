@@ -5,6 +5,7 @@ import * as React from "react";
 import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
 import UserManagementComponent from "@/components/users/user-management";
 import { ClientOnly } from "remix-utils/client-only";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -41,8 +42,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       usersData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json(usersData);
@@ -86,7 +88,9 @@ export default function Users() {
 
       setSearchParams(searchParams);
     } catch (error) {
-      console.error("Error deleting user:", error);
+      if (error instanceof Error) {
+        showErrorToast(error.message);
+      }
     }
   };
 

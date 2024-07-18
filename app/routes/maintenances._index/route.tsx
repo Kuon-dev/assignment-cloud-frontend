@@ -36,8 +36,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       maintenanceData.maintenances = data;
     }
   } catch (error) {
-    console.error(error);
-    showErrorToast(error);
+    if (error instanceof Error) {
+      showErrorToast(error.message);
+    }
   }
 
   return json(maintenanceData);
@@ -57,13 +58,13 @@ export default function Maintenances() {
       case "all":
         return true;
       case "pending":
-        return parseInt(maintenance.status) === 0;
+        return parseInt(maintenance.maintenanceRequest.status) === 0;
       case "inProgress":
-        return parseInt(maintenance.status) === 1;
+        return parseInt(maintenance.maintenanceRequest.status) === 1;
       case "completed":
-        return parseInt(maintenance.status) === 2;
+        return parseInt(maintenance.maintenanceRequest.status) === 2;
       case "cancelled":
-        return parseInt(maintenance.status) === 3;
+        return parseInt(maintenance.maintenanceRequest.status) === 3;
       default:
         return false;
     }
