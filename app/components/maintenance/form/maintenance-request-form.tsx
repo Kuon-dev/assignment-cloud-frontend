@@ -106,8 +106,8 @@ export default function MaintenanceRequestForm({
       }
       setIsLoading(false);
     } catch (error) {
-      setIsLoading(false);
       showErrorToast(error);
+      setIsLoading(false);
     }
   }
 

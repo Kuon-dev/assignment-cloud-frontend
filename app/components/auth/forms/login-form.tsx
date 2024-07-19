@@ -122,7 +122,7 @@ export default function LoginForm({ className, ...props }: UserAuthFormProps) {
       }
       setIsLoading(false);
     } catch (error) {
-      showErrorToast(error)
+      showErrorToast(error);
       // else toast.error('something went wrong, please try again')
       setIsLoading(false);
     }

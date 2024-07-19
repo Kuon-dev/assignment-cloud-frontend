@@ -35,6 +35,7 @@ import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import React, { useState } from "react";
 import SearchAddress from "@/components/custom/search-address.client";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface PropertyFormProps {
   ownerId?: string;
@@ -90,6 +91,9 @@ const PropertyFormSchema = z.object({
   amenities: z.array(z.string()).optional(),
   isAvailable: z.boolean(),
   roomType: z.nativeEnum(RoomType, { required_error: "Room type is required" }),
+  images: z
+    .array(z.any())
+    .min(1, { message: "At least one image is required" }),
 });
 
 export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
@@ -117,6 +121,9 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
       description: property?.description || "",
       amenities: property?.amenities || [],
       isAvailable: property?.isAvailable || false,
+      images:
+        property?.imageUrls?.map((url) => ({ preview: url }) as ImageFile) ||
+        [],
     },
   });
 
@@ -221,9 +228,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
 
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }
@@ -232,7 +237,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
     <div className="max-w-4xl max-h-[80vh] mx-auto overflow-y-scroll">
       <CardHeader>
         <CardTitle className="text-3xl font-bold">
-          Create a New Property
+          {property ? "Edit Property" : "Create Property"}
         </CardTitle>
         <CardDescription>
           Fill out the details below to list your property.
@@ -242,13 +247,25 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent>
             <div className="grid grid-cols-1 gap-6">
-              <FormItem>
-                <FormLabel>Image</FormLabel>
-                <FormControl>
-                  <ImageUpload images={images} setImages={setImages} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="images"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <ImageUpload
+                        images={images}
+                        setImages={(newImages) => {
+                          setImages(newImages);
+                          field.onChange(newImages);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
@@ -496,7 +513,7 @@ export default function PropertyForm({ ownerId, property }: PropertyFormProps) {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              Create Property
+              {property ? "Update Property" : "Create Property"}
             </Button>
           </CardFooter>
         </form>

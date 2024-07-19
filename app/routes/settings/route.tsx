@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { toast } from "sonner";
 import { ClientOnly } from "remix-utils/client-only";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   if (request.url === "/settings") return redirect("/settings/profile");
@@ -100,7 +101,7 @@ export function SettingsHeader() {
         toast.error("Logout failed");
       }
     } catch (error) {
-      console.error("Error during logout:", error);
+      showErrorToast(error);
     }
   };
 

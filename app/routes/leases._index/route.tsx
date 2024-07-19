@@ -36,7 +36,6 @@ export const loader: LoaderFunction = async ({ request }) => {
       console.error(`Error ${res.status}: ${res.statusText}`);
     }
   } catch (error) {
-    console.error(error);
     showErrorToast(error);
   }
 

@@ -6,6 +6,7 @@ import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
 import { ClientOnly } from "remix-utils/client-only";
 import AdminMaintenanceComponent from "@/components/maintenance/admin-requests";
 import { toast } from "sonner";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -42,8 +43,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       maintenanceData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json(maintenanceData);
@@ -87,7 +87,7 @@ export default function Miantenance() {
 
       setSearchParams(searchParams);
     } catch (error) {
-      console.error("Error deleting maintenance:", error);
+      showErrorToast(error);
     }
   };
 

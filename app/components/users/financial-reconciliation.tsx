@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { SaveIcon } from "lucide-react";
 import { toast } from "sonner";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface Tenant {
   id: string;
@@ -162,7 +163,7 @@ const Component: React.FC = ({ data, payoutData }) => {
       setPayments([]);
       localStorage.removeItem("payment");
     } catch (error) {
-      console.error("Error saving payment:", error);
+      showErrorToast(error);
     }
   };
 

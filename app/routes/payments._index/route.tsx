@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -45,8 +46,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       paymentData.payments = data;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json(paymentData);
@@ -127,8 +127,7 @@ function OwnerComponent() {
         setPeriods(data.items);
       }
     } catch (error) {
-      console.error(error);
-      throw new Error("Failed to fetch data");
+      showErrorToast(error);
     }
   }, [ENV.BACKEND_URL]);
 
@@ -156,8 +155,7 @@ function OwnerComponent() {
           setPayouts(data);
         }
       } catch (error) {
-        console.error(error);
-        throw new Error("Failed to fetch payouts");
+        showErrorToast(error);
       } finally {
         setLoading(false);
       }

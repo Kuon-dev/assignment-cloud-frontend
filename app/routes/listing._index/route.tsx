@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DataTable } from "@/components/custom/data-table";
 import { columns } from "./table-schema";
 import { TableFilter } from "@/components/custom/data-table-filter";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -46,8 +47,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       listingData.listings = data;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json({
@@ -82,8 +82,7 @@ export default function Listings() {
         setListings(data);
       }
     } catch (error) {
-      console.error(error);
-      throw new Error("Failed to fetch data");
+      showErrorToast(error);
     }
   }, [initialData.ENV.BACKEND_URL]);
 

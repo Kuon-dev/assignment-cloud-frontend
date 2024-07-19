@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import { showErrorToast } from "@/lib/handle-error";
 
 const profileFormSchema = z
   .object({
@@ -107,7 +108,7 @@ export default function ProfileComponent() {
       const result = await response.json();
       return result.imageUrl;
     } catch (error) {
-      console.error("Error uploading profile picture:", error);
+      showErrorToast(error);
       return null;
     }
   };
@@ -168,8 +169,7 @@ export default function ProfileComponent() {
       });
       toast.success("Profile updated successfully");
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
+      showErrorToast(error);
     }
   };
 

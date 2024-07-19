@@ -15,6 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { showErrorToast } from "@/lib/handle-error";
 
 const RentalApplicationSchema = z.object({
   employmentInfo: z
@@ -86,10 +87,7 @@ export default function RentalApplicationForm({
       }
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

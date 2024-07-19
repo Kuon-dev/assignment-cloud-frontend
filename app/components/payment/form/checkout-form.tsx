@@ -40,7 +40,6 @@ export default function CheckoutForm({
     });
 
     if (result.error) {
-      console.log(result.error.message);
       showErrorToast(result.error.message);
     } else {
       const response = await fetch(

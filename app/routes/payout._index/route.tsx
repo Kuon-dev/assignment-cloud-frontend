@@ -5,6 +5,7 @@ import * as React from "react";
 import { FilterOption } from "@/components/custom/admin-custom-table-toolbar";
 import PayoutPeriodsComponent from "@/components/payout/payout-periods";
 import { ClientOnly } from "remix-utils/client-only";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -41,8 +42,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       payoutPeriodData.totalPages = Math.ceil(data.totalCount / data.pageSize);
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json(payoutPeriodData);

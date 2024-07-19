@@ -6,6 +6,7 @@ import { useLoaderData } from "@remix-run/react";
 import { ClientOnly } from "remix-utils/client-only";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertyCard from "@/components/listing/listing-card";
+import { showErrorToast } from "@/lib/handle-error";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const cookieHeader = request.headers.get("Cookie");
@@ -35,8 +36,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       listingData.listings = data.items;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json({

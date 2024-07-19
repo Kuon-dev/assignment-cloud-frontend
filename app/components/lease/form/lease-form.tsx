@@ -33,6 +33,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { showErrorToast } from "@/lib/handle-error";
 
 interface LeaseFormProps extends HTMLAttributes<HTMLDivElement> {
   lease?: Lease;
@@ -121,10 +122,7 @@ export default function LeaseForm({
       }
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error) {
-        console.error(error);
-        toast.error(error.message);
-      }
+      showErrorToast(error);
       setIsLoading(false);
     }
   }

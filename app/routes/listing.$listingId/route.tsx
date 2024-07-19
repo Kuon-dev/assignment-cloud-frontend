@@ -1,6 +1,5 @@
 import { Link, useLoaderData } from "@remix-run/react";
 import { json, LoaderFunction } from "@remix-run/node";
-import { cookieConsent } from "@/utils/cookies.server";
 import { Shell } from "@/components/landing/shell";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
 import { useDashboardStore } from "@/stores/dashboard-store";
@@ -18,14 +17,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import RentalApplicationForm from "@/components/rental/form/rental-application-form";
+import { showErrorToast } from "@/lib/handle-error";
+import { useAdminStore } from "@/stores/admin-store";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const cookieHeader = request.headers.get("Cookie");
   const authToken = getAuthTokenFromCookie(cookieHeader);
-  const userSession = await cookieConsent.parse(cookieHeader);
-  if (!userSession || !userSession.token) {
-    // return redirect("/login");
-  }
 
   const listingDetailData: ListingDetailLoaderData = {
     listing: {
@@ -65,8 +62,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       listingDetailData.listing = data;
     }
   } catch (error) {
-    console.error(error);
-    throw new Error("Failed to fetch data");
+    showErrorToast(error);
   }
 
   return json({
@@ -75,7 +71,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function ListingDetail() {
-  const user = useDashboardStore((state) => state.user);
+  const user = useAdminStore((state) => state.userData);
   const data = useLoaderData<ListingDetailLoaderData>();
   const { listing } = data;
 

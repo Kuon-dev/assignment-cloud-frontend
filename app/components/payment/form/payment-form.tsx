@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAuthTokenFromCookie } from "@/lib/router-guard";
+import { showErrorToast } from "@/lib/handle-error";
 
 const PaymentFormSchema = z.object({
   amount: z
@@ -80,7 +81,7 @@ export default function PaymentForm({ lease }: PaymentFormProps) {
       setClientSecret(result.clientSecret);
       setIsCheckoutFormOpen(true);
     } catch (error) {
-      console.error("Error:", error);
+      showErrorToast(error);
     }
   };
 

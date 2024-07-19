@@ -23,6 +23,7 @@ import { useDashboardStore } from "./stores/dashboard-store";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { getAuthTokenFromCookie } from "./lib/router-guard";
+import { showErrorToast } from "./lib/handle-error";
 // import { json, LoaderFunction, ActionFunction } from "@remix-run/node";
 //
 
@@ -53,8 +54,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       }
     });
   } catch (error) {
-    toast.error("An error occurred");
-    console.error(error);
+    showErrorToast(error);
   }
 
   return json({

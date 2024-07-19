@@ -9,11 +9,11 @@ import {
 } from "@/components/dashboard/constants";
 import { Settings } from "lucide-react";
 // import VerifyEmailComponent from "@/components/dashboard/verify-email";
-import { useDashboardStore } from "@/stores/dashboard-store";
+import { useAdminStore } from "@/stores/admin-store";
 
 export default function DashboardLayout() {
   const [sidebarLinks, setSidebarLinks] = useState<LinkProps[]>([]);
-  const user = useDashboardStore((state) => state.user);
+  const user = useAdminStore((state) => state.userData);
 
   useEffect(() => {
     if (!user) return;
